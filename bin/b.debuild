@@ -258,7 +258,7 @@ rm -f debian/users debian/version debian/exporter debian/changelog.old || true
 cd "$T/$N-$VV"
 fakeroot dpkg-buildpackage -S $opt_s -uc -us
 if test -n "$bin"; then
-	dpkg-checkbuilddeps || sudo apt-get build-dep || exit 1
+	dpkg-checkbuilddeps || sudo apt-get build-dep $N || exit 1
 	fakeroot dpkg-buildpackage -nc -b -uc -us
 fi
 test -z "$pbin" || pdebuild --buildresult "$T" -- --debbuildopts "-nc -b"

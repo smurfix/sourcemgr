@@ -1,15 +1,5 @@
 #!/bin/sh
 
-dpkg-checkbuilddeps || sudo apt-get build-dep || exit 1
-
-if test "x$1" = "x-i" ; then INST=1; shift; fi
-
-if test -f /usr/local/bin/gpg-agent-start.sh ; then
-	source /usr/local/bin/gpg-agent-start.sh
-fi
-
-test ! -d Bitkeeper || b.uplog
-
 mustsetvar () {
     if [ "x$2" = x ]
     then
@@ -23,6 +13,16 @@ mustsetvar () {
 mustsetvar package "$(dpkg-parsechangelog | sed -ne 's/^Source: //p')"
 mustsetvar version "$(dpkg-parsechangelog | sed -ne 's/^Version: //p')"
 mustsetvar arch "$(dpkg-architecture -a${targetarch} -t${targetgnusystem} -qDEB_HOST_ARCH)"
+
+dpkg-checkbuilddeps || sudo apt-get build-dep $package || exit 1
+
+if test "x$1" = "x-i" ; then INST=1; shift; fi
+
+if test -f /usr/local/bin/gpg-agent-start.sh ; then
+	source /usr/local/bin/gpg-agent-start.sh
+fi
+
+test ! -d Bitkeeper || b.uplog
 
 sversion=`echo "$version" | perl -pe 's/^\d+://'`
 pva="${package}_${sversion}_${arch}"
