@@ -1,0 +1,7 @@
+#!/bin/sh
+
+source /usr/local/bin/gpg-agent-start.sh
+
+b.uplog
+debuild "$@" -b -uc -us -L -viI </dev/null 2>&1 |less
+	# +G
