@@ -1,3 +1,9 @@
+sourcemgr (1.328) unstable; urgency=low
+
+  * import Makefile.Linux stuff into debian/rules
+
+ -- Matthias Urlichs <smurf@debian.org>  Sat, 28 Feb 2004 15:12:22 +0100
+
 sourcemgr (1.327) unstable; urgency=low
 
   * remove datefudge usage -- BK currently doesn't like that. At all.
