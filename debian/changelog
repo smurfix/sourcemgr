@@ -1,3 +1,9 @@
+sourcemgr (1.364) unstable; urgency=low
+
+  * b.import.pl: Let bk() handle very long arg lists
+
+ -- Matthias Urlichs <smurf@debian.org>  Fri, 30 Jul 2004 03:29:36 +0200
+
 sourcemgr (1.363) unstable; urgency=low
 
   * Major CVS import overhaul:

@@ -39,13 +39,23 @@ if($?) {
 	Usage;
 }
 
-sub bk {
-	my @cmd = @_;
+sub bk($@);
+sub bk($@) {
+	my ($arg,@args) = @_;
+	my @cmd;
 
-	if(defined $cmd[0]) {
+	if(defined $arg) {
+		while(@args > 100) {
+			bk($arg,splice(@args,0,100));
+			# Yes, this means that only the last result will be returned.
+			# So sue me.
+		}
+		@cmd = @$arg;
 		unshift(@cmd,"env",@DT,"bk");
+		push(@cmd,@args);
 	} else {
-		shift(@cmd);
+		die "BK args" if @args != 1;
+		@cmd = @args;
 	}
 	open(FP,"-|") or do {
 		exec @cmd;
@@ -63,7 +73,7 @@ sub bk {
 	wantarray ? @res : (0+@res);
 }
 
-bk("-r","unlock","-fpxz");
+bk(["-r","unlock","-fpxz"]);
 
 sub bkfiles($) {
 	my($f) = @_;
@@ -71,18 +81,18 @@ sub bkfiles($) {
 		 m#/SCCS/#
 		? undef
 		: ( chmod((0600|0777&((stat $_)[2])),$_) or 1 );
-	} bk(sfiles=>"-U$f");
+	} bk(["sfiles", "-U$f"]);
 	@new;
 }
 
 {
 	my $cv;
-	foreach my $fn(bk("get","-q","-p","BitKeeper/etc/ignore")) {
+	foreach my $fn(bk(["get","-q","-p","BitKeeper/etc/ignore"])) {
 		$cv++ if $fn =~ /CVS/;
 	}
 	unless($cv) {
 		print STDERR "Ignoriere CVS...\n";
-		bk("ignore","CVS",".cvsignore","CVSROOT");
+		bk(["ignore"],"CVS",".cvsignore","CVSROOT");
 		bk(undef,"bk sfiles -pC | env @DT bk commit -q -y\"CVS-Ignore\" -");
 	}
 }
@@ -93,7 +103,7 @@ my @gone = grep {
 	if(-e $_) {
 		push(@cur,$_);
 		if(@cur >= 100) {
-			bk(get => "-qeg",@cur);
+			bk(["get","-qeg"],@cur);
 			@cur = ();
 		}
 		undef;
@@ -101,11 +111,11 @@ my @gone = grep {
 		1;
 	}
 } bkfiles("g");
-bk(get => "-qeg",@cur) if @cur;
+bk(["get", "-qeg"],@cur) if @cur;
 
 if(@new and @gone) {
 	print STDERR "  *** rename ***\r";
-	bk(get=>"-qeg",@gone);
+	bk(["get", "-qeg"],@gone);
 	open(RN,"| env @DT bk renametool");
 	foreach my $f(sort { $a cmp $b } @gone) { print RN "$f\n"; }
 	print RN "\n";
@@ -114,20 +124,20 @@ if(@new and @gone) {
 	confess "No rename" if $?;
 	print STDERR "                \r";
 } elsif(@new) {
-	bk(new => '-qG', "-yNew:$cmt", @new);
+	bk(["new", '-qG', "-yNew:$cmt"], @new);
 } elsif(@gone) {
-	bk(rm => @gone);
+	bk(["rm"], @gone);
 } else {
 	open(CH,"bk -r diffs | head -1 |");
 	my $ch = <CH>;
 	close(CH);
 	unless(defined $ch) {
 		print STDERR "...no changes.\n";
-		bk("-r","unlock","-f");
+		bk(["-r","unlock","-f"]);
 		exit 0;
 	}
 }
 
-bk('-r', ci => '-qG', "-y$cmt");
+bk(['-r', ci => '-qG', "-y$cmt"]);
 bk(undef,"bk sfiles -pC | env @DT bk commit -q -y\"AT ".$ENV{'ZEIT'}."\n$cmt\" -");
 
