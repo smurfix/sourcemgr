@@ -129,7 +129,7 @@ fi
 ( cd "$T/$N-$V" ; fakeroot dpkg-buildpackage -S )
 ( cd "$T/$N-$V" ; dpkg-genchanges -S > "../${N}_${DV}_source.changes" )
 ( cd "$T/$N-$V" ; test -z "$bin" || fakeroot dpkg-buildpackage -nc -b )
-#( cd $T; debsign "${N}_${DV}_source.changes" )
+( cd $T; echo y | debsign "${N}_${DV}_source.changes" )
 #( cd $T; test -z "$bin" || debsign "${N}_${DV}_$A.changes" )
 ( cd $T ; for i in * ; do if test -d $i; then rm -rf $i; fi; done )
 echo "Built:"
