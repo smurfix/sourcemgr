@@ -1,3 +1,15 @@
+sourcemgr (1.249) unstable; urgency=low
+
+  * Vergiss den Mac-Kram.
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Wed,  4 Jun 2003 06:29:27 +0200
+
+sourcemgr (1.248) unstable; urgency=low
+
+  * auto-generate debian/changelog entries on check-in.
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Wed,  4 Jun 2003 06:29:27 +0200
+
 sourcemgr (1.247) unstable; urgency=low
 
   * b.debuild
