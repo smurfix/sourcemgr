@@ -16,7 +16,7 @@ if test -b /dev/sdd ; then : ; else
 		cd /
 		cpio -iv <dev/DEVICES
 	else
-    	./MAKEDEV -v generic
+    	/sbin/makedev -v generic
 	fi
 fi
 cd /
@@ -25,20 +25,16 @@ if test -n "$boot" ; then
   cd /lib; test -d modules -o -L modules || ln -s modules-$who modules
   cd /
 fi
-if test -n "$KERNEL" ; then
-  cp -av /cd/boot/linux-$KERNEL /boot/
-  cp -av /cd/boot/disk-$KERNEL /boot/
-  cp -av /cd/lib/modules/$KERNEL /lib/modules/
+if test -n "$kernel" ; then
+  cp -av /cd/boot/linux-$kernel /boot/
+  cp -av /cd/boot/disk-$kernel /boot/
+  cp -av /cd/lib/modules/$kernel /lib/modules/
 fi
 
 #    who=$who master=$master slave=$slave mask=$mask imask=$netbits
 #    broad=$broad netz=$netz def=$def name=$name eth=$eth
 
 cat <<END >/tmp/cf.$$
-##
-## Was für eine Art Linuxsystem ist diese Kiste überhaupt?
-##
-SYSTYPE=$who
 ##
 ## Hostname mit Domain
 ##
@@ -53,10 +49,10 @@ HOSTNAME=$(echo $name | sed -e 's#\..*##')
 NETWORK="$eth,$slave,$imask,$def"
 ##
 ##
-## Bootdisk? (für lilo)
+## Bootdisk? (hda oder sda, für lilo)
 ##
 BOOTDISK=$disk
-
+##
 END
 fillup /etc/rc.config /tmp/cf.$$ || true
 rm /tmp/cf.$$
@@ -101,8 +97,5 @@ cd /
 rm mnt && mkdir mnt
 rm pop && mkdir pop
 chmod 755 /
-sync
-echo "Jetzt noch irgendwas zu tun? Wenn nein => Control-D."
-/bin/bash -i
 sync
 

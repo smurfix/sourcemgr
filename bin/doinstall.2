@@ -24,6 +24,45 @@ insmod /cd/lib/modules-$who/$(uname -r)/block/ide-disk.o
 rmmod ide-probe
 	echo -n "...done. "
 #swapoff -a
+
+if test -n "$partition" ; then
+
+root=${disk}1
+swap=${disk}2
+part=""
+
+echo "sfdisk startet."
+(
+	set -- $partition
+	echo ",${1},,*"
+	echo ",${2},S"
+	np=3
+	shift ; shift
+	while test -n "$2" ; do
+		echo ",$2";
+		shift ; shift
+
+		if test $np = 3 -a -n "$2" ; then echo ";,E" ; np=5; fi
+	done
+	echo ";"
+) | sfdisk -uM -L /dev/$disk
+
+# $partition: 10 20 /usr 30 /var
+
+np=3
+set -- $partition
+shift ; shift
+while test -n "$2" ; do
+	part="$part $1" ; shift ; shift
+	if test $np = 3 -a -n "$2" ; then part="$part -"; np=5;
+	else np=$(expr $np + 1) ; fi
+done
+part="$part $1"
+
+echo DONE $part
+
+else # manuell
+
 echo -n "Alles OK? "
 read ans
 if test "$ans" = "n" ; then exit 1 ; fi
@@ -31,11 +70,19 @@ if test "$ans" = "n" ; then exit 1 ; fi
 echo "fdisk startet."
 fdisk /dev/$disk
 
+echo -n "Root <${disk}1>: "; read root; root=${root:-${disk}1}
+echo "Root in dev/$root"
+
 echo -n "Swap <${disk}2>: "; read swap; swap=${swap:-${disk}2}
 echo "Swap nach /dev/$swap"
 
-echo -n "Root <${disk}1>: "; read root; root=${root:-${disk}1}
-echo "Root in dev/$root"
+echo -n "Mountpoints nach (ab ${disk}3; '-' überspringt)...: "
+read part
+
+set -xe
+
+fi # manuell
+
 
 /sbin/update
 echo "Swapspace."
@@ -46,32 +93,29 @@ swapon /dev/$swap
 /cd/sbin/fs/mkfs.ext2 -r 1 -s 1 -b 4096 -i 8192 /dev/${root}
 mount -t ext2 /dev/${root} /mnt
 
-mkdir -p /mnt/proc /mnt/var /mnt/var/tmp /mnt/var/run /mnt/cd
+mkdir -p /mnt/proc /mnt/dev/pts /mnt/var /mnt/var/tmp /mnt/var/run /mnt/cd
 ln -s /proc/mounts /mnt/var/run/mtab
 touch /mnt/proc/mounts
 ln -s var/tmp /mnt/tmp
 # mkdir -p /var/tmp /usr/bin; ln -sf /cd/usr/bin/perl /usr/bin; ln -sf var/tmp /tmp
 
-echo -n "Mountpoints nach (ab ${disk}3; '-' überspringt)...: "
-read a
-
-set -xe
-
 mkdir /mnt/etc
 cat >/mnt/etc/fstab <<EOF
-/dev/${root}       /                         ext2            defaults   1   1
+/dev/$root       /                         ext2            defaults   1   1
 /dev/$swap       swap                      swap            defaults   0   0
 none            /proc                     proc            defaults   0   0
+none            /dev/pts                  devpts          defaults   0   0
 EOF
-pp=3; for i in $a ; do
+pp=3; for i in $part ; do
 	if test "x$i" != "x-" ; then
 		mkdir -p /mnt/$i
 		/cd/sbin/fs/mkfs.ext2 -r 1 -s 1 -b 4096 -i 8192 /dev/${disk}$pp
 		mount -t ext2 /dev/${disk}$pp /mnt/$i
-		echo "/dev/${disk}$pp       $i                         ext2            defaults   2   2" >>/mnt/etc/fstab
+		echo "/dev/${disk}$pp       /$i                         ext2            defaults   2   2" >>/mnt/etc/fstab
 	fi
 	pp=$(expr $pp + 1)
 done
-fi
+
+fi # /mnt/etc
 
 exec /cd/usr/src/STATUS/bin/doinstall.2a

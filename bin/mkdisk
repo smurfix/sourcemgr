@@ -395,7 +395,7 @@ while read a ; do
 	    cp -a $b $disk/modules/$(basename $a)
 	    rm $b
 	fi
-	done <<END
+done <<END
 misc/sunrpc.o
 fs/lockd.o
 fs/nfs.o
@@ -470,13 +470,12 @@ END
 if test -n "$net" ; then
 cp /usr/src/STATUS/bin/doinstall.1 $disk/bin/install
 cat <<END >>$disk/MODULE
-8390.o
-ne.o io=0x300
-wd.o io=0x240
 sunrpc.o
 lockd.o
 nfs.o
 ext2.o
+floppy.o
+8390.o
 END
 
 else ## kein Netz
@@ -520,7 +519,12 @@ if test -z "$run" ; then
 cat <<END >>$disk/linuxrc
 /bin/sh -i
 END
+elif -n "$net" ; then
+cat <<END >>$disk/linuxrc
+/bin/install
+END
 fi
+
 cat <<END >>$disk/linuxrc
 echo -n umount /proc
 umount -n /proc
@@ -628,7 +632,7 @@ set +x
 	fi
 	cp STATUS/status/$kiste $disk/STATUS
 	if test -n "$ver" ; then
-	  echo "export KERNEL=$ver" >>$disk/STATUS
+	  echo "export kernel=$ver" >>$disk/STATUS
 	fi
 
   fi

@@ -17,7 +17,7 @@ touch proc/mounts
 cp -a /fd/STATUS fd
 rm -rf mnt; ln -s . mnt
 chroot /mnt /sbin/ldconfig -v
-chroot /mnt /bin/mount $master:/ /cd
+chroot /mnt /bin/mount -o timeo=20,hard,intr,nolock $master:/ /cd
 chroot /mnt /bin/mount /proc
 touch var/run/utmp
 touch var/run/lastlog
@@ -34,9 +34,38 @@ mkfifo dev/initctl || true
 fi
 
 chroot /mnt /cd/usr/src/STATUS/bin/doinstall.4
+echo Fertig mit chroot.
+
+set -x
+
+killall inetd sshd
+
+umount /mnt/cd
+umount /mnt/proc
+if test -n "$partition" ; then
+	np=3
+	set -- $partition
+	shift ; shift
+	while test -n "$2" ; do
+		part="$1 $part" ; shift ; shift
+		if test $np = 3 -a -n "$2" ; then part="- $part"; np=5;
+		else np=$(expr $np + 1) ; fi
+	done
+
+	part="$1 $part"
+	for a in $part ; do
+		if test "x$a" != "x-" ; then
+			umount /mnt/$a
+		fi
+	done
+fi
 umount -av
+echo 4
 sync
 echo Reboot. Jetzt. Mal sehen was passiert...
-/cd/sbin/killall5
+# /cd/sbin/killall5
+echo 3
 umount -av
+echo 2
 sleep 3
+echo 1
