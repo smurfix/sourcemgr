@@ -1,4 +1,5 @@
-All files in this repository are (c) Matthias Urlichs <smurf@noris.de>.
+All files in this repository are (c) 1994-2002
+by Matthias Urlichs <smurf@noris.de>.
 
 Usage: The b.* programs are helper scripts for using Bitkeeper with
 a central repository, pointed to by the environment variable
@@ -26,3 +27,7 @@ redistribute these programs outside your organization, nor would you
 want to. ;-)  You may not use them for repositories which are not Open
 Source without talking to me first -- hint: If you save money by using
 these programs, or ideas from them, I want some of it.
+
+You may not use this code if you plan to gain monetary or other
+compensation from me in case anything goes wrong. In other words,
+NO WARRANTY OF ANY KIND WHATSOEVER.
