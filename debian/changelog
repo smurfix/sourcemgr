@@ -1,3 +1,11 @@
+sourcemgr (1.359) unstable; urgency=low
+
+  * b.debuild:
+       Fix tarfile-orig source generation
+  * 
+
+ -- Matthias Urlichs <smurf@debian.org>  Sat, 10 Jul 2004 21:09:25 +0200
+
 sourcemgr (1.358) unstable; urgency=low
 
   * Oh no, some of Debian's .orig files include a tarfile in a tarfile!

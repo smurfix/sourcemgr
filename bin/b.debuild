@@ -260,7 +260,7 @@ if test -n "$E" ; then # non-original package
 		echo + get original source from .. or via HTTP
 	   if test $(tar tfvz "$T/${N}_$VV.orig.tar.gz" | wc -l) -lt 4 ; then
 		 # Oh no, an embedded tar file. I hate embedded tar files.
-		 SEPARATE=-su
+		 SEPARATE=-ss
 		 cd "$T"
 		 mkdir SEP
 		 cd SEP
@@ -281,7 +281,6 @@ if test -n "$E" ; then # non-original package
 		 cd ..
 
 		 mv SEP "$T/$N-$VV.orig"
-		 rm "$T/${N}_$VV.orig.tar.gz"
 	   fi
 	else
 		echo + create new original source archive
