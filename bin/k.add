@@ -7,8 +7,8 @@ fi
 
 K="$1"
 set -ex
-cp /smurf/rh-72/boot/linux-$K /boot/
-cp -r /smurf/rh-72/lib/modules/$K /lib/modules
+#cp /smurf/rh-72/boot/linux-$K /boot/
+#cp -r /smurf/rh-72/lib/modules/$K /lib/modules
 NK=$(cat /boot/grub/grub.conf | grep "^title" | wc -l | sed -e 's/[ \t]*//')
 cat <<END >>/boot/grub/grub.conf
 title $K (alt)

@@ -22,16 +22,10 @@ Requires: rpm
  Zustand unserer Sourcen, Binaries zum Bauen derselben
 
 %prep
-%setup -n pop_sourcemgr -T -c
-cd ..
-rm -rf pop_sourcemgr
-if test -d tmp.pop_sourcemgr ; then
-    mv -f tmp.pop_sourcemgr pop_sourcemgr
-else
-    b.get -v noris -d pop_sourcemgr pop_sourcemgr
-fi
-cd pop_sourcemgr
-bk -r get -q
+%setup -n $ARCHIVE$-$RELEASE$ -T 
+rm -rf $ARCHIVE$-$RELEASE$
+bk lclone $BK_RPM_SRC $ARCHIVE$-$RELEASE$
+cd $ARCHIVE$-$RELEASE$
 
 %build
 make -f Makefile.Linux compile
@@ -51,6 +45,7 @@ make -f Makefile.Linux install
 %dir /usr/src/STATUS/RPM
 %dir /usr/src/STATUS/RPM/RPMS
 %dir /usr/src/STATUS/RPM/BUILD
+%dir /usr/src/STATUS/RPM/BUILD/tmp
 %dir /usr/src/STATUS/after
 %dir /usr/src/STATUS/checkout
 %dir /usr/src/STATUS/cvsup

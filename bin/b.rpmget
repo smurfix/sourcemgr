@@ -1,0 +1,83 @@
+#!/bin/sh
+export BK_REPOSITORY=bk://bitkeeper.noris.de
+
+set -e
+trap 'usage; exit 1' 0
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- holt RPM-Sourcecode aus dem Archiv
+       [ -v releasename ]
+       [ -d Paket ]
+       [ -n (aktuelles Verzeichnis nicht killen+recyceln) ]
+	   [ dest ]
+
+Ausgepackt wird in das aktuelle Verzeichnis,
+unter Zuhilfename der übergeordneten Verzeichnisse
+tmp.NAME und ttmp.NAME.
+END
+}
+
+vers=noris
+dir=
+nix=
+
+   eval set -- "$(getopt "d:v:nh" "$@")"
+   for i
+   do
+	   case "$i"
+	   in
+		   -h)
+		       exit 1 ;;
+		   -n)
+		   	   shift; nix=1 ;;
+		   -d)
+			   shift; dir="$1"; shift;;
+		   -v)
+			   shift; vers="$1"; shift;;
+			--)
+				shift; break ;;
+	   esac
+   done
+
+
+test -z "$1"
+
+trap "" 0
+dc="$(pwd)"
+cd /
+
+if test -n "$BK_RPM_SRC" ; then
+	d="$BK_RPM_SRC"
+else
+	d="$(dirname "$dc")/tmp/$(basename "$dc")"
+fi
+dtmp="$d.x"
+
+export BK_NO_GET=1
+if test -z "$vers" ; then
+	vget="" 
+else   
+	vget="-v $vers"
+fi
+
+if test -d "$d" ; then 
+	mv "$d" "$dtmp"
+	cd "$dtmp"
+	bk pull
+	mv "$dtmp" "$d"
+else
+	rm -rf "$d" "$dtmp"
+	b.get -d "$dir" $vget "$dtmp"
+	mv "$dtmp" "$d"
+fi
+
+test -z "$nix" || exit 0
+
+rm -rf "$dc"
+export -n BK_NO_GET
+bk lclone "$d" "$dc"
+cd "$dc"
+bk -r get -q
+
+exit 0

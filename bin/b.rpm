@@ -31,10 +31,25 @@ Usage: $(basename $0)  -- Hole aus Archiv, baue, installiere, wirf weg.
        [ was ]
 rpm.spec   komplette .spec-Datei
          ansonsten:
-rpm.pre .preun .post .postun .check .verify .version (Versionsnummer)
-           Standard-Skripts
+rpm.version
+           Versionsnummer, automagisch inkrementiert beim Einchecken
+rpm.pre .preun .post .postun .check .verify
+           Standard-Skripts (/bin/sh)
 rpm.tags   Tags für den Standardheader, interpretiert
 rpm.sub    Zusatz für die .spec, nicht interpretiert
+
+END
+cat >&2 <<END
+RPM Setup:
+	%prep
+	%setup -n \$ARCHIVE\$-\$RELEASE\$ -T -c
+	b.rpmget -d \$ARCHIVE\$ -v\$RELEASE\$
+
+Variablen in RPM-Dateien:
+	$ARCHIVE$   Archivname (pop_datenbank, ...)
+	$RELEASE$   Art (noris, test, ...)
+	$VERSION$   Versionsnummer, aus rpm.version oder ChangeSet
+
 END
     trap "" 0
     exit 1
@@ -258,25 +273,27 @@ fi
 
 if test -z "$again" -a -z "$qpack" ; then
 	# FR=/usr/src/RPM/BUILD/$(basename $dir)
-	RFR=$BUILD/tmp.$archive
-	FR=/tmp/b.r.$$
-	mkdir $FR
-	sudo rm -rf "$RFR"
+	export BK_RPM=$BUILD/tmp.$archive
+	export BK_DIR=$BUILD/$archive
 	echo "Hole Sourcen aus dem Archiv ..."
-	sudo b.get -d $what $vget $RFR
-	bkvers="$( cd $RFR; bk get -q -p rpm.version 2>/dev/null | head -1 )"
+	export BK_RPM_SRC=$BUILD/tmp/$archive
+	b.rpmget -n -d $what $vget 
+	FR=/tmp/b.r.$$
+	rm -rf $FR
+	mkdir $FR
+	bkvers="$( cd $BK_RPM_SRC; bk get -q -p rpm.version 2>/dev/null | head -1 )"
 	if test -z "$bkvers" ; then
-		bkvers="$( cd $RFR; bk prs -ah -r+ -d:I: ChangeSet )"
+		bkvers="$( cd $BK_RPM_SRC; bk prs -ah -r+ -d:I: ChangeSet )"
 	fi
 
 	for i in rpm.spec rpm.tags rpm.sub rpm.clean rpm.verify \
 			rpm.pre rpm.post rpm.preun rpm.postun ; do
-		(	cd $RFR
-			bk get -q -p $i || true
+		(	cd $BK_RPM_SRC
+			bk get -q -p $i 2>/dev/null || true
 		) | sed \
-			-e 's/\$ARCHIVE\$/'"$archive/g" \
-			-e 's/\$VERSION\$/'"$bkvers/g" \
+			-e 's/\$ARCHIVE\$/'"$what/g" \
 			-e 's/\$RELEASE\$/'"$bkrel/g" \
+			-e 's/\$VERSION\$/'"$bkvers/g" \
 			> $FR/$i
 		test -s $FR/$i || rm -f $FR/$i
 	done
@@ -311,15 +328,7 @@ END
 			cat <<END
 %prep
 %setup -n $archive -T -c
-cd ..
-rm -rf $archive
-if test -d tmp.$archive ; then
-	mv -f tmp.$archive $archive
-else
-	b.get -v $vers -d $what $archive
-fi
-cd $archive
-# bk -r get -q ## ist schon geholt
+b.rpmget -d $what $vget
 
 %build
 make -f Makefile.Linux $compile$subtarget

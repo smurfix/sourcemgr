@@ -28,6 +28,6 @@ install:
 	@install rpmmacros /usr/src/STATUS/rpmmacros
 	@install rpmrc /usr/src/STATUS/rpmrc
 
-	@install -d /usr/src/STATUS/RPM/BUILD
+	@install -d /usr/src/STATUS/RPM/BUILD/tmp
 	@install -d /usr/src/STATUS/RPM/RPMS
 	@install -d /usr/src/STATUS/RPM/RPMS/i686

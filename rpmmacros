@@ -1,3 +1,4 @@
 %_topdir	/usr/src/STATUS/RPM
 %__find_provides    /usr/lib/rpm/find-provides
 %__find_requires    /usr/lib/rpm/find-requires
+%_vendor	noris
