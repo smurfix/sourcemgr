@@ -55,6 +55,7 @@ END
 Usage unless @ARGV == 2;
 Usage unless $ENV{BK_REPOSITORY};
 $ENV{BK_LICENSE}="ACCEPTED";
+$ENV{BK_LOGGING_OK}="YES";
 select(STDERR); $|=1; select(STDOUT);
 
 use Shell qw(); ## bk cvs/rcs

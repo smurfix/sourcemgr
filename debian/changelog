@@ -1,3 +1,9 @@
+sourcemgr (1.310) unstable; urgency=low
+
+  * Set BK_LOGGING_OK for import scripts
+
+ -- Matthias Urlichs <smurf@debian.org>  Wed, 28 Jan 2004 15:24:28 +0100
+
 sourcemgr (1.309) unstable; urgency=low
 
   * bk cset => bk commit

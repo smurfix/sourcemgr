@@ -18,6 +18,7 @@ my $debug=1;
 my @DT;
 
 $ENV{BK_LICENSE}="ACCEPTED";
+$ENV{BK_LOGGING_OK}="YES";
 $ENV{CLOCK_DRIFT}="1";
 
 $|=1;

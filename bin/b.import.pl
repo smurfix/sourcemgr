@@ -26,6 +26,7 @@ if($ARGV[0] =~ /^(\d\d\d\d)-(\d\d)-(\d\d)$/) {
 my $cmt = "@ARGV"; $cmt =~ s/"/'/g;
 
 $ENV{BK_LICENSE}="ACCEPTED";
+$ENV{BK_LOGGING_OK}="YES";
 $ENV{BK_USER}="?" unless defined $ENV{BK_USER};
 $ENV{CLOCK_DRIFT}="1";
 
