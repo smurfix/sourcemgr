@@ -388,7 +388,7 @@ if(-f "$tmppn.data") {
 	find(sub {
 		$File::Find::name =~ s/^\.\///;
 		foreach my $d(@skip) {
-			if ($File::Find::name eq $skip) {
+			if ($File::Find::name eq $d) {
 				$File::Find::prune=1;
 				return;
 			}
