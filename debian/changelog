@@ -1,3 +1,10 @@
+sourcemgr (1.324) unstable; urgency=low
+
+  * b.get: Make "-w -" work
+  * 
+
+ -- Matthias Urlichs <smurf@debian.org>  Wed, 18 Feb 2004 05:22:48 +0100
+
 sourcemgr (1.323) unstable; urgency=low
 
   * b.debuild: I hate escaped escape characters.

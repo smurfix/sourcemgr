@@ -88,7 +88,7 @@ rm -f /tmp/tf.$$
 
 if test -z "$what" ; then echo >&2 "'$dir' not found" ; exit 1 ; fi
 test -z "$dv" || dv="-$dv"
-test -z "$nvers" -o "$nvers" = "not/given" || ndv="-$nvers"
+test -z "$nvers" -o "$nvers" = "-" -o "$nvers" = "not/given" || ndv="-$nvers"
 
 if test -z "$1" ; then
 	dir="$what$dv"
