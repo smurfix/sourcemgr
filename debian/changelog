@@ -1,3 +1,9 @@
+sourcemgr (1.323) unstable; urgency=low
+
+  * b.debuild: I hate escaped escape characters.
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 17 Feb 2004 21:49:03 +0100
+
 sourcemgr (1.322) unstable; urgency=low
 
   * Also use BK_REMOTE_REPOSITORY (read-only, in b.cache)
