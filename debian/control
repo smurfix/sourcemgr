@@ -1,0 +1,15 @@
+Source: sourcemgr
+Section: devel
+Priority: optional
+Maintainer: Matthias Urlichs <smurf@noris.de>
+Build-Depends: debhelper (>> 3.0.0)
+Standards-Version: 3.5.2
+
+Package: sourcemgr
+Architecture: any
+Depends: bitkeeper
+Suggests: prcs
+Description: Source management speed-up commands
+ Helper commands to handle Bitkeeper or PRCS archives.
+ Included are commands to debianize source archives and auto-build RPMs
+ (Debian binary packages are much less complicated to work with).
