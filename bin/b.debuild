@@ -176,7 +176,7 @@ if ! test -d BitKeeper ; then
 fi
 
 ## Make sure there are no outstanding changes
-if test "$(bk sfiles -xcg | wc -l)" -eq 0 ; then
+if test "$(bk sfiles -xcg | wc -l)" -ne 0 ; then
 	echo "You have unsaved changes. (bk -xgc)  Aborting." >&2
 	exit 1
 fi

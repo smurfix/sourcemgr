@@ -1,3 +1,10 @@
+sourcemgr (1.312) unstable; urgency=low
+
+  * b.debuild, helper/upload_to:
+    Two rather stupid brainos
+
+ -- Matthias Urlichs <smurf@debian.org>  Fri, 30 Jan 2004 17:08:52 +0100
+
 sourcemgr (1.311) unstable; urgency=low
 
   * b.version required write access to the archive.
