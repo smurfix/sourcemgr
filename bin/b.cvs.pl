@@ -586,6 +586,12 @@ sub scmt($;$) {
 	$scmt;
 }
 
+sub wget($$) {
+	my($url,$file) = @_;
+	system("wget",$url,"-O",$file);
+	die "CVS error: $?\n" if $? and not $ENV{BKCVS_IGNORE_ERROR};
+}
+
 sub process($$$$) {
 	my($autor,$wann,$adt,$len)=@_;
 	my $scmt = scmt($adt);
@@ -644,7 +650,13 @@ sub process($$$$) {
 				#cvs("get","-A","-d",$d,"-r",$rev, map { ($d eq ".") ? "$cne/$_" : "$cne/$d/$_" } @f);
 				my @lf = grep { -f $_ } map { dirname($_)."/SCCS/s.".basename($_) } @ff;
 				bk("get","-egq", @lf) if @lf;
-				cvs("-q","update","-A","-r",$rev, @ff);
+				if($ENV{BKCVS_WEB}) {
+					foreach my $f(@ff) {
+						wget ($ENV{BKCVS_WEB}.$f."?rev=".$rev."&content-type=text/plain", $f);
+					}
+				} else {
+					cvs("-q","update","-A","-r",$rev, @ff);
+				}
 				utime($wann,$wann,@ff);
 			}
 			push(@gone, grep {

@@ -18,7 +18,7 @@ Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -v releasename (cvs) ]  [ -t Tag ]
        [ -w neuer releasename ]
        [ -e CVS-Fudge-Sekunden (Default 120) ]
-       [ -q (quiet!) ]
+       [ -q (quiet!) ] [ -W http://XXX/ (/viewcvs?rev+text/plain) ]
        [ -D (Debug) ] [ -Z (keine Kompression) ] [ -b # (Limit) ]
        woher  was
 
@@ -48,8 +48,9 @@ bg=
 df=0
 tag=
 user=
+web=
 
-   eval set -- "$(getopt "hb:d:De:klLn:qr:sSt:u:v:w:Z" "$@")"
+   eval set -- "$(getopt "hb:d:De:klLn:qr:sSt:u:v:w:W:Z" "$@")"
    for i
    do
 	   case "$i"
@@ -86,6 +87,8 @@ user=
 			   shift; rvers="$1"; shift;;
 			-n)
 				shift; push=$1 ; shift ;;
+			-W)
+				shift; web="$1" ; shift ;;
 			-l)
 				shift; loc=y ;;
 			-b)
@@ -146,5 +149,6 @@ test -z "$BKCVS_NORENAME" && export BKCVS_NORENAME=$rename
 test -n "$verbose" && export BK_VERBOSE=1
 test -n "$ignore" && export BKCVS_IGNORE_ERROR=1
 test -n "$tag" && export BKCVS_TAG=$tag
+test -n "$web" && export BKCVS_WEB="$web"
 export BKCVS_LOCK=$bg
 exec $run "$was" "$what$dv"

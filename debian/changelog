@@ -1,3 +1,9 @@
+sourcemgr (1.261) unstable; urgency=low
+
+  * TEST: cvs clone pull via WWW
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Sun, 13 Jul 2003 23:09:10 +0200
+
 sourcemgr (1.260) unstable; urgency=low
 
   * bin/b.cache
