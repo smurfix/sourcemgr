@@ -586,30 +586,33 @@ sub process($$$$) {
 		foreach my $f(keys %$adt) {
 			my $rev = $adt->{$f}{rev};
 			push(@{$rev{$rev}}, $f);
-			dirs: while(1) {
-				$f = dirname($f);
-				last dirs if -d "$f/CVS";
-				mkpath("$f/CVS",0,0755);
-				open(R,">$f/CVS/Repository");
-				if($f eq ".") {
-					print R "$cne\n";
-				} else {
-					print R "$cne/$f\n";
-				}
-				close(R);
-				open(R,">$f/CVS/Root");
-				print R $ENV{CVS_REPOSITORY},"\n";
-				close(R);
-				open(R,">$f/CVS/Entries");
-				close(R);
-			}
 		}
 		my $cnt=0;
 		my $rcnt=0+keys %rev;
 		foreach my $rev(keys %rev) {
 			my %d;
 			my @f = @{$rev{$rev}};
-			unlink(@f);
+			foreach my $fx(@f) {
+				unlink($fx);
+				my $f=$fx;
+				dirs: while(1) {
+					$f = dirname($f);
+					last dirs if -d "$f/CVS";
+					mkpath("$f/CVS",0,0755);
+					open(R,">$f/CVS/Repository");
+					if($f eq ".") {
+						print R "$cne\n";
+					} else {
+						print R "$cne/$f\n";
+					}
+					close(R);
+					open(R,">$f/CVS/Root");
+					print R $ENV{CVS_REPOSITORY},"\n";
+					close(R);
+					open(R,">$f/CVS/Entries");
+					close(R);
+				}
+			}
 			while(@f) {
 				print STDERR " $pn: Processing $len: $cvsdate $cnt ".(0+@f)." $rcnt  |\r";
 				my @ff;
