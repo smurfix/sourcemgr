@@ -50,8 +50,7 @@ lwarn=
 nosign=
 opt_v=
 local=
-web1=http://smurf.noris.de/code/debian/unstable/source/
-web2=http://smurf.noris.de/code/debian/public/
+web=http://smurf.noris.de/code/debian/
 
 if test "$DEBEMAIL" = "smurf@debian.org" ; then
 	ddestdir=""
@@ -94,9 +93,7 @@ do
 		-V)
 			shift; opt_v="-v$1"; shift;;
 		-w)
-			shift; web1="$1"; shift;;
-		-W)
-			shift; web2="$1"; shift;;
+			shift; web="$1"; shift;;
 		-s)
 			shift; opt_s="-s$1"; shift;;
 		-d)
@@ -196,6 +193,7 @@ if ! test -w debian/changelog && ! bk get -q debian/changelog ; then
 	exit 1
 fi
 V="$(dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*//p')"
+DI="$(dpkg-parsechangelog | sed -ne 's/^Distribution:[ 	]*//p')"
 
 N="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
 test -n "$N" || N="$(basename "$dir")"
@@ -239,9 +237,9 @@ if test -n "$E" ; then # non-original package
 	if \
 	   cp ../${N}_$VV.orig.tar.gz "$T/" 2>/dev/null ||
  	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
-		"${web1}${N}_$VV.orig.tar.gz" ||
+		"${web}/$DI/source/${N}_$VV.orig.tar.gz" ||
 	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
-		"${web2}${N}_$VV.orig.tar.gz" ||
+		"${web}/public/${N}_$VV.orig.tar.gz" ||
 	   false
 	then
 		echo + get original source from .. or via HTTP

@@ -1,3 +1,9 @@
+sourcemgr (1.298) unstable; urgency=low
+
+  * b.debuild: Use the correct distribution for orig-source download
+
+ -- Matthias Urlichs <smurf@debian.org>  Sun, 18 Jan 2004 12:17:01 +0100
+
 sourcemgr (1.297) unstable; urgency=low
 
   * b.debuild: typo
