@@ -20,10 +20,7 @@ r="\n"
 usage() {
 	cat >&2 <<END
 Usage: $(basename $0)  -- Bauen und Installieren eines Programms
-       [ -C (nur  CVS-archivierte Sourcen angucken) ]
-       [ -P (nur PRCS-archivierte Sourcen angucken) ]
        [ -i (installiere fertiggebaute Programme) ]
-       [ -c (nur Programme mit bereits in /usr/src/XXX ausgecheckten Sourcen) ]
        [ was_gebaut_werden_soll... ] 
 
 Ohne "was_gebaut_werden_soll" wird alles gebaut, was noch nicht fertig ist.
@@ -39,75 +36,38 @@ set -- `getopt fcipCP $*`
 if test $? != 0
 then
 	usage
-        echo 'Usage: build [ -f(orce) -p(ath) -i(nstall) -c(heckout nothing)'
-        echo '               -C(vs only) -P(rcs only) what...'
+        echo 'Usage: build [ -i(nstall) ] [ what... ]'
         exit 2
 fi
+doinstall=
+
 for i ; do
         case "$i"
         in
-                -C)
-                        cvsonly=1; shift;;
-                -P)
-                        prcsonly=1; shift;;
-                -c)
-                        noupdate=1; shift;;
                 -i)
-                        noupdate=1; nomake=1; shift;;
-				-p)
-						dir=$(/bin/pwd|sed -e 's/^.*\.src\///')
-						what=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
-						shift;;
+                        doinstall=y; shift;;
                 --)
                         shift; break;;
         esac
 done
 
-ld="$(pwd)"
+cd /usr/src/STATUS
+while read ver dir rest ; do 
+	if test "$ver" = "*" ; then
+		desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
+		if test -f "done/$desc" ; then 
+			echo "$desc: Fertig."
+		elif test -f "fail/$desc" ; then 
+			echo "$desc: Hatte einen Fehler!"
+		elif test -z "$doinstall" ; then
+			p.make "$dir"
+		else
+			p.make -i "$dir"
+		fi
+	fi
+done < build
 
-if test -z "$nomake" -a "$(whoami)" = "root" ; then
-	echo "Unsere Sourcen werden bitte NICHT als Root gebaut, nur installiert."
-	exit 1
-fi
-
-if test -n "$nomake" -a "$(whoami)" != "root" ; then
-	echo "Unsere Sourcen werden bitte als Root installiert."
-	exit 1
-fi
-
-fn=1
-cd /usr/src
-exec 3>&1
-
-sl="/tmp/slist.$$"
-
-( if test -n "$what" ; then
-  echo $what
-elif test -z "$1" ; then
-  while read a b c ; do echo $b ; done < STATUS/build
-else
-  for i ; do 
-    echo $i
-  done
-fi
-) | sed -e 's/:/\//g' -e 's/\/*$//' > $sl
-
-set -e
-
-sed -e '/^#/d' -e 's/^\? /HEAD /' < STATUS/build |
-while read ver dir rest ; do # {
-	tag=$(echo $dir | sed -e 's|/|:|g' -e 's|:*$||')
-	dir=$(echo $tag | sed -e 's|:|/|g')
-	if grep "^$dir\$" >/dev/null $sl ; then  # {
-		pv="$(echo "$ver" | perl -ne 'if(s/^\*//) { $_="noris" if $_ eq "\n"; print; next; }; print "";')"
-		if test -n "$pv" ; then # {
-			ptag=$(echo $tag | sed -e 's|:|_|g')
-			ver=$pv
-		else # }{
-			ptag=
-		fi # }
-
-		echo -n "$dir $pv: "
+exit 0
 		if test -z "$noupdate" -a -f STATUS/legacy/$tag ; then # {
 			echo "will not be done."
 			if test -f STATUS/out/$tag ; then : ; else # {
@@ -257,7 +217,7 @@ while read ver dir rest ; do # {
 		fi # }
 	    echo ""
 	fi # }
-done  # }
+done  < STATUS/build  # }
 
 echo "Done."
 

@@ -12,6 +12,7 @@ p.import    update externer Sourcen
 p.info      Statusinfo eines Archivs
 p.init      Initiales Installieren von externem Source im Archiv
 p.new       Initiales Installieren von eigenen Sourcen im Archiv
+p.make      Hole aus Archiv, baue, installiere, wirf Sourcen wieder weg.
 p.merge     Update lokaler Sourcen bei Konflikten beim Checkin
 p.oget      holt Original-Sourcecode aus dem Archiv
 p.put       Speichern von Änderungen im Archiv

@@ -51,7 +51,7 @@ vers=$(echo $nvers | \
 fi
 
 export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
-what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
+what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 
 set -xe
 

@@ -44,8 +44,13 @@ while(<>) {
 		next;
 	}
 	if($key eq "LNK") {
-		dodir($val2);
-		$files{$val2}++;
+		if($val2 eq "") {
+			dodir($val1);
+			$files{$val1}++;
+		} else {
+			dodir($val2);
+			$files{$val2}++;
+		}
 		next;
 	}
 	if($key eq "SLN") {

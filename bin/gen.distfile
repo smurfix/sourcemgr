@@ -5,6 +5,7 @@ chdir("/usr/src") || die "No sources!";
 $ENV{'PATH'} = "/usr/src/STATUS/bin:".$ENV{'PATH'};
 
 my($fh) = "fh00";
+my $verbose = ($#ARGV < 0);
 
 sub procsub($$) {
 	my($who,$where) = @_;
@@ -147,7 +148,7 @@ while(($_ = &$dir) ne "") {
 			push(@cmds, $file) if $file =~ m#/+sbin/+init\.d/+scripts/# and $force;
 
 			next if ($force == 0) != ($sk == 0);
-			if (-e $file and $file !~ m#/tmp/*$#) {
+			if (-e $file) { # and $file !~ m#/tmp/*$#)
 				$did[$force]++;
 			} else {
 				$newdist .= "#";
@@ -207,7 +208,7 @@ while(($_ = &$dir) ne "") {
 		print OUT $newdist;
 		close OUT;
 	}
-	print $w,"\n";
+	print $w,"\n" if $verbose;
 	$/=$slash;
 }
 
