@@ -1,3 +1,10 @@
+sourcemgr (1.366) unstable; urgency=low
+
+  * b.cvs.pl: fix .cvspass parsing
+  * 
+
+ -- Matthias Urlichs <smurf@debian.org>  Thu, 16 Sep 2004 16:42:25 +0200
+
 sourcemgr (1.365) unstable; urgency=low
 
   * b.cvs.pl: Repo-Passwort vernünftig in ~/.cvspass finden

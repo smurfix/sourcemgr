@@ -194,7 +194,7 @@ sub new {
 		unless($pass) {
 			open(H,$ENV{'HOME'}."/.cvspass") and do {
 				while(<H>) {
-					s/^\\\d+\s+//;
+					s/^\/\d+\s+//;
 					my ($w,$p) = split;
 					if($w eq $rr) {
 						$pass = $p;
