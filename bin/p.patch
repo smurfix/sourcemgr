@@ -69,7 +69,7 @@ perl -p -i -e '
 
 vi $what.prj
 
-echo prcs checkin -f -r $vers.@ $what
+echo prcs checkin -r $vers.@ $what </dev/tty
 
 cd ..
 rm -rf $what.prj.$$ $what.$$ &

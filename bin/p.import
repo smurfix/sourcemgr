@@ -80,5 +80,5 @@ fi
 
 set -xe
 
-prcs checkin -f -r $vers.@ $what
+prcs checkin -r $vers.@ $what </dev/tty
 

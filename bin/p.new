@@ -66,5 +66,5 @@ if test -n "$*" ; then
 fi
 
 set -x
-prcs checkin -f -r$vers $what
+prcs checkin -r$vers $what </dev/tty
 

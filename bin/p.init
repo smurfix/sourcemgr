@@ -77,7 +77,7 @@ cat <<END >>$what.prj
 ;;*
 END
 vi $what.prj
-prcs checkin -f -r$overs.@ $what
+prcs checkin -r$overs.@ $what </dev/tty
 
 else
 prcs checkout -r $overs $what $what.prj
@@ -124,7 +124,7 @@ prcs populate $what
 
 vi $what.prj
 
-prcs checkin -f -r$vers.@ $what
+prcs checkin -r$vers.@ $what </dev/tty
 
 fi
 

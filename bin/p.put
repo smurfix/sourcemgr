@@ -56,6 +56,6 @@ fi
 
 set -xe
 
-prcs checkin -f $vers $what
+prcs checkin $vers $what </dev/tty
 redo $dir
 
