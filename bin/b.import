@@ -76,7 +76,7 @@ zeit=$(perl -e '
  my $mtime=0;
  find(sub {
 	return unless -f $_;
-	$t=(lstat(_))[9];
+	$t=(stat(_))[9];
 	$mtime=$t if $mtime<$t;
  }, ".");
  print $mtime;
