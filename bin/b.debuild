@@ -121,7 +121,7 @@ V="$(echo $DV | sed -ne 's/\(..*\)-..*/\1/p' )"
 if test -z "$V" ; then E=""; V="$DV"; fi
 bk export -T -w -tplain -r+ . "$T/$N-$V"
 mv debian/changelog "$T/$N-$V"/debian
-( cd "$T/$N-$V" ; rm debian/users debian/version )
+( cd "$T/$N-$V" ; rm debian/users debian/version debian/changelog.old )
 if test -n "$E" ; then # non-original package
 	bk export -T -w -tplain -rEXTERN . "$T/$N-$V.orig"
 fi
