@@ -56,7 +56,12 @@ shift
 cmt="$*"
 test -n "$cmt"
 
-b.get -n -v "$vers" -w "$nvers" -d "$dir" $tmp
+if test "$nvers" = "gibts/nicht" ; then
+	b.get -n -v "$vers" -d "$dir" $tmp
+else
+	b.get -n -v "$vers" -w "$nvers" -d "$dir" $tmp
+fi
+
 test -d "$tmp"
 
 set -e
