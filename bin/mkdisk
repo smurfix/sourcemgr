@@ -243,7 +243,6 @@ END
 #    cat STATUS/out/lib:shadow
   ) | grep ^/lib/ ;
     cat <<END
-/bin/bash
 /bin/sh
 END
 		) | 
@@ -308,10 +307,10 @@ net/depca.o
 net/smc-ultra.o
 net/smc9194.o
 net/tulip.o
+net/de4x5.o
 fs/nfs.o
 block/floppy.o
 END
-# net/de4x5.o
 
 else ## kein Netz
 

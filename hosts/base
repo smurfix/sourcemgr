@@ -43,7 +43,7 @@ misc:strace
 misc:trans
 misc:util-linux
 misc:vim
-net:backup:amanda:client
+net:backup:amanda-client
 net:debug:tcpdump
 net:debug:traceroute
 security:ssh

@@ -47,5 +47,5 @@ what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
 
 set -xe
 
-prcs diff $overs $vers $what "$@" -- -u -b 2>&1 |less
+prcs diff -f $overs $vers $what "$@" -- -u -b 2>&1 |less
 

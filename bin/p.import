@@ -5,16 +5,17 @@ cat >&2 <<END
 Usage: $(basename $0)  -- update externer Sourcen
        [ -d dest-directory ]
        [ -W origreleasename ]
-       [ -V neworigreleasename ]
+       [ -V neworigreleasename ] | [ -v releasename ]
 END
 exit 1
 }
 
 dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
 overs=base
-vers=base
+nvers=base
+vers=
 
-   set -- $(getopt "d:V:hv:" $*)
+   set -- $(getopt "d:V:W:hv:" $*)
    if test $? != 0
    then
 	   usage
@@ -30,12 +31,15 @@ vers=base
 		   -W)
 			   shift; overs="$1"; shift;;
 		   -V)
+			   shift; nvers="$1"; shift;;
+		   -v)
 			   shift; vers="$1"; shift;;
 	   esac
    done
 
 if test -z "$dir"; then usage; fi
-vers=$(echo $vers | \
+if test -z "$vers" ; then
+vers=$(echo $nvers | \
 	perl -pe '
 	tr/-_/./; if(/([^-\.]*)\.(.*)/) {
 		$base=$1; $wha=$2;
@@ -44,6 +48,7 @@ vers=$(echo $vers | \
 		$_ = "$base.$wha";
 	}
 ' )
+fi
 
 export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')

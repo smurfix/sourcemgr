@@ -103,7 +103,7 @@ nsv=$(echo $sv | \
    -e 's/-/./g' \
    -e 'y/abcdefghijklmnopqrstuvwxyz/12345678912345678912345678/' \
    -e 's/\.0*\([0-9]\)/.\1/g' \
-   -e 's/..*/./g' \
+   -e 's/\.\.*/./g' \
    -e 's/$/.@/'
 )
 
@@ -125,7 +125,8 @@ perl -p -e '
 
 echo $dir: Checking in $nsv '<=' $sv
 
-if test -n "$overs" ; then nsv="$overs.$nsv" ; else nsv="base.@"; fi
+if test -n "$overs" ; then nsv="$overs.@" ; else nsv="base.@"; fi
+#if test -n "$overs" ; then nsv="$overs.$nsv" ; else nsv="base.@"; fi
 prcs checkin -f -r$nsv $what
 echo $sv >$LV
 
@@ -149,7 +150,7 @@ if test -n "$goto" ; then
 cd /usr/src/$dir
 
 if test -n "$overs" ; then ov="$overs.@"; else ov="base.@"; fi
-prcs checkout -r $ov $what $what.prj
+prcs checkout -f -r $ov $what $what.prj
 perl -n -i -e '
    s#\(Populate-Ignore\s+\(#(Populate-Ignore ("/CVS/" "^CVS/" "\\\\.rej\$" "\\\\.orig\$" #;
     print unless /^;;\*/;

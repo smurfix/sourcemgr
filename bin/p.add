@@ -42,9 +42,9 @@ if test -z "$dir"; then usage; fi
 export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
 
-set -xe
-
-prcs populate $update $what $*
+cp -f $what.prj $what.backup
+prcs populate -f $update $what.prj $*
+prcs depopulate -f $what.prj $what.backup
 
 if test -n "$keys" ; then
     perl -p -i -e '

@@ -45,5 +45,5 @@ if test -n "$imp" ; then imp="$what.prj"; fi
 
 set -xe
 
-prcs checkout -r$vers $what $imp "$@"
+prcs checkout -r$vers $what.prj $imp "$@"
 

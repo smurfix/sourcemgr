@@ -17,9 +17,28 @@ what=
 
 r="\n"
 
+usage() {
+	cat >&2 <<END
+Usage: $(basename $0)  -- Bauen und Installieren eines Programms
+       [ -C (nur  CVS-archivierte Sourcen angucken) ]
+       [ -P (nur PRCS-archivierte Sourcen angucken) ]
+       [ -i (installiere fertiggebaute Programme) ]
+       [ -c (nur Programme mit bereits in /usr/src/XXX ausgecheckten Sourcen) ]
+       [ was_gebaut_werden_soll... ] 
+
+Ohne "was_gebaut_werden_soll" wird alles gebaut, was noch nicht fertig ist.
+Programme markiert man mit "redo was_gebaut_werden_soll" als unfertig.
+
+Gebaut wird als normaler Benutzer. Installiert wird als Root.
+END
+	exit 1
+}
+
+
 set -- `getopt fcipCP $*`
 if test $? != 0
 then
+	usage
         echo 'Usage: build [ -f(orce) -p(ath) -i(nstall) -c(heckout nothing)'
         echo '               -C(vs only) -P(rcs only) what...'
         exit 2
@@ -31,8 +50,6 @@ for i ; do
                         cvsonly=1; shift;;
                 -P)
                         prcsonly=1; shift;;
-                -f)
-                        force=1; shift;;
                 -c)
                         noupdate=1; shift;;
                 -i)
@@ -133,6 +150,9 @@ while read ver dir rest ; do # {
 				out=$(basename $dir)
 				mkdir -p $goto
 				where=" -d $out"
+				if test -n "$pv" ; then # {
+					ptag=$(echo $what | sed -e 's|[:/]|_|g')
+				fi # }
 			else # }{
 				what=$dir
 				where=""
@@ -211,7 +231,7 @@ while read ver dir rest ; do # {
 							echo "Building file list in background."
 							(
 								(	gen.flist <STATUS/done/$tag
-									if test -f STATUS/out/$tag ; then cat STATUS/out/$tag ; fi
+#									if test -f STATUS/out/$tag ; then cat STATUS/out/$tag ; fi
 								)	| sort -u > STATUS/out/new.$tag 
 								mv -f STATUS/out/new.$tag STATUS/out/$tag
 							) &

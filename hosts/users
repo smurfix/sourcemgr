@@ -1,5 +1,6 @@
 base
 misc:colm
+gnu:bc
 gnu:recode
 net:debug:trace
 net:debug:vrfy

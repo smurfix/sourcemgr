@@ -1,4 +1,6 @@
 router
+qmail
+user
 kernel:linux-adaptec
 kernel:mrouted
-net:backup:amanda:server
+net:backup:amanda-server

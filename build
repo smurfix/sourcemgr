@@ -21,7 +21,6 @@ v-0-2 gnu/ed	Batch-/Zeileneditor
 #-3-24-0 gnu/expect
 #-1993-04-28 gnu/f2c	Fortan-nach-C-Translator
 v-3-19 gnu/file	Dateitypen rausfinden
-v-3-16 gnu/fileutils	cp/rm/ls
 v-4-1 gnu/findutils	find/xargs
 #-1-37 gnu/finger	-- kein Linuxsupport...
 v-2-5-2 gnu/flex	!r-2-5-3 Lexikalischer Analyzer
@@ -74,10 +73,8 @@ v-2-0-5 gnu/sed	r-3-0	3.0 ist nicht verwendbar
 v-1-15 gnu/sh-utils
 #-1-1-1 gnu/smalltalk
 #-2-3 gnu/superopt
-v-1-11-11 gnu/tar
 #-1-2 gnu/termcap	stattdessen: ncurses -- zwei dieser Teile sind Overkill!
 # gnu/texi2roff	-- keine Versionsnummer
-v-3-7 gnu/texinfo
 v-1-11 gnu/textutils
 #-2-1 gnu/tile-forth
 v-1-6 gnu/time
@@ -128,21 +125,16 @@ v-3-0-11 misc/strace
 v-6-06 misc/tcsh
 #v-96-e misc/timezone ## in glibc
 v-2-5 misc/util-linux
-v-2-3-0 net/backup/amanda/client
-v-2-3-0 net/backup/amanda/server
 v-3-0 net/debug/tcpdump	-- Cleanup notwendig!
 v-4-4 net/debug/traceroute
 #v-4-9-5-6b net/dns/bind => bind8
 v-2-3-0 net/ftp/ncftp
 v-2-4-25 net/mail/elm
 v-8-7-6 net/mail/sendmail
-v-2-99-47-1 net/mail/zmailer r-2-99-47-1
 v-1-5-1 net/news/inn
 v-3-3-2 net/news/nntplink
 v-0-4 net/news/gup
 #?? net/news/gup
-v-2-2-b-23 net/rpc/nfsd
-v-0-9 net/rpc/rpc
 v-1-2-b-7 net/www/apache
 ? net/www/lynx
 v-2-6-3 security/pgp
@@ -154,7 +146,6 @@ v-3-5-f server/xntp
 # x11/gimp	Bildbearbeitung hoch zehn
 v-0-75-a x11/lesstif	Ich hasse Motif.
 v-212	x11/xmt	ftp.ora.com/pub/examples/xbook/Xmt
-? x11/xfree386/xc
 v-3-10-a	x11/xv	ftp.cis.upenn.edu/pub/xv
 v-2-0-30 kernel/linux-adaptec
 v-2-0-30 kernel/linux-at
@@ -175,14 +166,12 @@ v-2-0-10 x11/xarchie /mirror/lxserver/ftp.x.org/contrib/utilities/
 v-u	net/misc/sup	?	Sauger für mit SUP verteilte Sourven
 v-1996-10-23	emulators/wine	Wine Is No Emulator ;-)
 ? net/appletalk/netatalk
-v-1-9-16-9 net/windows/samba
 v-3-6 net/news/trn
 r-2 misc/trans
 v-4-0-b-2 net/multicast/vat Audio hoch Mbone
 #v-0-50	net/meta/tcpcontrol TCP-Krempel
 v-0-72	net/meta/ucspi TCP-Listener etc.
 v-1-93	net/mail/majordomo
-v-3-6-a-2	net/route/gated
 v-0	net/mail/pop3d ?ftp.ucdavis.edu:/pub/pop3d.tar
 v-4-0	misc/glimpse
 v-0-9-8	net/news/knews
@@ -284,7 +273,6 @@ v-1-9-1	lib/ld.so
 v-0		net/meta/midentd	???
 ? x11/xfree386/contrib
 v-3-1-3	lib/snmp	ftp.ece.ucdavis.edu:/pub/snmp
-v-1-6	misc/perl/snmp	CPAN
 v-1997-04-09	kernel/automount	ftp://ftp.kernel.org/pub/linux/daemons/autofs/
 v-0-4-8	misc/tex/tetex/lib
 v-0-4-7	misc/tex/tetex/src
@@ -298,7 +286,6 @@ v-2-0-b-7	database/msql
 v-1-1701	misc/perl/msql	CPAN
 v-2-3-0 kernel/pppd ftp://cs.anu.edu.au/pub/software/ppp/
 v-3-11-p-4	net/mail/procmail ftp://ftp.informatik.rwth-aachen.de/pub/packages/procmail/
-v-0-10	misc/perl/dns
 v-1-6-3 misc/rsync ftp://samba.anu.edu.au/pub/rsync
 v-var	gnu/cygnus
 v-3-5-8 gnu/gv
@@ -384,6 +371,30 @@ v-1 misc/colm
 *	vendor/capi	*	Bintec-CAPI-Tools	ftp://ftp.bintec.de//
 *	net/mail/qmail	*	Standardmailer für Unkritisches	1-00	ftp://koobera.math.uic.edu/pub/software/
 *	net/mail/serialmail	*	Schicken von Mails aus einem maildir heraus	0-51	ftp://koobera.math.uic.edu/pub/software/
-*	net/mail/zmailer	*	ZMailer	2-99-47	xxx
-*	net/mail/zmailer	*	ZMailer	2-99-48	xxx
 *	net/mail/zmailer	*	ZMailer	2-99-48-3	xxx
+*	x11/xfree386/xc	*	X11-Basis, Core	ftp://ftp.xfree86.org/
+*	net/rpc/nfsd	*	NFS- und Mountdaemons	2-2-b-23	x
+*	net/rpc/rpc	*	Portmapper und Konsorten	0-9	x
+*noris.exp	net/route/gated	*	GateD-Routingdaemon	3.5.8/3.6.a2 ftp://ftp.merit.edu/net-research/gated
+*	misc/perl/dns	*	DNS-Zugriff von Perl aus	0-10	CPAN:/net/dns
+*	misc/perl/snmp	*	SNMP-Zugriff von Perl aus	1-6	CPAN:/net/snmp
+*	net/meta/ucspi	*	TCP-Listener	0-72	-
+*	misc/perl/tk	*	TkPerl	402-000	CPAN:/net/snmp
+*	kernel/netkit-b	*	Diverse Netzwerkprogramme	0-09	-
+*	kernel/netkit-a	*	Diverse Netzwerkprogramme A	0-10	-
+*	kernel/isdn	noris	U-ISDN-Krempel	19	-
+*	kernel/isdn	noris	U-ISDN-Krempel	45	-
+*	misc/prcs	*	Project Revision Control System	ftp://ftp.xcf.berkeley.edu/pub/prcs/
+*	misc/xdelta	*	Binäres Deltagenerierungs- und -archivierungsprogramm	ftp://ftp.xcf.berkeley.edu/pub/jmacd/
+*	net/backup/amanda-server	*	Amanda-Netzbackupsystem	2-3-0	ftp://ftp.cs.umd.edu/pub/amanda/
+*	net/backup/amanda-client	*	Amanda-Netzbackupsystem	2-3-0	ftp://ftp.cs.umd.edu/pub/amanda/
+*	vendor/brickmib	*	MIBs fuer Bricks	4.6.1	ftp://ftp.bintec.de/pub/brick/mib/
+*	gnu/fileutils	*	GNU Fileutils	3-16	ftp://ftp.gnu.org/pub/gnu/
+*	gnu/tar	*	GNU tar	1.12	ftp://ftp.gnu.org/pub/gnu/
+*	gnu/texinfo	*	GNU TeXInfo	3.9	ftp://ftp.gnu.org/pub/gnu/
+*	net/windows/samba	*	SMB-Client+Server	1-9-16-11	ftp://samba.anu.edu.au/pub/samba/
+*	x11/kde/libs	*	KDE Libraries	ftp://ftp.kde.org/
+*	x11/qt	*	QT Toolkit	ftp://ftp.troll.no/qt/source/
+*	x11/kde/base	*	KDE Base	ftp://ftp.kde.org/
+*	gnu/cygnus/binutils	*	GNU Binutils	2-7	-
+*	x11/gtk	*	GTK Toolkit	ftp://ftp.gimp.org/pub/gtk/
