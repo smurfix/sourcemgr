@@ -18,7 +18,7 @@ dir=
 vers=
 single=
 
-   eval set -- "$(getopt "d:v:h" "$@")"
+   eval set -- "$(getopt "d:sv:h" "$@")"
    for i
    do
 	   case "$i"
