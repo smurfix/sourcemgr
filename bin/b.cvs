@@ -13,6 +13,8 @@ Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -r Fork (im CVS) ]
        [ -v releasename (cvs / extern) ]
        [ -w releasename (cvs) ]
+       [ -e CVS-Fudge-Sekunden (Default 30) ]
+       [ -E Abstand-zwischen-Push (Default 10) ]
        [ -V (verbose) ]
        [ -D Datum ] [ -Z (keine Kompression) ]
        woher  was
@@ -27,7 +29,6 @@ PATH=/usr/src/STATUS/bin:/usr/local/bin:$PATH
 
 dir=
 vers=cvs
-nvers=
 nopush=
 rvers=
 rdir=
@@ -36,10 +37,12 @@ datum=$(date '+%Y-%m-%d')
 sdatum=now
 quiet=-q
 comp=-z3
+each=10
+diff=30
 loc=
 df=0
 
-   eval set -- "$(getopt "Vd:v:w:r:hD:Zlnp:" "$@")"
+   eval set -- "$(getopt "Vd:v:r:hD:Zlnp:e:E:" "$@")"
    for i
    do
 	   case "$i"
@@ -55,12 +58,14 @@ df=0
 			   df=$(expr $(date -d "now" "+%s") - $(date -d "$D" "+%s" )); shift;;
 		   -p)
 			   shift; parent="$1"; shift;;
+		   -e)
+			   shift; diff="$1"; shift;;
+		   -E)
+			   shift; each="$1"; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
 			   shift; vers="$1"; shift;;
-		   -w)
-			   shift; nvers="$1"; shift;;
 		   -r)
 			   shift; rvers="-r $1"; rdir="-$1"; shift;;
 			-n)
@@ -73,7 +78,6 @@ df=0
    done
 
 set -e
-if test -z "$nvers" ; then nvers=$vers; fi
 
 if test -z "$dir" ; then
 	b.name > /tmp/bn.$$
@@ -101,4 +105,8 @@ dest=/var/cache/cvs/bk/"$dir-$vers"
 
 export BK_REPOSITORY=bk://bitkeeper.noris.de
 export CVS_REPOSITORY="$woher"
+export BKCVS_COMP=$comp
+export BKCVS_EACH=$each
+export BKCVS_DIFF=$diff
+export BKCVS_NOPUSH=$nopush
 exec b.cvs.pl "$was" "$dir-$vers"

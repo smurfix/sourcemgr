@@ -12,13 +12,13 @@ use Carp qw(confess);
 use Storable qw(nstore retrieve);
 
 my $debug=0;
-my $diff=30; # Zeitraum für "gleichzeitige" Änderungen im CVS
+my $diff=$ENV{BKCVS_DIFF}||30; # Zeitraum für "gleichzeitige" Änderungen im CVS
 
 sub Usage() {
 	print STDERR <<END;
 Usage: $0 CVSName ProjektName
 
-Environment: CVS_REPOSITORY BK_REPOSITORY
+Environment: CVS_REPOSITORY BK_REPOSITORY DISPLAY
 END
 	exit 1;
 }
@@ -30,6 +30,11 @@ $ENV{BK_LICENSE}="ACCEPTED";
 select(STDERR); $|=1; select(STDOUT);
 
 use Shell qw(); ## bk cvs
+system("xterm -e true");
+if($?) {
+	print STDERR "No X connection?\n\n";
+	Usage;
+}
 
 sub init_bk();
 my $rhost="un.known";
@@ -143,8 +148,14 @@ sub bk {
 }
 
 sub cvs {
-	unshift(@_,"cvs","-z3","-d",$ENV{CVS_REPOSITORY});
-	print STDERR ">>> @_\n";
+	my @comp = ();
+	if(defined $ENV{BKCVS_COMP}) {
+		push(@comp,$ENV{BKCVS_COMP}) if $ENV{BKCVS_COMP} ne "";
+	} else {
+		push(@comp,"-z3");
+	}
+	unshift(@_,"cvs",@comp,"-d",$ENV{CVS_REPOSITORY});
+	print STDERR ">>> @_\n" if $debug;
 	open(FP,"-|") or do {
 		chdir("..");
 		exec @_;
@@ -242,6 +253,7 @@ sub atta($$) {
 
 
 }
+
 sub csdiff($$$$) {
 	my($i,$fn,$autor,$cmt)=@_;
 	my $df = $diff;
@@ -255,7 +267,7 @@ sub csdiff($$$$) {
 	}
 	if(defined $cmt and exists $fi->{scmt}) {
 		unless(defined $fi->{scmt}) { # Konflikt
-			$df /= 5;
+			$df /= 3;
 		} elsif($fi->{scmt} eq $cmt) { # OK
 			$df *= 5;
 		}
@@ -263,10 +275,18 @@ sub csdiff($$$$) {
 	$df /= 2 if defined $fn and defined $fi->{cmt}{$fn};
 	$df;
 }
+
 my %known;
 sub add_date($;$$$$) {
 	my($wann,$fn,$rev,$autor,$cmt)=@_;
 	return if defined $fn and $known{$fn}{$rev}++;
+
+	sub acmp($$) {
+		my($a,$b)=@_;
+		return 0 if not defined $a;
+		return 0 if not defined $b;
+		$a cmp $b;
+	}
 
 	my $i;
 	cset:
@@ -289,7 +309,7 @@ sub add_date($;$$$$) {
 			if($cset->[$i]{start}-csdiff($i,$fn,$autor,$cmt) > $wann) { # A: weitersuchen
 				$max=$i; $i--;
 				next;
-			} elsif($cset->[$i]{start} > $wann) { # B: verlängern
+			} elsif($cset->[$i]{start} > $wann and !acmp($cset->[$i]{autor},$autor)) { # B: verlängern
 				if($i>0 and $cset->[$i-1]{ende}+$diff >= $wann) {
 					atta($cset->[$i-1],$cset->[$i]);
 					splice(@$cset,$i,1);
@@ -298,16 +318,37 @@ sub add_date($;$$$$) {
 					$cset->[$i]{start} = $wann;
 				}
 				last cset;
+			} elsif($cset->[$i]{start} > $wann) { # B: weitersuchen
+				$max=$i; $i--;
+				next;
 			} elsif($cset->[$i]{ende}+csdiff($i,$fn,$autor,$cmt) < $wann) { # E: weitersuchen
 				$min=$i;
 				next;
-			} elsif($cset->[$i]{ende} < $wann) { # D: Verlängern
+			} elsif($cset->[$i]{ende} < $wann and !acmp($cset->[$i]{autor},$autor)) { # D: Verlängern
 				if($i < @$cset-1 and $cset->[$i+1]{start}-$diff <= $wann) {
 					atta($cset->[$i],$cset->[$i+1]);
 					splice(@$cset,$i+1,1);
 				} else {
 					$cset->[$i]{ende} = $wann;
 				}
+			} elsif($cset->[$i]{ende} < $wann) { # D: Weitersuchen
+				$min=$i;
+				next;
+			} elsif(acmp($cset->[$i]{autor},$autor)) { # Konflikt!
+				my($ss,$mm,$hh,$d,$m,$y)=localtime($wann);
+				$m++; $y+=1900; ## zweistellig wenn <2000
+				my $date = sprintf "%04d-%02d-%02d %02d:%02d:%02d",$y,$m,$d,$hh,$mm,$ss;
+				die <<END;
+
+There is a conflict!
+	date $date
+	file $fn
+	rev  $rev
+	by   $autor
+
+It falls within a change by $cset->[$i]{autor}.
+Reduce the time tolerance variables and try again.
+END
 			}
 			# ansonsten sind wir im Bereich => OK.
 			last cset;
@@ -547,7 +588,7 @@ sub process($) {
 				my $i = undef;
 				$i=50 if @f>60;
 				my @ff = splice(@f,0,$i||(1+@f));
-				bk("get","-eg", @ff);
+				bk("get","-egq", @ff);
 				unlink(@ff);
 				cvs("get","-r",$rev, map { "$cn/$_" } @ff);
 			}
@@ -572,7 +613,6 @@ sub process($) {
 	my @new = grep { if(-l $_) { unlink $_; undef; } else { 1; } } bkfiles("x");
 
 	if(@new and @gone) {
-		$DB::single=1;
 		my $cmds = $inf->{rename};
 
 		unless($cmds) {
@@ -683,11 +723,10 @@ foreach my $x(@$cset) {
 	if($last) {
 		my $idate = int(($last->{ende}+$x->{start})/2);
 		if($idate > $dt_done) {
-			$DB::single=1 if $sum;
 			# process($sum->{ende},$sum) if $sum;
 			$sum=undef;
 			process($last);
-			bk("push") unless $step++%10;
+			bk("push","-q") unless $ENV{BKCVS_NOPUSH} or $step++%($ENV{BKCVS_EACH}||10);
 		} else {
 			$sum={} unless ref $sum;
 			atta($sum,$last);
@@ -696,5 +735,5 @@ foreach my $x(@$cset) {
 	$last = $x;
 }
 process($last) if $last;
-bk("push");
+bk("push","-q") unless $ENV{BKCVS_NOPUSH};
 unlink("$tmpcv.data");
