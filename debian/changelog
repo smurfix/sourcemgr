@@ -1,3 +1,13 @@
+sourcemgr (1.301) unstable; urgency=low
+
+  * b.cvs.pl just skipped deleted files (except for 1.1 versions)
+  * which breaks down when a file is added to a branch.
+  * 
+  * Fixed by explicitly skipping those files.
+  * NOTE: Saved .data files are obsoleted by this.
+
+ -- Matthias Urlichs <smurf@debian.org>  Thu, 22 Jan 2004 08:01:01 +0100
+
 sourcemgr (1.300) unstable; urgency=low
 
   * + combine_changes

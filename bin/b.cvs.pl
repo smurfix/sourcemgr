@@ -258,8 +258,8 @@ my $cset;
 my $dt_done;
 
 my %known;
-sub add_date($;$$$$) {
-	my($wann,$fn,$rev,$autor,$cmt)=@_;
+sub add_date($;$$$$$) {
+	my($wann,$fn,$rev,$autor,$cmt,$gone)=@_;
 	return if defined $fn and $known{$fn}{$rev}++;
 
 	sub acmp($$) {
@@ -306,6 +306,7 @@ sub add_date($;$$$$) {
 	
 		$cs->{$fn}{cmt} = $cmt;
 		$cs->{$fn}{rev} = $rev;
+		$cs->{$fn}{gone} = 1 if $gone;
 	} else {
 		$cs->{sym} = [] unless defined $cs->{sym};
 		return $cs->{sym};
@@ -349,8 +350,8 @@ sub rev_ok($$) {
 }
 
 # Bearbeite den Log-Eintrag EINER Datei
-sub proc1($$$$$$) {
-	my($fn,$dt,$rev,$cmt,$autor,$syms) = @_;
+sub proc1($$$$$$$) {
+	my($fn,$dt,$rev,$cmt,$autor,$syms,$gone) = @_;
 
 	return if 
 		 $fn =~ m#^CVS/# or
@@ -359,7 +360,7 @@ sub proc1($$$$$$) {
 		 $fn =~ m#/CVSROOT/# or
 		 0;
 	return unless rev_ok($fn,$rev);
-	add_date($dt,$fn,$rev,$autor,$cmt);
+	add_date($dt,$fn,$rev,$autor,$cmt,$gone);
 	foreach my $sym(@$syms) {
 		$symdate{$sym}=$dt if not defined $symdate{$sym} or $symdate{$sym}<$dt;
 	}
@@ -373,7 +374,7 @@ sub proc(@) {
 	my $cmt;
 	my %syms;
 	my $pre;
-	my $skip;
+	my $gone;
 	foreach my $x(@_) {
 		if($state == 0 and $x =~ s/^Working file:\s+(\S+)\s*$/$1/) {
 			$fn = $x;
@@ -414,8 +415,8 @@ sub proc(@) {
 		}
 		if($state >= 2 and $x =~ /^\-+\s*$/) {
 			$state=4;
-			proc1($fn,$dt,$rev,$cmt,$autor,$syms{$rev}) if $dt and not $skip;
-			$dt=0; $cmt=""; $skip=0;
+			proc1($fn,$dt,$rev,$cmt,$autor,$syms{$rev},$gone) if $dt;
+			$dt=0; $cmt=""; $gone=0;
 			next;
 		}
 		if($state == 4 and $x =~ /^revision\s+([\d\.]+)(?:$|\s+)/) {
@@ -424,7 +425,7 @@ sub proc(@) {
 			next;
 		}
 		if($state == 5 and $x =~ /^date:\s+(\d+)\/(\d+)\/(\d+)\s+(\d+)\:(\d+)\:(\d+)\s*\;\s+author\:\s+(\S+)\;\s+state\:\s+(\S+)\;/) {
-			# $skip=1 if lc($8) eq "dead";
+			$gone=1 if lc($8) eq "dead";
 			$autor = $7;
 			my($y,$m,$d,$hh,$mm,$ss)=($1,$2,$3,$4,$5,$6);
 			$y-=1900 if $y>=1900; $m--;
@@ -440,7 +441,7 @@ sub proc(@) {
 			next;
 		}
 	}
-	proc1($fn,$dt,$rev,$cmt,$autor,$syms{$rev}) if $dt and not $skip; $dt=0;
+	proc1($fn,$dt,$rev,$cmt,$autor,$syms{$rev},$gone) if $dt;
 }
 
 my $tmpcv = "/var/cache/cvs";
@@ -625,7 +626,11 @@ sub process($$$$) {
 		my %rev;
 		foreach my $f(keys %$adt) {
 			my $rev = $adt->{$f}{rev};
-			push(@{$rev{$rev}}, $f);
+			if(exists $adt->{$f}{gone}) {
+				unlink($f);
+			} else {
+				push(@{$rev{$rev}}, $f);
+			}
 		}
 		my $cnt=0;
 		my $rcnt=0+keys %rev;
@@ -638,7 +643,7 @@ sub process($$$$) {
 				dirs: while(1) {
 					$f = dirname($f);
 					last dirs if -d "$f/CVS";
-					mkpath("$f/CVS",0,0755);
+					mkpath("$f/CVS",0,0755) or die "$f: $!\n";
 					open(R,">$f/CVS/Repository");
 					if($f eq ".") {
 						print R "$cne\n";
