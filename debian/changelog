@@ -1,3 +1,9 @@
+sourcemgr (1.291) unstable; urgency=low
+
+  * prophylaktischen xterm-Aufruf abschalten
+
+ -- Matthias Urlichs <smurf@debian.org>  Fri, 28 Nov 2003 10:03:55 +0100
+
 sourcemgr (1.290) unstable; urgency=low
 
   * depend on Perl shlock
