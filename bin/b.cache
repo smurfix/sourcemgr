@@ -105,7 +105,7 @@ else
 	bk clone -q $BK_REPOSITORY/$what$dv "$c.x"
 fi
 cd "$c.x" 
-bk -r clean -q
+bk -Ur get -Sq
 cd ..
 mv "$c.x" "$c"
 echo "$c"
