@@ -1,3 +1,9 @@
+sourcemgr (1.279) unstable; urgency=low
+
+  * disabled *.changelog triggers
+
+ -- Matthias Urlichs <smurf@debian.org>  Fri, 12 Sep 2003 21:00:26 +0200
+
 sourcemgr (1.278) unstable; urgency=low
 
   * bin/b.debuild:
