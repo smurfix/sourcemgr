@@ -45,8 +45,9 @@ else
 fi
 if test "$vers" = "-" ; then vers="" ; fi
 
-desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
-what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
+#desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
+#what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
+what=$dir
 
 trap '' 0
 

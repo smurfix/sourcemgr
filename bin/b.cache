@@ -48,16 +48,18 @@ if b.exists -v "$vers" $dir > /tmp/tf.$$ ; then : ; else
 	exit 1
 fi
 read what dv < /tmp/tf.$$
+dest=$(echo $what | sed -e 's/\//_/g' -e 's/_*$//')
+
 rm -f /tmp/tf.$$
 
 if test -z "$what" ; then echo >&2 "'$dir' not found." ; exit 1 ; fi
 test -z "$dv" || dv="-$dv"
 
-dir="$what$dv"
+dir="$dest$dv"
 
 case "$BK_REPOSITORY" in
-	/*) if test -d "$BK_REPOSITORY/$dir";  then
-			echo "$BK_REPOSITORY/$dir"
+	/*) if test -d "$BK_REPOSITORY/$what$dv";  then
+			echo "$BK_REPOSITORY/$what$dv"
 			exit 0
 		else
 			echo "Archive '$what$dv' doesn't exist in $BK_REPOSITORY"
@@ -73,13 +75,13 @@ if test -d "$cbase" ; then : ; else
 	exit 1
 fi
 
-if shlock /var/lock/b.cache.$what$dv ; then : ; else
+if shlock /var/lock/b.cache.$dest$dv ; then : ; else
 	echo "$what$dv: Locked." >&2
 	exit 1
 fi
-trap "rm -f /var/lock/b.cache.$what$dv" 0
+trap "rm -f /var/lock/b.cache.$dest$dv" 0
 
-c="$cbase/$what$dv"
+c="$cbase/$dest$dv"
 if test -d "$c" ; then
 	mv "$c" "$c.x"
 	cd "$c.x"
