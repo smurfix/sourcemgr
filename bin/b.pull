@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -e
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- Update aus allen Upstream-Repositories.
+	Es wird immer das aktuelle Verzeichnis verwendet.
+	Die Upstream-Liste steht in BitKeeper/log/parents.
+END
+    trap "" 0
+    exit 1
+}
+
+if test -n "$1" ; then
+	usage
+fi
+
+if test ! -f BitKeeper/log/parents ; then
+	cat BitKeeper/log/parent > BitKeeper/log/parents
+fi
+
+# I hate shells.
+exec 9<&0
+while read a ; do
+	bk pull "$a" <&9
+	test ! -d RESYNC || bk resolve <&9
+done < BitKeeper/log/parents

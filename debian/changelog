@@ -1,3 +1,10 @@
+sourcemgr (1.286) unstable; urgency=low
+
+  * Neu: b.pull
+       Updatet aus allen Parents.
+
+ -- Matthias Urlichs <smurf@debian.org>  Wed,  1 Oct 2003 10:57:11 +0200
+
 sourcemgr (1.285) unstable; urgency=low
 
   * debu, b.debuild:
