@@ -10,6 +10,8 @@
 #echo ""
 #set -ex
 
+test -z "$NO_NEW_VERSION" || exit 0
+
 BF=rpm.version; F=SCCS/s.rpm.version
 if ! test -f $F ; then BF=debian/version; F=debian/SCCS/s.version; fi
 
