@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
  
 set -e
 trap 'usage; exit 1' 0
@@ -69,7 +69,7 @@ dfile=
 
 set -e
 dir="$(p.name "$dir")"
-export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=${PRCS_REPOSITORY:-/usr/src/archiv/prcs} PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 dist=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 

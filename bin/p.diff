@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 trap 'usage; exit 1' 0
@@ -8,7 +8,7 @@ cat >&2 <<END
 Usage: $(basename $0)  -- Diffs zur letzten Version
        [ -d Paket ]
        [ -b (unterschiedliche Leerstellenzahl ignorieren) ]
-       [ -v vonreleasename ]
+       [ -v vonreleasename ] [ -n (neue Dateien) ]
        [ -w nachreleasename ]
 END
 }
@@ -18,7 +18,7 @@ vers=
 b=
 dir=
 
-   eval set -- "$(getopt "d:bv:w:h" "$@")"
+   eval set -- "$(getopt "d:bnv:w:h" "$@")"
    for i
    do
 	   case "$i"
@@ -26,7 +26,9 @@ dir=
 		   -h)
 		       exit 1 ;;
 		   -b)
-			   b="-b"; shift;;
+			   b="$b -b"; shift;;
+		   -n)
+			   b="$b -N"; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
@@ -49,7 +51,7 @@ else
     what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 fi
 
-export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=${PRCS_REPOSITORY:-/usr/src/archiv/prcs} PRCS_LOGQUERY=1
 
 set -x
 trap '' 0

@@ -32,7 +32,8 @@ END
 }
 
 dir=
-vers=noris
+defvers=noris
+vers=
 doinstall=
 islocal=
 nodelete=
@@ -118,16 +119,7 @@ else
 	test -z "$*"
 fi
 
-#if test "$doinstall" = "b" ; then
-#	trap '' 0
-#	sudo id >/dev/null
-#	perl -e 'while(getppid() != 1) { system("sudo id >/dev/null"); sleep(60); }' &
-#	if p.make    $recargs ; then echo Make OK ; else echo Make BAD ; exit 1; fi
-#	if p.make -i $recargs ; then echo MakeInstall OK ; else echo MakeInstall BAD ; exit 1; fi
-#	exit 0
-#fi
-
-export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=${PRCS_REPOSITORY:-/usr/src/archiv/prcs} PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/:/_/g'  -e 's/\//_/g' -e 's/_*$//')
 desc=$(echo $dir | sed -e 's/_/:/g'  -e 's/\//:/g' -e 's/:*$//')
 #dir=$(echo $desc | sed -e 's/:/\//g')
@@ -167,10 +159,13 @@ if test -z "$islocal" ; then
 		# set -- $(grep "^$desc[	 ]" STATUS/checkout/$desc)
 		set -- $(cat /usr/src/STATUS/checkout/$desc)
 		what=$1
-		compile=$2$submode
-		install=$3$submode
-		if test -n "$4" ; then what="$4" ; fi
-		what=$(echo $what | sed -e 's/[:\/]/_/g' -e 's/_*$//')
+		compile=$2
+		install=$3
+		install=$3
+		what=$(echo $what | sed -e 's/:/_/g'  -e 's/\//_/g' -e 's/_*$//')
+		if test -n "$4" ; then
+			defvers="$4"
+		fi
 	fi
 	if test ! -d $PRCS_REPOSITORY/$what ; then
 		echo "$desc$submode: kein PRCS-Archiv gefunden!"
@@ -228,11 +223,14 @@ if test -z "$islocal" ; then
 	fi
 
 	mkfifo /tmp/ff.$$
+	mkfifo /tmp/fg.$$
 	( set +x; while read a ; do echo "# $a" ; done < /tmp/ff.$$ | tee -a STATUS/work/$desc$submode ) &
 	reader=$!
+	( set +x; while read a ; do echo "# $a" ; done < /tmp/fg.$$ | tee -a STATUS/work/$desc$submode ) &
+	readere=$!
 	sleep 1
-	exec  5>&1 6>&2  >/tmp/ff.$$ 2>&1
-	rm /tmp/ff.$$
+	exec  5>&1 6>&2  >/tmp/ff.$$ 2>/tmp/fg.$$
+	rm /tmp/ff.$$ /tmp/fg.$$
 
 	if test -f "$dir/AUTOREMOVE" ; then
 		if test -f "STATUS/keep/$desc" ; then
@@ -250,7 +248,7 @@ if test -z "$islocal" ; then
 	else
 		mkdir -p $dir
 		cd $dir
-		prcs checkout -f -r$vers $what.prj
+		prcs checkout -f -r${vers:-$defvers} $what.prj
 	    touch AUTOREMOVE
 	fi
 fi
@@ -269,12 +267,15 @@ fi
 
 if test -z "$doinstall" -o "$doinstall" = "b" ; then # compile
 	echo + make -f $MF $compile$subtarget
-	env LANG=C-JIS make -f $MF $compile$subtarget || bad=y
+	make -f $MF $compile$subtarget || bad=y
+	#env LANG=C-JIS make -f $MF $compile$subtarget || bad=y
 fi
 if test -n "$doinstall" -a -z "$bad" ; then
 	echo + make -f $MF $install$subtarget
-	sudo env LD_PRELOAD=/usr/lib/log-install.so LOGFILE=/usr/src/STATUS/work/$desc$submode \
-	env LANG=C-JIS make -f $MF $install$subtarget || bad=y
+	#sudo env LD_PRELOAD=/usr/lib/log-install.so LOGFILE=/usr/src/STATUS/work/$desc$submode \
+	#env LANG=C-JIS make -f $MF $install$subtarget || bad=y
+	sudo env LD_PRELOAD=/usr/lib/log-install.so LOGFILE=/usr/src/STATUS/work/$desc$submode.p \
+	make -f $MF $install$subtarget || bad=y
 fi
 
 if test -z "$islocal" ; then
@@ -282,6 +283,9 @@ if test -z "$islocal" ; then
 	exec  1>&5 2>&6
 	sleep 1
 	kill $reader 2>/dev/null || true
+	kill $readere 2>/dev/null || true
+	test ! -s /usr/src/STATUS/work/$desc$submode.p || cat /usr/src/STATUS/work/$desc$submode.p >> /usr/src/STATUS/work/$desc$submode && rm -f /usr/src/STATUS/work/$desc$submode.p
+	test ! -s /usr/src/STATUS/work/$desc$submode.e || cat /usr/src/STATUS/work/$desc$submode.e >> /usr/src/STATUS/work/$desc$submode && rm -f /usr/src/STATUS/work/$desc$submode.e
 	if test -n "$bad" ; then
 		mv "STATUS/work/$desc$submode" "STATUS/fail/$desc$submode"
 		if test -n "$doinstall" ; then touch "STATUS/done/$desc$submode"; fi

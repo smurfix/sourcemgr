@@ -610,3 +610,51 @@ x	kernel/linux 	*	Master-Kernelsource	2.0.33/2.1.77	ftp.kernel.org
 *	x11/gnome/emusic	Version DR-0.9	Musikspieler	http://www.icom.net/~smelecat/emp3/downloads.html
 *	net/mail/drac	Version 1.9	POP3-nach-SMTP	ftp://ftp.cc.umanitoba.ca/src/drac.tar.Z
 *	lib/tcl/itcl	Version 3.0a1	incrTCL	ftp://ftp.tcltk.com/pub/itcl/
+*	net/mail/ezmlm	Version 0.53	Mailinglistenverwaltung	www.ezmlm.org
+*	net/mail/whoson	Version 1.01	Who-is-online	http://www.average.org/ftp/whoson/
+*	misc/perl/mysql	Version 1.18.34	Mysql-Zugriff	CPAN
+*	lib/openssl	Version 0.9.1c	SSL-Library	www.openssl.org
+*	lib/mm	Version 1.0.10	Shared-Memory-Mapper	http://www.engelschall.com/sw/mm/
+*	lib/gd	Version 1.6.3	Grafiklibrary	http://www.boutell.com/gd/
+*	misc/perl/fastcgi	Version 0.42	FastCGI	CPAN
+*	net/www/fastcgi	Version 2.2.2	Apache-FastCGI	http://fastcgi.idle.com/
+*	net/www/fastcgi	Version 2.2.2	Apache-FastCGI	http://fastcgi.idle.com/
+*	kernel/netfilter	Version 0.1.6	Filtermodule	http://www.samba.org/netfilter/
+*	net/www/phplib	Version 7	PHP-Library	http://phplib.shonline.de/
+*	kernel/mt	Version 0.5b	Tapemanagement	RedHat
+*	misc/perl/irc	Version 0.41	IRC-Modul	CPAN
+*	net/ftp/pro-ftpd	Version 1.2.0 pre3a	FTP-Server	www.proftpd.org
+*	test	*	test	nix://gibts
+*	misc/rpm	2.0	RedHat-PackageManager	ftp.rpm.org
+*	misc/rpm	2.0	RedHat-PackageManager	ftp.rpm.org
+*	misc/rpm	Version 2.0	RedHat-PackageManager	ftp.rpm.org
+*	misc/ezrpm	Version 1.0	RPM-Autodependencyinstaller	www.rpm.org
+*	server/lpr	Version 3.5.2	Druckerspooler	ftp.iona.ie
+*	test	*	test	nix://gibts
+*	kernel/initscripts	Version 4.48	RedHat-initscripts	-
+*	kernel/add-on	*	kernel:add-on	nix://gibts
+*	sound/cdcd	Version 0.3.5	Console-CD-Player+cddb	ftp://gjhsnews.mesa.k12.co.us/pub/cdcd/
+*	lib/cdaudio	Version 0.4.3	CD-Player-Library	ftp://gjhsnews.mesa.k12.co.us/pub/libcdaudio/
+*	net/mail/imap	Vesrion 2.3	IMAP-Server	http://www.washington.edu/imap/
+*	sound/nist	Version 0.6	MPEG2-Player	http://home.germany.net/100/5083/index.htm
+*	misc/perl/module	*	misc:perl:module	nix://gibts
+*	misc/shlock	*	misc:shlock	nix://gibts
+*	misc/pgpgpg	Version 0.11	PGP-Wrapper	www.gnupg.org
+*	misc/perl/embperl	Version 1.1	Embedded-Perl	CPAN
+*	sound/lame	Version 3.51	MP3-Coder	ftp://geek.rcc.se/pub/mp3encoder/lame/
+*	pop/intra	*	pop:intra	nix://gibts
+*	misc/perl/ssleay	Version 0.04	SSL-Library	CPAN
+*	gnu/nana	Version 0.75	Asserter	ftp://ftp.cs.ntu.edu.au/pub/nana/
+*	bktest	*	bktest	nix://gibts
+*	bktest	*	bktest	nix://gibts
+*	bktest	*	bktest	nix://gibts
+*	bktest	*	bktest	nix://gibts
+*	bktest	*	bktest	nix://gibts
+*	bktest	*	bktest	nix://gibts
+*	bktest	*	bktest	nix://gibts
+*	bktest	*	bktest	nix://gibts
+*	bktest	*	bktest	nix://gibts
+*	bktest	*	bktest	nix://gibts
+*	kernel/devfsd	Version 1.1.1	devfs-Daemon	ftp://ftp.atnf.csiro.au/pub/people/rgooch/linux/daemons/
+*	misc/g723	Version 5.1 ITU	G.723.1-Codec	-
+*	lib/pcre	Version 2.08	Perl-REs	-

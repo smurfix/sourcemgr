@@ -12,6 +12,15 @@ sub dodir(\$) {
 	# $$f .= "/." if -d "$$f/.";
 }
 
+sub cleanup($) {
+	my $f = $_[0];
+	$f =~ s#//+#/#g;
+	$f =~ s#^(?:/var)?/tmp/[^/]+\.build[^/]*/#/#;
+	1 while $f =~ s#/\./+#/#;
+	1 while $f =~ s#/[^/]+/\..(/|$)#$1#;
+	$f;
+}
+
 %files=();
 nf: while(<>) {
 	chop;
@@ -38,30 +47,30 @@ nf: while(<>) {
 	}
 	if($key eq "OLD") {
 		dodir($val);
-		$files{$val}++;
+		$files{cleanup($val)}++;
 		next;
 	}
 	if($key eq "STN" or $key eq "STL" or $key eq "ACC") {
 		dodir($val);
 		foreach my $pref(@prefs) {
 			next if index($val,$prefs) != 0;
-			$files{$val}++;
+			$files{cleanup($val)}++;
 			next nf;
 		}
 		next;
 	}
 	if($key eq "NEW" or $key eq "NW?" or $key eq "DIR") {
 		dodir($val);
-		$files{$val}++;
+		$files{cleanup($val)}++;
 		next;
 	}
 	if($key eq "LNK") {
 		if($val2 eq "") {
 			dodir($val);
-			$files{$val}++;
+			$files{cleanup($val)}++;
 		} else {
 			dodir($val2);
-			$files{$val2}++;
+			$files{cleanup($val2)}++;
 		}
 		next;
 	}
@@ -71,8 +80,8 @@ nf: while(<>) {
 #			$valn = $val2; $valn =~ s/[^\/]+$//;
 #			$val = $valn.$val;
 #		}
-#		$files{$val}++;
-		$files{$val2}++; ## just in case...
+#		$files{cleanup($val)}++;
+		$files{cleanup($val2)}++; ## just in case...
 		next;
 	}
 	if($key eq "REN") {
@@ -81,13 +90,13 @@ nf: while(<>) {
 			$valn = $val; $valn =~ s/[^\/]+$//;
 			$val2 = $valn.$val2;
 		}
-		$files{$val2}++;
-		delete $files{$val};
+		$files{cleanup($val2)}++;
+		delete $files{cleanup($val)};
 		next;
 	}
 	if($key eq "DEL") {
 		dodir($val);
-		delete $files{$val};
+		delete $files{cleanup($val)};
 		next;
 	}
 }

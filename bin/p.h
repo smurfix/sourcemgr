@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 cat <<'END'
 p.add       neue Dateien hinzufügen
@@ -19,6 +19,7 @@ p.oget      holt Original-Sourcecode aus dem Archiv
 p.patch     Patchen (normalerweise externer) Sourcen
 p.put       Speichern von Änderungen im Archiv
 p.rcvsget   updatet PRCS aus Remote-CVS
+p.rrcvsget  updatet PRCS aus lokalem CVS, gespiegelt via rsync
 p.rdist     Verteile an alle betroffenen Rechner
 p.rmcvs     Rekursives Löschen von CVS-spezifischen Subdirectories
 p.scvsget   updatet PRCS aus CVSUP

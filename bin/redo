@@ -1,6 +1,7 @@
 #!/bin/sh
 
-dir=${1:-$(/bin/pwd|sed -e 's/^.*\.src\///')}
+dir=${1:-$(/bin/pwd|sed -e 's/^.*[\/\.]src\///')}
+what=$(echo "$dir" | sed -e 's/[\/:]/_/g')
 tag=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 
 cd /usr/src/STATUS
@@ -8,5 +9,6 @@ rm -f done/$tag
 rm -f fail/$tag
 rm -f work/$tag
 rm -f to-install/$tag
+rm -f rpm/$what.spec
 
 exit 0

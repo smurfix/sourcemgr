@@ -10,7 +10,7 @@ Usage: $(basename $0)  -- Speichern von Änderungen im Archiv
        [ -v releasename (Default: wie bei p.get angegeben) ]
        [ -N (kein Abspeichern ohne Änderungen (ansonsten wird nachgefragt)) ]
        [ -e (editiere Projektdatei) ]
-       [ -r (rekursiv) ]
+       [ -r (rekursiv) ] [ -f (force) ]
        [ Kommentar ]
 END
 }
@@ -21,8 +21,9 @@ edit=
 noput=
 rec=
 recopt=
+force=
 
-   eval set -- "$(getopt "d:v:heNr" "$@")"
+   eval set -- "$(getopt "d:v:heNrf" "$@")"
    for i
    do
 	   case "$i"
@@ -35,6 +36,8 @@ recopt=
 		       recopt="$recopt -r"; rec=y; shift;;
 		   -e)
 		       recopt="$recopt -e"; edit=y; shift;;
+		   -f)
+		       recopt="$recopt -f"; force=-f; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
@@ -55,7 +58,7 @@ else
 	what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 fi
 
-export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=${PRCS_REPOSITORY:-/usr/src/archiv/prcs} PRCS_LOGQUERY=1
 trap '' 0
 
 if test -n "$edit" ; then
@@ -68,7 +71,7 @@ elif grep -q 'New-Version-Log ""' $what.prj ; then
 fi
 
 echo + prcs checkin $noput $vers $what
-prcs checkin $noput $vers $what </dev/tty
+prcs checkin $force $noput $vers $what </dev/tty
 
 if [ -n "$rec" ] ; then
     for i in * ; do

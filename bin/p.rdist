@@ -43,7 +43,7 @@ kiste=
 test -z "$2"
 if test -z "$dir" ; then dir="$(p.name "$1")" ; else test -z "$1"; fi
 
-export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=${PRCS_REPOSITORY:-/usr/src/archiv/prcs} PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/:/_/g'  -e 's/\//_/g' -e 's/_*$//')
 desc=$(echo $dir | sed -e 's/_/:/g'  -e 's/\//:/g' -e 's/:*$//')
 dir=$(echo $desc | sed -e 's/:/\//g')

@@ -50,7 +50,7 @@ else
     what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 fi
 
-export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=${PRCS_REPOSITORY:-/usr/src/archiv/prcs} PRCS_LOGQUERY=1
 trap '' 0
 
 prcs checkout -r$vers $what
