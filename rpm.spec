@@ -2,7 +2,7 @@
 
 #from p.rpm#
 Summary: noris-Paket STATUS,
-Name: STATUS
+Name: sourcemgr
 Version: 1
 # $Format: "Release: $ProjectVersion$"$
 
@@ -13,10 +13,11 @@ Group: noris
 Packager: smurf@noris.net
 Vendor: noris network GmbH
 Prefix: /usr
+Requires: rpm-noris
+Requires: prcs-noris
+Requires: sudo
 
 %description
- Original: Version base.@
-
  Noris: Version noris.@
  STATUS noris.34 Mon, 09 Oct 2000 09:17:58 +0200 by smurf
  Parent-Version:      noris.33
