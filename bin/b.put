@@ -78,6 +78,6 @@ else
 	test -z "$vers" -o "$vers" = "-" || dv="-$vers"
 	echo "Branch '$vers' doesn't exist -- it will be created."
 	echo + bk clone . $BK_REPOSITORY/$pub$what$dv
-	bk clone . $BK_REPOSITORY/$pub$what$dv
+	bk clone -q . $BK_REPOSITORY/$pub$what$dv
 fi
 

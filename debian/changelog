@@ -1,3 +1,9 @@
+sourcemgr (1.372) unstable; urgency=low
+
+  * Be quiet if b.put needs to clone something
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue,  5 Oct 2004 13:54:39 +0200
+
 sourcemgr (1.371) unstable; urgency=low
 
   * b.cvs.pl: Restart when the CVS server is dying on us
