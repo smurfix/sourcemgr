@@ -66,16 +66,16 @@ while(<STDIN>) {
 		push(@DT,"BK_USER=$who","BK_HOST=$where");
 	} elsif($state==1 and /^$/) {
 		$state=11;
-	} elsif(($state==11 or $state==12) and not /^$/) {
+	} elsif($state==12 and /^Affected files/) {
+		chop $cmt;
+		$state=2;
+	} elsif(($state==11 or $state==12) and (/^$/ or /^\s/)) {
 		$state=12;
 		s/^\t//;
 		$cmt .= "$_\n";
 	} elsif($state==12 and /^$/) {
 		$cmt .= "$_\n";
 		$state=12;
-	} elsif($state==12 and /^Affected files/) {
-		chop $cmt;
-		$state=2;
 	} elsif($state==2 and /^$/) {
 		$state=3;
 	} elsif($state==3 and /^\.\.\./) {
