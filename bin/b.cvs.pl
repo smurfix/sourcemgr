@@ -33,7 +33,7 @@ use Shell qw(); ## bk cvs
 
 sub init_bk();
 my $rhost="un.known";
-$rhost=$1 if $ENV{CVS_REPOSITORY} =~ /\@(:?cvs\.)([^\:]+)\:/;
+$rhost=$1 if $ENV{CVS_REPOSITORY} =~ /\@(?:cvs\.)?([^\:]+)\:/;
 
 my $cn = shift @ARGV;
 my $pn = shift @ARGV;
@@ -263,10 +263,11 @@ sub csdiff($$$$) {
 	$df /= 2 if defined $fn and defined $fi->{cmt}{$fn};
 	$df;
 }
+my %known;
 sub add_date($;$$$$) {
-	chomp;
-
 	my($wann,$fn,$rev,$autor,$cmt)=@_;
+	return if defined $fn and $known{$fn}{$rev}++;
+
 	my $i;
 	cset:
 	{
@@ -406,30 +407,31 @@ if(-f "$tmpcv.data") {
 	print STDERR "Reading stored CVS log\n";
 	$cset = retrieve("$tmpcv.data");
 } else {
-	print STDERR "Processing CVS log\n";
-	if(-d "$tmpcv") {
-		chdir("$tmpcv");
-	} else {
-		print STDERR "Need to fetch the CVS files...\n";
-		chdir("/var/cache/cvs/bk");
-		cvs("get",$cn);
-		chdir($tmpcv);
-		print STDERR "processing...\n";
-	}
 	$cset=[];
-	my @buf = ();
-	open(LOG,"cvs log |");
-	while(<LOG>) {
-		chomp;
-		if($_ =~ /^=+\s*$/) {
-			proc(@buf);
-			@buf=();
-		} else {
-			push(@buf,$_) if @buf or /^RCS file:/;
+	print STDERR "Processing CVS log\n";
+	for my $mr(1..9) {
+		rmtree($tmpcv);
+		
+		print STDERR "Fetch CVS files $mr...\n";
+		chdir("/var/cache/cvs/bk");
+		cvs("get","-r$mr.1",$cn);
+		chdir($tmpcv);
+		print STDERR "processing $mr...\n";
+		my @buf = ();
+		open(LOG,"cvs log |");
+		while(<LOG>) {
+			chomp;
+			if($_ =~ /^=+\s*$/) {
+				proc(@buf);
+				@buf=();
+			} else {
+				push(@buf,$_) if @buf or /^RCS file:/;
+			}
 		}
+		proc(@buf) if @buf;
+		close(LOG);
 	}
-	proc(@buf) if @buf;
-	close(LOG);
+	rmtree($tmpcv);
 	foreach my $sym(keys %symdate) {
 		push(@{add_date($symdate{$sym})->{sym}},$sym);
 	}
@@ -489,6 +491,7 @@ chdir($tmppn);
 sub cleanout() {
 	unlink bkfiles("g");
 	unlink bkfiles("x");
+	bk("-r","unget");
 	bk("-r","unedit");
 	bk("-r","unlock");
 }
@@ -511,11 +514,11 @@ sub cleanout() {
 }
 
 
-sub process($$) {
-	my($dt,$inf) = @_;
-	my($ss,$mm,$hh,$d,$m,$y)=localtime($dt);
+sub process($) {
+	my($inf) = @_;
+	my($ss,$mm,$hh,$d,$m,$y)=localtime($inf->{ende});
 	$m++; $y+=1900; ## zweistellig wenn <2000
-	dateset($dt,$inf->{autor});
+	dateset($inf->{ende},$inf->{autor});
 	my $cvsdate = sprintf "%04d-%02d-%02d %02d:%02d:%02d",$y,$m,$d,$hh,$mm,$ss;
 	print STDERR "Processing: $cvsdate\n";
 
@@ -668,8 +671,9 @@ sub process($$) {
 	}
 
 	# unlink(bkfiles("g"));
-	bk("-r","unedit");
-	bk("-r","unlock");
+#	bk("-r","unget");
+#	bk("-r","unedit");
+#	bk("-r","unlock");
 }
 
 my $sum;
@@ -682,7 +686,7 @@ foreach my $x(@$cset) {
 			$DB::single=1 if $sum;
 			# process($sum->{ende},$sum) if $sum;
 			$sum=undef;
-			process($idate,$last);
+			process($last);
 			bk("push") unless $step++%10;
 		} else {
 			$sum={} unless ref $sum;
@@ -691,4 +695,5 @@ foreach my $x(@$cset) {
 	}
 	$last = $x;
 }
-process($last->{ende}+30,$last) if $last;
+process($last) if $last;
+unlink("$tmpcv.data");
