@@ -270,7 +270,7 @@ if test -n "$E" ; then # non-original package
 fi
 
 cd "$T/$N-$VV"
-rm -f debian/users debian/version debian/exporter debian/changelog.old || true
+rm -f debian/users debian/version debian/changelog.old || true
 # cd "$T"
 # dpkg-source -b -sa "$N-$VV"
 cd "$T/$N-$VV"

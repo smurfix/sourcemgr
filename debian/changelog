@@ -1,3 +1,9 @@
+sourcemgr (1.356) unstable; urgency=low
+
+  * b.debuild: don't kick debian/exporter
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 29 Jun 2004 17:04:26 +0200
+
 sourcemgr (1.355) unstable; urgency=low
 
   * Some CVS trees actually have files with (only) 1.0 revisions.
