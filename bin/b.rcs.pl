@@ -408,7 +408,7 @@ if(-f "$tmppn.data") {
 		proc("$dir/$file",@buf);
 		close(LOG);
 
-	}, ".");
+	}, $ENV{BKCVS_LOCAL} ? "RCS" : ".");
 
 	foreach my $sym(keys %symdate) {
 		push(@{add_date($symdate{$sym})},$sym);

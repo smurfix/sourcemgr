@@ -19,7 +19,7 @@ Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -e CVS-Fudge-Sekunden (Default 120) ]
        [ -q (quiet!) ]
        [ -D (Debug) ] [ -Z (keine Kompression) ] [ -b # (Limit) ]
-       [ -x SKIPSUBDIR,... ]
+       [ -x SKIPSUBDIR,... ] [ -X (lokal) ]
        wo
 
 "wo" ist der Pfad zum RCS-Repository.
@@ -32,6 +32,7 @@ PATH=/usr/src/STATUS/bin:/usr/local/bin:$PATH
 dir=
 vers=rcs
 push=100
+locdir=
 rvers=
 nvers=
 ignore=
@@ -45,7 +46,7 @@ shells=0
 bg=
 df=0
 
-   eval set -- "$(getopt "hb:d:De:kLn:qr:sSv:w:x:Z" "$@")"
+   eval set -- "$(getopt "hb:d:De:kLn:qr:sSv:w:x:XZ" "$@")"
    for i
    do
 	   case "$i"
@@ -76,6 +77,8 @@ df=0
 			   shift; nvers="$1"; shift;;
 		   -x)
 			   shift; skip="$1 $skip"; shift;;
+		   -X)
+			   shift; locdir=1 ;;
 		   -r)
 			   shift; rvers="$1"; shift;;
 			-n)
@@ -131,4 +134,5 @@ test -n "$verbose" && export BK_VERBOSE=1
 test -n "$ignore" && export BKCVS_IGNORE_ERROR=1
 export BKCVS_LOCK=$bg
 export BKCVS_SKIP=$skip
+test -n "$locdir" && export BKCVS_LOCAL=1
 exec $run "$wo" "$what$dv"
