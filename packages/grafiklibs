@@ -1,7 +1,0 @@
-lib:gd
-lib:glib
-lib:jpeg
-lib:png
-lib:tiff
-lib:zlib
-x11:freetype

@@ -1,9 +1,0 @@
-kernel:lilo
-base
-kernel:linux-pci
-net:windows:samba
-net:mail:zmailer
-server:xntp
-users
-devel
-router

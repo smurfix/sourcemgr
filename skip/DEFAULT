@@ -1,5 +1,0 @@
-# - skip, + do, n only if nonexisting, m move-to-arg2
-- ^/usr/src
-- /tmp/
-n ^/etc/ /sbin/config.d/
-+ .

@@ -1,8 +1,0 @@
-kernel:linux-pci
-kernel:isdn-pci
-router
-net:mail:zmailer
-net:dns:bind8
-net:mail:qmail
-net:mail:qmapop
-net:mail:majordomo
