@@ -73,15 +73,13 @@ sub bkfiles($) {
 
 {
 	my $cv;
-	foreach my $fn(bk("get","-p","BitKeeper/etc/ignore")) {
+	foreach my $fn(bk("get","-q","-p","BitKeeper/etc/ignore")) {
 		$cv++ if $fn =~ /CVS/;
 	}
 	unless($cv) {
 		print STDERR "Ignoriere CVS...\n";
 		bk("ignore","CVS",".cvsignore","CVSROOT");
 		bk(undef,"bk sfiles -pC | env @DT bk cset -q -y\"CVS-Ignore\"");
-	} else {
-		print STDERR "CVS bereits ignoriert.\n";
 	}
 }
 
