@@ -11,6 +11,8 @@ use Carp qw(confess);
 use Storable qw(nstore retrieve);
 use File::ShLock;
 
+my $ENDFILE = "/var/run/b.cvs.stop";
+
 my $lock;
 if($ENV{BKCVS_LOCK}) {
 	nl: while(1) {
@@ -904,6 +906,7 @@ while(@$cset) {
 	}
 } continue {
 	shift @$cset;
+	last if -f $ENDFILE;
 	if($ENV{BKCVS_PUSH} and $done >= $ENV{BKCVS_PUSH}) {
 		$ddone += $done;
 		print STDERR " $pn: Push $ddone     |\r";
@@ -915,6 +918,7 @@ if($ENV{BKCVS_PUSH}) {
 	print STDERR " $pn: Push LAST        |\r";
 	bk("push","-q");
 }
+exit 0 if -f $ENDFILE;
 print STDERR "$pn: OK     |\n";
 unlink("$tmppn.data");
 unlink("/var/lock/bcvs-$pn");
