@@ -247,8 +247,9 @@ if test -z "$again" -a -z "$qpack" ; then
 	FR=/tmp/b.r.$$
 	mkdir $FR
 	if test -d "$RFR" ; then
-		( cd "$RFR"; sudo bk pull )
+		( cd "$RFR"; echo "Update Sourcen ..."; sudo bk pull )
 	else
+		echo "Hole Sourcen aus dem Archiv ..."
 		sudo b.get -d $what -v "$vers" $RFR
 	fi
 	for i in rpm.spec rpm.tags rpm.sub rpm.clean rpm.verify \
@@ -301,7 +302,7 @@ else
 	b.get -v $vers -d $archive $archive
 fi
 cd $archive
-bk -r get -q
+# bk -r get -q ## ist schon geholt
 
 %build
 make -f Makefile.Linux $compile$subtarget
