@@ -87,6 +87,7 @@ make -f Makefile.Linux install
 /usr/local/bin/b.get
 /usr/local/bin/b.import
 /usr/local/bin/b.import.pl
+/usr/local/bin/b.cache
 /usr/local/bin/b.make
 /usr/local/bin/b.merge
 /usr/local/bin/b.name

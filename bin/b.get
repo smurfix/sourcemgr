@@ -76,26 +76,15 @@ if test -e "$dir" ; then
 	exit 1
 fi
 
-### $optp -- geht momentan nicht
-if test -d /var/cache/bk ; then
-	c=/var/cache/bk/$what$dv
-	if test -d "$c" ; then
-		pw="$(pwd)"
-		cd $c
-		bk pull -q $BK_REPOSITORY/$what$dv 
-		cd "$pw"
-	else
-		bk clone -q $BK_REPOSITORY/$what$dv $c
-	fi
-	bk lclone -q $c $ddir
-else
-	bk clone -q $BK_REPOSITORY/$what$dv $ddir
-fi
+### $opt_p -- geht momentan nicht
+cache="$(b.cache -d "$dir" -v "$vers")"
+bk lclone -q "$cache" $ddir || \
+bk clone -q "$cache" $ddir || \
 
 if test "$nvers" != "gibts/nicht" ; then
 	echo Kopiere Quelldaten...
 	cd "$ddir"
-	bk clone -q . $BK_REPOSITORY/$what$ndv
+	bk lclone -q . $BK_REPOSITORY/$what$ndv
 	bk parent $BK_REPOSITORY/$what$ndv
 else
 	cd "$ddir"
