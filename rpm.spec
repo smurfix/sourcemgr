@@ -22,10 +22,8 @@ Requires: rpm
  Zustand unserer Sourcen, Binaries zum Bauen derselben
 
 %prep
-%setup -n $ARCHIVE$-$RELEASE$ -T 
-rm -rf $ARCHIVE$-$RELEASE$
-bk lclone $BK_RPM_SRC $ARCHIVE$-$RELEASE$
-cd $ARCHIVE$-$RELEASE$
+%setup -n $ARCHIVE$-$RELEASE$ -T -c
+b.rpmget -d $ARCHIVE$ -v $RELEASE$
 
 %build
 make -f Makefile.Linux compile
