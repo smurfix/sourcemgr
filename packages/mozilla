@@ -1,0 +1,6 @@
+lib:glib
+lib:jpeg
+lib:tiff
+x11:gnome A
+x11:mozilla A
+x11:mozilla

@@ -1,0 +1,4 @@
+sound:sox
+sound:wavplay
+sound:cdcd
+lib:cdaudio

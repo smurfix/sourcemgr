@@ -1,0 +1,14 @@
+#!/usr/bin/perl
+while(<STDIN>) {
+	chomp;
+	my $fn = $_;
+	$fn = "./$fn" if $fn !~ /^\//;
+	open(F,$fn."\0");
+	while(<F>) {
+		if(/\$Format:/ or /\$Project: STATUS $:]/) {
+
+			last;
+		}
+	}
+	close(F);
+}

@@ -1,0 +1,17 @@
+lib:glib
+lib:jpeg
+lib:tiff
+lib:orbit
+x11:xpm
+x11:fnlib
+x11:kde A
+x11:gnome A
+x11:gnome B
+x11:gnome C
+x11:gnome D
+x11:gnome E
+x11:gnome F
+x11:gnome G
+x11:gnome H
+x11:gnome I
+x11:gnome

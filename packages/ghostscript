@@ -1,0 +1,5 @@
+gnu:ghostscript
+gnu:enscript
+x11:libs
+lib:png
+lib:zlib

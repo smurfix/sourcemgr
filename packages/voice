@@ -1,0 +1,11 @@
+sound
+voice:mbrola
+voice:hadifix
+voice:de1
+voice:de2
+lib:libc5
+lib:libc5.other
+pop:voice
+server:bintec
+x11:oldlibs
+lib:libc5

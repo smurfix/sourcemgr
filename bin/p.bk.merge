@@ -1,0 +1,6 @@
+#!/bin/sh
+##  Usage: $0 old common new target
+## 'old' is on the main branch, 'new' is on the to-be-merged branch.
+
+echo Fake-Merge: "$@" >&2
+exec cp "$1" "$4" ## The new main-line version, i.e. no change

@@ -670,3 +670,8 @@ x	kernel/linux 	*	Master-Kernelsource	2.0.33/2.1.77	ftp.kernel.org
 *	misc/perl/cgi	Version 2.45	CGI-Paket	CPAN
 *	misc/perl/gpg	Version 0.02	GPG-Interface	CPAN
 *	sound/vsound	Version 0.3	Soundgrabber	http://www.zip.com.au/~erikd/vsound/
+*	pop/logmon	*	pop:logmon	nix://gibts
+*	pop/nchown	*	pop:nchown	nix://gibts
+*	bktest	*	bktest	nix://gibts
+*	bktest	*	bktest	nix://gibts
+*	bktest	*	bktest	nix://gibts

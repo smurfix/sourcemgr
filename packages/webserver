@@ -1,0 +1,8 @@
+misc:glimpse
+net:www:apache
+net:www:analog
+lib:gd
+misc:perl:gd
+misc:perl:mkstats
+lib:openssl
+php

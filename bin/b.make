@@ -15,7 +15,7 @@ Usage: $(basename $0)  -- Hole aus Archiv, baue, installiere, wirf weg.
        [ was ]
 
 Mit -g-Option: Gehe nach /usr/src/dest-directory, checke aus, baue.
-Mit -l-Option: Verwende lokales Verzeichnis. Default: -g.
+Mit -l-Option: Verwende lokales Verzeichnis. Default: -l.
 
 Normalerweise werden automatisch ausgecheckte Sourcen nach erfolgreicher
 Installation auch wieder automatisch gelöscht, _ohne_ irgendwas
@@ -35,7 +35,7 @@ dir=
 defvers=noris
 vers=
 doinstall=
-islocal=
+islocal=y
 nodelete=
 compile=compile
 install=install
@@ -93,14 +93,14 @@ superset=
 #fi
 
 if test -z "$dir" ; then
-	dir="$(p.name -n "$*")" ;
+	dir="$(b.name -n "$*")" ;
     if test -f "/usr/src/STATUS/packages/$dir" ; then
 		trap 'test -n "$superset" && kill $SUPERPID' 0
 		if test "$doinstall" = "b" ; then recargs="$recargs -I"; fi
 		while read x y ; do
 			if test -n "$y" ; then y="-s $y"; fi
-			echo + p.make $recargs $y $x
-			p.make -N $recargs $y $x
+			echo + b.make $recargs $y $x
+			b.make -N $recargs $y $x
 		done < /usr/src/STATUS/packages/$dir
 	    exit 0
     fi
@@ -109,8 +109,8 @@ if test -z "$dir" ; then
 		if test "$doinstall" = "b" ; then recargs="$recargs -I"; fi
 		while read x y ; do
 			if test -n "$y" ; then y="-s $y"; fi
-			echo + p.make $recargs $y $x
-			p.make -N $recargs $y $x
+			echo + b.make $recargs $y $x
+			b.make -N $recargs $y $x
 		done < /usr/src/STATUS/hosts/$dir
 	    exit 0
     fi
@@ -119,7 +119,7 @@ else
 	test -z "$*"
 fi
 
-export PRCS_REPOSITORY=${PRCS_REPOSITORY:-/usr/src/archiv/prcs} PRCS_LOGQUERY=1
+export BK_REPOSITORY=${BK_REPOSITORY:-/usr/src/archiv/bk}
 what=$(echo $dir | sed -e 's/:/_/g'  -e 's/\//_/g' -e 's/_*$//')
 desc=$(echo $dir | sed -e 's/_/:/g'  -e 's/\//:/g' -e 's/:*$//')
 #dir=$(echo $desc | sed -e 's/:/\//g')
@@ -147,7 +147,7 @@ if test -z "$islocal" ; then
 		echo "$desc$submode: Installationsfehler? wiederhole..."
 		mv "STATUS/fail/$desc$submode" "STATUS/to-install/$desc$submode"
 	fi
-	if test -n "$doinstall" -a ! -d "$dir" ; then
+	if test "$doinstall" eq "y" -a ! -d "$dir" ; then
 		echo "$desc$submode: erst auschecken und bauen!"
 		exit 1
 	fi
@@ -161,14 +161,13 @@ if test -z "$islocal" ; then
 		what=$1
 		compile=$2
 		install=$3
-		install=$3
 		what=$(echo $what | sed -e 's/:/_/g'  -e 's/\//_/g' -e 's/_*$//')
 		if test -n "$4" ; then
 			defvers="$4"
 		fi
 	fi
-	if test ! -d $PRCS_REPOSITORY/$what ; then
-		echo "$desc$submode: kein PRCS-Archiv gefunden!"
+	if test ! -d $BK_REPOSITORY/$what ; then
+		echo "$desc$submode: kein BK-Archiv gefunden!"
 		exit 1
 	fi
 	if test -f "STATUS/work/$desc$submode" ; then
@@ -246,20 +245,25 @@ if test -z "$islocal" ; then
 		fi
 		cd $dir
 	else
-		mkdir -p $dir
-		cd $dir
-		prcs checkout -f -r${vers:-$defvers} $what.prj
+		dv=
+		test ! -d $BK_REPOSITORY/$dir-noris || dv=-noris
+		test ! -d $BK_REPOSITORY/$dir-$vers || dv=-$vers
+		bk lclone $BK_REPOSITORY/$what$dv $dir$dv
+		cd $dir$dv
 	    touch AUTOREMOVE
 	fi
+else
+	cd $(bk root)
 fi
+test -f Makefile.Linux || bk -r get -q
 
 bad=
 if test -f Makefile.Linux ; then
 	MF=Makefile.Linux
-elif test -f ../../Makefile.Linux.sub ; then
-	MF=../../Makefile.Linux.sub
 elif test -f ../Makefile.Linux.sub ; then
 	MF=../Makefile.Linux.sub
+elif test -f ../../Makefile.Linux.sub ; then
+	MF=../../Makefile.Linux.sub
 else
 	echo No Makefile.Linux found >&2
 	exit 1

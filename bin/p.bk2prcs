@@ -1,0 +1,92 @@
+#!/bin/bash
+
+set -e
+trap 'usage; exit 1' 0
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- update aus Bitkeeper-Archiv
+       [ -d Paket ]
+       [ -v releasename (base) ]
+       [ -w neworigreleasename (=releasename) ]
+       [ -e (editiere Projektdatei) ]
+       [ Kurzbeschreibung ]
+END
+}
+
+dir=
+overs=base
+nvers=
+edit=
+
+   eval set -- "$(getopt "d:v:hw:e" "$@")"
+   for i
+   do
+	   case "$i"
+	   in
+		   -h)
+		       exit 1 ;;
+		   -d)
+			   shift; dir="$1"; shift;;
+		   -v)
+			   shift; overs="$1"; shift;;
+		   -w)
+			   shift; nvers="$1"; shift;;
+		   -e)
+		       edit=y; shift;;
+		   --)
+		       shift; break ;;
+	   esac
+   done
+
+set -e
+dir="$(p.name "$dir")"
+if test -z "$nvers" ; then nvers=$overs; fi
+
+
+scratch=/var/tmp/bkp.$$
+
+#if test -z "$vers" ; then
+#vers=$(echo $nvers | \
+#	perl -pe '
+#	tr/-_/./; if(/([^-\.]*)\.(.*)/) {
+#		$base=$1; $wha=$2;
+#		$wha =~ tr/abcdefghijklmnopqrstuvwxyz/123456789/;
+#		s/\.0*([0-9])/.$1/g;
+#		$_ = "$base.$wha";
+#	}
+#' )
+#fi
+
+export PRCS_REPOSITORY=${PRCS_REPOSITORY:-/usr/src/archiv/prcs} PRCS_LOGQUERY=1
+what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
+
+trap 'cd / ; rm -rf $scratch' 0
+bk export -k -tplain $scratch
+cd $scratch
+
+test -f $what.prj || prcs checkout -f -r $overs $what $what.prj
+cp $what.prj $what.backup
+prcs populate -f -d $what
+prcs depopulate -f -d $what $what.backup
+
+perl -p -i -e '
+    s/^  \((.*)\(\)\)/  ($1() :no-keywords)/;
+' $what.prj
+
+
+if test -n "$edit" ; then
+  ${VISUAL:-${EDITOR:-vi}} $what.prj
+elif grep -q 'New-Version-Log ""' $what.prj ; then
+  if test -n "$*" ; then
+	perl -p -i -e '
+		BEGIN { $s="'"$*"'"; $s =~ s/"/'\''/g; }
+	    s/\(New-Version-Log \"\"\)/(New-Version-Log "$s")/;
+  ' $what.prj
+  fi
+fi
+
+set -x
+
+prcs checkin -f -r $nvers.@ $what
+
