@@ -96,6 +96,7 @@ make -f Makefile.Linux install
 /usr/local/bin/b.rev
 /usr/local/bin/b.rpm
 /usr/local/bin/b.rpmenv
+/usr/local/bin/b.rpmget
 /usr/local/bin/b.upversion
 /usr/local/bin/p.add
 /usr/local/bin/p.bk
