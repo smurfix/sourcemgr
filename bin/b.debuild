@@ -176,9 +176,9 @@ bk export -T -w -tplain -r+ . "$T/$N-$VV"
 mv debian/changelog "$T/$N-$VV"/debian
 
 if test -n "$E" ; then # non-original package
-	if wget -O "$T/${N}_$VV.orig.tar.gz" \
+	if wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
 		"http://smurf.noris.de/code/debian/public/${N}_$VV.orig.tar.gz" ||
-	   wget -O "$T/${N}_$VV.orig.tar.gz" \
+	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
 		"http://smurf.noris.de/code/debian/unstable/source/${N}_$VV.orig.tar.gz"
 	then
 		echo + get original source via HTTP
