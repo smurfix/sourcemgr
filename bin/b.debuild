@@ -337,7 +337,7 @@ for f in *.changes; do
 	fi
 done
 
-if test -n "$nosign" ; then
+if test -z "$nosign" ; then
 	if test -n "$dest" ; then
 		for f in *.changes; do
 			dput $dest "$f"

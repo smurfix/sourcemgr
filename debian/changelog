@@ -1,3 +1,9 @@
+sourcemgr (1.375) unstable; urgency=low
+
+  * thinko
+
+ -- Matthias Urlichs <smurf@debian.org>  Thu,  9 Dec 2004 12:09:31 +0100
+
 sourcemgr (1.374) unstable; urgency=low
 
   * do not try to dput if not signed
