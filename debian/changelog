@@ -1,3 +1,11 @@
+sourcemgr (1.302) unstable; urgency=low
+
+  * b.cvs.pl:
+       Be more verbose while pushing
+       don't hang if the remote is locked
+
+ -- Matthias Urlichs <smurf@debian.org>  Thu, 22 Jan 2004 11:18:41 +0100
+
 sourcemgr (1.301) unstable; urgency=low
 
   * b.cvs.pl just skipped deleted files (except for 1.1 versions)

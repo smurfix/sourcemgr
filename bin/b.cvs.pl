@@ -946,7 +946,7 @@ while(@$cset) {
 	if($ENV{BKCVS_PUSH} and $done >= $ENV{BKCVS_PUSH}) {
 		$ddone += $done;
 		print STDERR "$CLR $pn: Push $ddone\r" if $verbose;
-		bk("push","-q");
+		bk("push","-q","-c1");
 		$done=0;
 	}
 }
@@ -964,7 +964,7 @@ if ($ENV{BKCVS_TAG}) {
 }
 if($ENV{BKCVS_PUSH}) {
 	print STDERR "$CLR $pn: Push LAST\r" if $verbose;
-	bk("push","-q");
+	bk("push","-c1");
 }
 exit 0 if -f $ENDFILE;
 print STDERR "$pn: OK     |\n" if $verbose;
