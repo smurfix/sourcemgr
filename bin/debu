@@ -1,5 +1,7 @@
 #!/bin/sh
 
+dpkg-checkbuilddeps || exit 1
+
 if test "x$1" = "x-i" ; then INST=1; shift; fi
 
 if test -f /usr/local/bin/gpg-agent-start.sh ; then
