@@ -1,0 +1,55 @@
+#!/bin/bash
+
+set -e
+trap 'usage; exit 1' 0
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- konvertiert PRCS zu BitKeeper
+       [ -d Paket ]
+       [ -x major-to-exclude ]
+END
+}
+
+vers=noris
+imp=
+mkdir=
+dir=
+force=
+excl=
+
+   eval set -- "$(getopt "d:x:h" "$@")"
+   for i
+   do
+	   case "$i"
+	   in
+		   -h)
+		       exit 1 ;;
+		   -d)
+			   shift; dir="$1"; shift;;
+		   -x)
+			   shift; excl="$excl $1"; shift;;
+			--)
+				shift; break ;;
+	   esac
+   done
+
+test $# == 0 || exit 1
+
+dir="$(p.name "$dir")"
+desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
+
+if test -f "/usr/src/STATUS/checkout/$desc" ; then
+    desc=$(sed  -e 's/[ 	].*//' "/usr/src/STATUS/checkout/$desc")
+    what=$(echo $desc | sed -e 's/[:\/]/_/g' -e 's/_*$//')
+else
+    what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
+fi
+
+export PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=${PRCS_REPOSITORY:-/usr/src/archiv/prcs} 
+export BK_REPOSITORY=${BK_REPOSITORY:-/usr/src/archiv/bk}
+
+trap '' 0
+
+exec $0.pl $what $excl

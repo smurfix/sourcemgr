@@ -1,0 +1,24 @@
+# This file represents the standard CVSup distribution file
+# for the INN CVSup server
+#
+# Defaults that apply to all the collections
+*default host=inn-cvs.isc.org
+#*default host=pub2.pa.vix.com
+*default compress
+*default release=cvs
+*default delete use-rel-suffix
+
+*default tag=.
+*default date=2001.02.07.00.00.00
+
+# base directory points to where CVSup will store its 'bookmarks' file(s)
+*default base=/usr/src/STATUS/cvsup
+
+# prefix directory points to where CVSup will store the actual distribution(s)
+*default prefix=/var/cache/cvs
+
+# complete distribution, including all below 
+inn
+
+## what to update
+#/net/news/inn

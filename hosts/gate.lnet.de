@@ -1,0 +1,9 @@
+base
+devel
+router
+kernel:linux-pci
+server:xntp
+net:www:squid
+net:dns:bind8
+users
+newsserver

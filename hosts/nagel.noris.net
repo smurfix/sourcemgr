@@ -1,0 +1,6 @@
+base
+kernel:linux-pci
+server:xntp
+net:dns:bind8
+users
+sms

@@ -1,0 +1,13 @@
+kernel:lilo
+base
+kernel:linux-pci
+server:xntp
+net:www:squid
+net:dns:bind8
+users
+usersound
+voice
+tex
+router
+xwindows
+cd

@@ -1,0 +1,66 @@
+#!/bin/bash
+export BK_REPOSITORY=bk://bitkeeper.noris.de
+
+set -e
+trap 'usage; exit 1' 0
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- Test ob das Verzeichnis existiert
+       [ -v releasename ]
+       [[-d]Paket ]
+		Rückmeldung: Paketname Version
+			Quellarchiv unter $Paketname-$Version
+			'-' fehlt wenn Version leer
+END
+}
+
+vers=noris
+dir=
+
+   eval set -- "$(getopt "d:v:h" "$@")"
+   for i
+   do
+	   case "$i"
+	   in
+		   -h)
+		       exit 1 ;;
+		   -d)
+			   shift; dir="$1"; shift;;
+		   -v)
+			   shift; vers="$1"; shift;;
+			--)
+				shift; break ;;
+	   esac
+   done
+
+dest="$1"
+if test -z "$dir" ; then
+	dir="$dest"
+else
+	test -n "$mkdir" || test -z "$1"
+fi
+
+desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
+
+if test -f "/usr/src/STATUS/checkout/$desc" ; then
+    desc=$(sed  -e 's/[ 	].*//' "/usr/src/STATUS/checkout/$desc")
+    what=$(echo $desc | sed -e 's/[:\/]/_/g' -e 's/_*$//')
+else
+    what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
+fi
+
+trap '' 0
+
+test -z "$vers" || dv="-$vers"
+if bk tip -q "$BK_REPOSITORY/$what$dv" >/dev/null ; then
+	dv=$vers
+elif test "$vers" = "noris" && \
+	bk tip -q "$BK_REPOSITORY/$what" >/dev/null ; then
+	dv=
+else
+	exit 1
+fi
+
+echo $what $dv
+

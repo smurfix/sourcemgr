@@ -1,0 +1,4 @@
+neu:/etc/ssh/ssh_host_key.pub an irgendwo:/etc/ssh/ssh_known_hosts dranhängen,
+neu.noris.net in distfile und in shosts.equiv und evtl. in hosts.equiv
+einbauen, rdisten.
+

@@ -15,12 +15,6 @@ END
 	exit 2
 fi
 
-prefdir=
-if test "x$1" = "x-n" ; then 
-	prefdir=y
-	shift
-fi
-
 set -e
 
 f="$1"; shift || true
@@ -30,12 +24,12 @@ if test -n "$f" ; then echo "$f" | sed -e 's/\?.*//' -e 's/[:_]/\//g'; exit 0 ; 
 trap '' 0
 
 bkr="$(bk root | sed -e 's#/archiv/bk/#/#' -e 's#-[^/]*$##')" || exit 1
+test -n "$bkr" || exit 1
 
 dir=$(echo "$bkr"|sed -ne 's/^.*[\./]src\///p')
-if test -n "$dir" # && ! ( cd ..; p.name >/dev/null )
-then
-	echo "$dir"; exit 0
+if test -z "$dir" ; then
+	echo "keine Root gefunden" >&2
+	exit 1
 fi
-echo "keine Root gefunden" >&2
-exit 1
 
+echo "$dir"

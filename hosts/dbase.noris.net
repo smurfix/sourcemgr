@@ -1,0 +1,7 @@
+qmail
+users
+kernel:linux-pci
+database:mysql
+pop:datenbank
+server:xntp
+net:dns:bind8

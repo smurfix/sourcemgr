@@ -1,0 +1,17 @@
+#*default host=cvs.kde.org
+*default host=ferret.lmh.ox.ac.uk
+*default release=cvs
+*default delete
+*default compress
+*default tag=.
+*default use-rel-suffix
+#*default base=/usr/src/STATUS/cvsup
+*default prefix=/var/cache/cvs/kde
+*default base=/var/cache/cvs/kde
+
+#*default base=/usr/src/kde
+#*default prefix=/usr/src/kde
+*default date=99.12.06.00.00.00
+
+kdeall
+kde-i18n

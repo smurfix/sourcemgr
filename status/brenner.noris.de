@@ -1,0 +1,12 @@
+### KONFIGDATEN
+export who=pci
+export master=193.141.54.131
+export slave=193.141.54.147
+export mask=255.255.255.192
+export imask=26
+export broad=193.141.54.191
+export netz=193.141.54.128
+export def=193.141.54.190
+export name=brenner.noris.de
+export eth=eth0
+disk=sda

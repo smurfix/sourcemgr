@@ -1,0 +1,69 @@
+#!/bin/bash
+
+if test "x$1" = "x-h" ; then 
+cat >&2 <<END
+Usage: $(basename $0)  -- spuckt den Namen des aktuellen Projekts aus
+       [ Paket ]
+
+Algorithmus:
+
+Genau ein nichtleerer Parameter => Name.
+
+Genau eine Projektdatei => Name (ohne .prj).
+
+Keine Projektdatei und Verzeichnisname ist im Repository als Paket
+eingetragen => Verzeichnisname (unterhalb von src). (Die Bedingung ist TODO.)
+
+Ansonsten: Fehler.
+
+END
+	exit 2
+fi
+
+prefdir=
+if test "x$1" = "x-n" ; then 
+	prefdir=y
+	shift
+fi
+
+set -e
+
+f="$1"; shift || true
+if test -n "$*" ; then exit 1; fi
+if test -n "$f" ; then echo "$f" | sed -e 's/\?.*//' -e 's/[:_]/\//g'; exit 0 ; fi
+shopt -s nullglob
+
+trap '' 0
+
+if test -n "$prefdir" ; then
+	dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
+	if test -n "$dir" # && ! ( cd ..; p.name >/dev/null )
+	then
+		echo "$dir"; exit 0
+	fi
+fi
+f=($(echo *.prj))
+if test ${#f[*]} == 0 ; then
+	dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
+	test -n "$dir"
+	if test -f "/usr/src/STATUS/checkout/$dir" ; then
+		read dir x y < "/usr/src/STATUS/checkout/$dir"
+	fi
+	# ( cd ..; p.name >/dev/null ) && exit 1
+	echo "$dir"; exit 0
+fi
+test ${#f[*]} == 1 || exit 1
+
+dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
+bdir="$(basename ${f[0]} .prj)"
+if test "$(echo "$dir" | sed -e 's/\//_/g')" = "$bdir" ; then
+	bdir="$(echo "$dir" | sed -e 's/[\/_]/:/g')"
+	if test -f "/usr/src/STATUS/checkout/$bdir" ; then
+		read dir x y < "/usr/src/STATUS/checkout/$bdir"
+	fi
+	echo $dir
+else
+	echo $bdir | sed -e 's/_/\//g'
+fi
+
+

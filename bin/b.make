@@ -82,6 +82,8 @@ freinst=
    done
 
 superset=
+dv=
+test -z "$vers" || dv="-$vers"
 #if test -n "$doinstall" -a -z "$SUPERPID"; then
 #	sudo echo "sudo-Test OK"
 #	(
@@ -92,37 +94,32 @@ superset=
 #	superset=y
 #fi
 
-if test -z "$dir" ; then
+if test -z "$dir$dv" ; then
 	dir="$(b.name -n "$*")" ;
-    if test -f "/usr/src/STATUS/packages/$dir" ; then
+    if test -f "/usr/src/STATUS/packages/$dir$dv" ; then
 		trap 'test -n "$superset" && kill $SUPERPID' 0
 		if test "$doinstall" = "b" ; then recargs="$recargs -I"; fi
 		while read x y ; do
 			if test -n "$y" ; then y="-s $y"; fi
 			echo + b.make $recargs $y $x
 			b.make -N $recargs $y $x
-		done < /usr/src/STATUS/packages/$dir
+		done < /usr/src/STATUS/packages/$dir$dv
 	    exit 0
     fi
-    if test -f "/usr/src/STATUS/hosts/$dir" ; then
+    if test -f "/usr/src/STATUS/hosts/$dir$dv" ; then
 		trap 'test -n "$superset" && kill $SUPERPID' 0
 		if test "$doinstall" = "b" ; then recargs="$recargs -I"; fi
 		while read x y ; do
 			if test -n "$y" ; then y="-s $y"; fi
 			echo + b.make $recargs $y $x
 			b.make -N $recargs $y $x
-		done < /usr/src/STATUS/hosts/$dir
+		done < /usr/src/STATUS/hosts/$dir$dv
 	    exit 0
     fi
 	recargs="$recargs $*"
 else
 	test -z "$*"
 fi
-
-export BK_REPOSITORY=${BK_REPOSITORY:-/usr/src/archiv/bk}
-what=$(echo $dir | sed -e 's/:/_/g'  -e 's/\//_/g' -e 's/_*$//')
-desc=$(echo $dir | sed -e 's/_/:/g'  -e 's/\//:/g' -e 's/:*$//')
-#dir=$(echo $desc | sed -e 's/:/\//g')
 
 trap 'test -n "$superset" && kill $SUPERPID' 0
 
@@ -147,7 +144,7 @@ if test -z "$islocal" ; then
 		echo "$desc$submode: Installationsfehler? wiederhole..."
 		mv "STATUS/fail/$desc$submode" "STATUS/to-install/$desc$submode"
 	fi
-	if test "$doinstall" eq "y" -a ! -d "$dir" ; then
+	if test "$doinstall" = "y" -a ! -d "$dir$dv" ; then
 		echo "$desc$submode: erst auschecken und bauen!"
 		exit 1
 	fi
@@ -166,16 +163,12 @@ if test -z "$islocal" ; then
 			defvers="$4"
 		fi
 	fi
-	if test ! -d $BK_REPOSITORY/$what ; then
-		echo "$desc$submode: kein BK-Archiv gefunden!"
-		exit 1
-	fi
 	if test -f "STATUS/work/$desc$submode" ; then
 		read host pid < STATUS/work/$desc$submode
 		if ! test "$host" = "$(hostname)" || kill -0 $pid >/dev/null 2>&1 ; then
 			echo -n "$desc$submode: In Arbeit: "
 			head -1 STATUS/work/$desc$submode 
-			echo "$desc$submode: 'redo $dir', wenn Abbruch."
+			echo "$desc$submode: 'redo $dir$dv', wenn Abbruch."
 			exit 1
 		fi
 	fi
@@ -221,36 +214,14 @@ if test -z "$islocal" ; then
 		rm -f STATUS/work/$desc$submode.new
 	fi
 
-	mkfifo /tmp/ff.$$
-	mkfifo /tmp/fg.$$
-	( set +x; while read a ; do echo "# $a" ; done < /tmp/ff.$$ | tee -a STATUS/work/$desc$submode ) &
-	reader=$!
-	( set +x; while read a ; do echo "# $a" ; done < /tmp/fg.$$ | tee -a STATUS/work/$desc$submode ) &
-	readere=$!
-	sleep 1
-	exec  5>&1 6>&2  >/tmp/ff.$$ 2>/tmp/fg.$$
-	rm /tmp/ff.$$ /tmp/fg.$$
-
-	if test -f "$dir/AUTOREMOVE" ; then
-		if test -f "STATUS/keep/$desc" ; then
-			echo "$desc$submode: Ist der Inhalt eingecheckt?"
-		else
-			echo "$desc$submode: Wird nach der Installation gelöscht!"
-			echo "$desc$submode: Ist der Inhalt eingecheckt???"
-		fi
-		cd $dir
-	elif test -d "$dir" ; then
+	if test -d "$dir$dv" ; then
+		cd "$dir$dv"
 		if test -z "$doinstall" ; then
-			echo "$desc$submode: Existiert, ist der Inhalt aktuell???"
+			bk pull
 		fi
-		cd $dir
 	else
-		dv=
-		test ! -d $BK_REPOSITORY/$dir-noris || dv=-noris
-		test ! -d $BK_REPOSITORY/$dir-$vers || dv=-$vers
-		bk lclone $BK_REPOSITORY/$what$dv $dir$dv
-		cd $dir$dv
-	    touch AUTOREMOVE
+		b.get -d "$dir" -v "$vers" "$dir$dv"
+		cd "$dir$dv"
 	fi
 else
 	cd $(bk root)
@@ -294,7 +265,7 @@ if test -z "$islocal" ; then
 		mv "STATUS/work/$desc$submode" "STATUS/fail/$desc$submode"
 		if test -n "$doinstall" ; then touch "STATUS/done/$desc$submode"; fi
 		echo "$desc$submode: ### FEHLER ###"
-		rm -f /usr/src/$dir/AUTOREMOVE
+		rm -f /usr/src/$dir$dv/AUTOREMOVE
 			## falls Fixes aus Versehen nicht eingecheckt werden
 		exit 1
 	fi
@@ -309,13 +280,15 @@ if test -z "$islocal" ; then
 			comm -23 <( ( test ! -f STATUS/removed/$desc$submode || cat STATUS/removed/$desc$submode ; test ! -f STATUS/out/$desc$submode || cat STATUS/out/$desc$submode ) | sort -u) <(sort -u STATUS/out/new.$desc$submode) > STATUS/removed/new.$desc$submode
 			mv -f STATUS/out/new.$desc$submode STATUS/out/$desc$submode
 			mv STATUS/removed/new.$desc$submode STATUS/removed/$desc$submode 
-			gen.distfile $dir
+			gen.distfile "$dir$dv"
 		) &
-		if test -f "$dir/AUTOREMOVE" -a ! -f "STATUS/keep/$desc$submode" ; then
-			if test -z "$nodelete" ; then
-				rm -rf "$dir"
+		if test -f "$dir$dv/AUTOREMOVE" -a ! -f "STATUS/keep/$desc$submode" ; then
+			cd "$dir$dv"
+			if test -z "$nodelete" && bk superset ; then
+				cd /tmp
+				rm -rf "$dir$dv"
 			else
-				rm -rf "$dir/AUTOREMOVE"
+				rm -rf "$dir$dv/AUTOREMOVE"
 			fi
 		fi
 	fi

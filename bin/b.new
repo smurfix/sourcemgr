@@ -1,0 +1,74 @@
+#!/bin/bash
+BK_REPOSITORY=bk://bitkeeper.noris.de
+
+set -e
+trap 'usage; exit 1' 0
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- generiert ein neues BK-Archiv
+         -d Paket
+	   [ -v Version ]
+	     Beschreibung
+END
+}
+
+dir=
+vers=
+
+   eval set -- "$(getopt "d:v:h" "$@")"
+   for i
+   do
+	   case "$i"
+	   in
+		   -h)
+		       exit 1 ;;
+		   -d)
+			   shift; dir="$1"; shift;;
+		   -v)
+			   shift; vers="$1"; shift;;
+			--)
+				shift; break ;;
+	   esac
+   done
+
+tmpcf="/tmp/b.s.cf.$$";
+trap 'rm -f $tmpcf' 0
+set -e
+
+test -n "$*"
+test -n "$dir"
+
+test -z "$vers" || dv="-$vers"
+
+desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
+if test -f "/usr/src/STATUS/checkout/$desc" ; then
+    desc=$(sed  -e 's/[ 	].*//' "/usr/src/STATUS/checkout/$desc")
+    what=$(echo $desc | sed -e 's/[:\/]/_/g' -e 's/_*$//')
+else
+    what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
+fi
+
+cat <<END >$tmpcf
+description: $*
+
+logging:    changesets@openlogging.org
+security:   none
+contact:    $USER
+email:		$USER@noris.de
+Company:    noris network AG
+Street:     Kilianstraße 142
+City:       Nürnberg
+Postal:     90491
+Country:    Germany
+
+checkout:get
+END
+
+tmp=/tmp/b.s.$$
+trap 'rm -rf $tmp $tmpcf' 0
+bk setup -f -c $tmpcf $tmp
+cd $tmp
+bk clone -q . $BK_REPOSITORY/$what$dv
+echo "Archiv '$what' angelegt."
+exit 0

@@ -1,0 +1,85 @@
+#!/bin/bash
+
+set -e
+trap 'usage; exit 1' 0
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- checkt neue Version von externem Source ein
+       [ -d Paket ]
+       [ -v altes-Release ]
+       [ -w neues-Release ]
+       Verzeichnis-mit-neuem-Source
+       Kommentar
+
+importiert einen Dateibaum als "neue Version".
+
+END
+}
+
+vers=extern
+nvers=gibts/nicht
+dir=
+ext=
+parent=0
+
+   eval set -- "$(getopt "d:v:w:e:h" "$@")"
+   for i
+   do
+	   case "$i"
+	   in
+		   -h)
+		       exit 1 ;;
+		   -d)
+			   shift; dir="$1"; shift;;
+		   -v)
+			   shift; vers="$1"; shift;;
+		   -w)
+			   shift; nvers="$1"; shift;;
+			--)
+				shift; break ;;
+	   esac
+   done
+
+test -n "$dir" || dir="$(b.name)"
+
+tmp=/var/tmp/bki.$$
+trap 'rm -rf $tmp' 0
+
+dir="$1"
+test -d "$dir"
+shift
+cmt="$*"
+test -n "$cmt"
+
+b.get -n -v "$vers" -w "$nvers" -d "$dir" $tmp
+test -d "$tmp"
+
+set -e
+
+cd "$dir"
+test ! -d SCCS
+dir="$(pwd)"
+
+done=/tmp/f.done.$$
+trap 'rm -rf $done $tmp' 0
+
+( cd $tmp; find . -type d -name SCCS -prune -print | grep -v "^\./BitKeeper/"
+  echo BitKeeper ) |
+( set -e
+  while read a ; do
+	echo $a
+	mv "$a" "$dir/$a" || cp -a "$a" "$dir/$a"
+  done
+  touch $done
+)
+test -f $done
+rm -f $tmp $done
+
+b.import.pl "$cmt"
+
+bk push -q
+echo "Import OK:" $(bk prs -ah -r+ -d:I: ChangeSet)
+rm -rf BitKeeper ChangeSet
+find . -name SCCS -type d -prune -print0 | xargs -0r rm -rf
+exit 0

@@ -1,0 +1,37 @@
+#!/bin/sh
+
+echo -n "Was: "
+read pack
+
+echo -n "Hosts: "
+read hosts
+
+echo -n "Install: "
+read inst
+
+set -e
+for i in $hosts ; do
+	echo -n "$i..."
+	echo -n "dir1 "
+	ssh -a -x -l sroot $i mkdir -p /cd
+	echo -n "mount "
+	ssh -a -x -l sroot $i mount work.noris.de:/ /cd || true
+	echo -n "dir2 "
+	ssh -a -x -l sroot $i mkdir -p /var/lib/packages
+	echo "packages... "
+	for j in $pack; do
+		echo $j
+	done | ssh -a -x -l sroot $i /cd/usr/src/STATUS/bin/copyover / /cd
+	echo -n "$host..."
+	for j in $inst; do
+		echo -n "config.$j "
+		ssh -n -a -x -l sroot $i /sbin/init.d/scripts/$j config
+		# echo -n "start.$j "
+		# ssh -n -a -x -l sroot $i /sbin/init.d/scripts/$j start
+	done
+	echo -n "unmount "
+	ssh -a -x -l sroot $i umount /cd || true
+	echo -n "nodir "
+	ssh -a -x -l sroot $i rmdir /cd
+	echo "done."
+done

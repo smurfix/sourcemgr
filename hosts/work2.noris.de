@@ -1,0 +1,7 @@
+kernel:linux-pci
+xwindows
+net:appletalk:netatalk
+net:windows:samba
+net:mail:qmail
+users
+devel

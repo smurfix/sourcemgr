@@ -1,0 +1,89 @@
+#!/bin/sh
+export BK_REPOSITORY=bk://bitkeeper.noris.de
+
+set -e
+trap 'usage; exit 1' 0
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- holt Sourcecode aus dem Archiv
+       [ -v releasename ]
+       [ -w neureleasename, legt eine Kopie an ]
+       [ -d Paket ]
+	   [ -n (checkt Sourcen nicht aus) ]
+       [ neuesVerzeichnis ]
+	Verzeichnisname ist der Paketname, wenn nicht angegeben.
+END
+}
+
+vers=noris
+nvers=gibts/nicht
+dir=
+optp=
+
+   eval set -- "$(getopt "d:nv:w:h" "$@")"
+   for i
+   do
+	   case "$i"
+	   in
+		   -h)
+		       exit 1 ;;
+		   -d)
+			   shift; dir="$1"; shift;;
+		   -n)
+		       shift; optp=-P ;;
+		   -v)
+			   shift; vers="$1"; shift;;
+		   -w)
+			   shift; nvers="$1"; shift;;
+			--)
+				shift; break ;;
+	   esac
+   done
+
+if test -z "$dir" ; then
+	test -n "$1"
+	dir="$1"
+fi
+ddir="$1"
+test -n "$ddir" || ddir="$dir"
+test -z "$2"
+test -n "$dir"
+test -n "$ddir"
+
+trap '' 0
+
+mod=p
+if b.exists -v "$vers" $dir > /tmp/tf.$$ ; then : ; else
+	echo >&2 "Problem: '$dir' Version '$vers' nicht bekannt."
+	exit 1
+fi
+read what dv < /tmp/tf.$$
+rm -f /tmp/tf.$$
+
+if test -z "$what" ; then echo >&2 "'$dir' nicht gefunden" ; exit 1 ; fi
+test -z "$dv" || dv="-$dv"
+test -z "$nvers" || ndv="-$nvers"
+
+if test -z "$1" ; then
+	dir="$what$dv"
+else
+	dir="$1"
+fi
+
+if test -e "$dir" ; then
+	echo >&2 "Das Verzeichnis '$dir' gibt es schon... geht nicht"
+	exit 1
+fi
+bk clone $optp -q $BK_REPOSITORY/$what$dv $ddir
+
+if test "$nvers" != "gibts/nicht" ; then
+	echo Kopiere Quelldaten...
+	cd "$ddir"
+	bk clone -q . $BK_REPOSITORY/$what$ndv
+	bk parent $BK_REPOSITORY/$what$ndv
+else
+	cd "$ddir"
+fi
+echo "Archiv '$what$dv' nach '$ddir' kopiert."
+

@@ -1,0 +1,45 @@
+#!/bin/sh
+
+set -e
+umask 002
+
+trap 'usage; exit 1' 0
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- updatet Schlüsselwörter in Dateien
+       [ -d Paket ]
+       [ -v releasename ]
+END
+}
+
+vers=
+dir=
+
+   eval set -- "$(getopt "d:v:h" "$@")"
+   for i
+   do
+	   case "$i"
+	   in
+		   -h)
+		       exit 1 ;;
+		   -d)
+			   shift; dir="$1"; shift;;
+		   -v)
+			   shift; vers="$1"; shift;;
+			--)
+				shift; break ;;
+	   esac
+   done
+
+dir="$(p.name "$dir")"
+desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
+what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
+
+export PRCS_REPOSITORY=${PRCS_REPOSITORY:-/usr/src/archiv/prcs} PRCS_LOGQUERY=1
+
+test -z "$vers" || vers="-r$vers"
+trap '' 0
+
+prcs rekey $vers $what.prj "$@"
+# prcs execute -r$vers --match :tag=project -- p.sub -v$vers $what '{}'
