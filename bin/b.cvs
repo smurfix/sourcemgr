@@ -8,7 +8,7 @@ cat >&2 <<END
 Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -d Paket ]
        [ -l (kein PSERVER) ]
-       [ -n # (Intermediate-Push alle # Importe; Default 10; 0=garnicht) ]
+       [ -n # (Intermediate-Push alle # Importe; Default 100; 0=garnicht) ]
 #      [ -r Fork (im CVS) ]
 	   [ -s (shell instead of renametool) ] [ -S (kein Renametool) ]
        [ -v releasename (cvs) ]
@@ -26,7 +26,7 @@ PATH=/usr/src/STATUS/bin:/usr/local/bin:$PATH
 
 dir=
 vers=cvs
-push=10
+push=100
 rvers=
 run="$0.pl"
 comp=-z3
