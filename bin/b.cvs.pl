@@ -562,6 +562,7 @@ END
 			system($ENV{SHELL} || "/bin/sh","-i");
 			$shells--;
 		} else {
+			print STDERR "  *** rename ***\r";
 			open(RN,"|env @AU @DT bk renametool -p > $tmf");
 			foreach my $f(sort { $a cmp $b } @gone) { print RN "$f\n"; }
 			print RN "\n";

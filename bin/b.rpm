@@ -261,12 +261,9 @@ if test -z "$again" -a -z "$qpack" ; then
 	RFR=$BUILD/tmp.$archive
 	FR=/tmp/b.r.$$
 	mkdir $FR
-	if test -d "$RFR" ; then
-		( cd "$RFR"; echo "Update Sourcen ..."; sudo bk pull )
-	else
-		echo "Hole Sourcen aus dem Archiv ..."
-		sudo b.get -d $what $vget $RFR
-	fi
+	rm -rf "$RFR"
+	echo "Hole Sourcen aus dem Archiv ..."
+	sudo b.get -d $what $vget $RFR
 	bkvers="$( cd $RFR; bk get -q -p rpm.version 2>/dev/null | head -1 )"
 	if test -z "$bkvers" ; then
 		bkvers="$( cd $RFR; bk prs -ah -r+ -d:I: ChangeSet )"

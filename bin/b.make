@@ -234,7 +234,7 @@ if test -z "$islocal" ; then
 else
 	cd $(bk root)
 fi
-test -f Makefile.$ARCH || bk -r get -q
+test -f Makefile.$ARCH || { echo "+ bk -r get -q" ; bk -r get -q }
 
 bad=
 if test -f Makefile.$ARCH ; then
