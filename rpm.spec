@@ -118,3 +118,14 @@ make -f Makefile.Linux install
 /usr/local/bin/p.unchecked
 /usr/local/bin/gen.distfile
 /usr/local/bin/gen.flist.rpm
+/usr/local/bin/b.exists
+/usr/local/bin/b.get
+/usr/local/bin/b.import
+/usr/local/bin/b.import.pl
+/usr/local/bin/b.make
+/usr/local/bin/b.merge
+/usr/local/bin/b.name
+/usr/local/bin/b.new
+/usr/local/bin/b.put
+/usr/local/bin/b.rpm
+/usr/local/bin/b.rpmenv
