@@ -10,6 +10,17 @@ use Time::Local;
 use Carp qw(confess);
 use Storable qw(nstore retrieve);
 
+### Test Revisionsmatching
+#my %target=("x"=>"2.2.0.4");
+#my $trev="test";
+#sub rev_ok($$);
+#foreach my $i(qw(1.1 1.2 1.3 1.4  2.0 2.1 2.2 2.2.4.1 2.2.4.2 2.2.4.3)) {
+#	die "RevProb $i\n" unless rev_ok("x",$i);
+#}
+#foreach my $i(qw(1.2.3.4 2.3 2.3.4.5 2.2.3.1 2.2.5.1 2.2.4.1.4.4 3.1)) {
+#	die "RevProb $i\n" if rev_ok("x",$i);
+#}
+
 my $debug=0;
 my $diff=$ENV{BKCVS_DIFF}||60; # Zeitraum für "gleichzeitige" Änderungen im CVS
 my $shells=$ENV{BKCVS_SHELLS}||0;
@@ -42,6 +53,12 @@ $rhost=$1 if $ENV{CVS_REPOSITORY} =~ /\@(?:cvs\.)?([^\:]+)\:/;
 
 my $cn = shift @ARGV;
 my $pn = shift @ARGV;
+my $trev = $ENV{BK_TARGET_REV};
+$trev="" unless defined $trev;
+my %target;
+my %tpre; # Vorlaeufer-Versionsname
+my %cutoff; # Datum, ab dem Vendor-Versionen nicht mehr aktiv sind
+
 $pn =~ s#[/:]#_#g;
 my %excl;
 foreach my $arg(@ARGV) {
@@ -129,7 +146,7 @@ sub bk {
 	};
 	my @res;
 	while(<FP>) {
-		chop;
+		chomp;
 		push(@res,$_);
 	}
 	close(FP) or do {
@@ -167,14 +184,14 @@ sub cvs {
 	unshift(@_,"cvs",@comp,"-d",$ENV{CVS_REPOSITORY});
 	print STDERR ">>> @_\n" if $debug;
 	open(FP,"-|") or do {
-		chdir("..") if $do_cd;
+		#chdir("..") if $do_cd;
 		exec @_;
 		#exec "strace","-v","-s3000","-o","/var/tmp/prcs","-F","-f",@_;
 		exit(99);
 	};
 	my @res;
 	while(<FP>) {
-		chop;
+		chomp;
 		push(@res,$_);
 	}
 	close(FP);
@@ -270,9 +287,43 @@ sub add_date($;$$$$) {
 	}
 }
 
+sub rev_ok($$) {
+	my($fn,$rev)=@_;
+# Target: 2.2.0.4
+# OK: 1.1 1.2 1.3 1.4  2.0 2.1 2.2 2.2.4.1 2.2.4.2 2.2.4.3
+# !OK: 1.2.3.4 2.3 2.3.4.5 2.2.3.1 2.2.5.1 2.2.4.1.4.4 3.1 
+
+	my @f = split(/\./,$rev);
+	return (0+@f == 2 or (0+@f==4 and $f[0]==1 and $f[1]==1 and $f[2]==1))
+		if $trev eq ""; # baseline / vendor branch
+
+	my $tr = $target{$fn};
+	return 0 unless defined $tr;
+	die "Target: $tr  File: $fn\n" unless $tr =~ s/\.0\.(\d+)$/.$1/;
+
+	my @t = split(/\./,$tr);
+
+	my $rt = shift @t;
+	my $rf = shift @f;
+	if($rt != $rf) { # Special für 1.9 => 2.0: nimm die Baseline
+		return 0 if 0+@f > 2;  # !OK: 1.2.3.4
+		return ($rt > $rf); # OK: 1.?  !OK: 3.1
+	}
+
+	while(@t) {
+		$rt = shift @t;
+		$rf = shift @f;
+
+		return ($rt > $rf and @f == 0)
+			if $rt != $rf;
+	}
+	return 0+@f == 1;
+}
+
 # Bearbeite den Log-Eintrag EINER Datei
 sub proc1($$$$$$) {
 	my($fn,$dt,$rev,$cmt,$autor,$syms) = @_;
+	return unless rev_ok($fn,$rev);
 
 	add_date($dt,$fn,$rev,$autor,$cmt);
 	foreach my $sym(@$syms) {
@@ -287,6 +338,8 @@ sub proc(@) {
 	my $autor;
 	my $cmt;
 	my %syms;
+	my $pre;
+	my $skip;
 	foreach my $x(@_) {
 		if($state == 0 and $x =~ s/^Working file:\s+(\S+)\s*$/$1/) {
 			$fn = $x;
@@ -300,30 +353,48 @@ sub proc(@) {
 		}
 		if($state == 2) {
 			if($x =~ /^\s+(\S+)\:\s*(\S+)\s*$/) {
-				$syms{$2}=[] unless defined $syms{$2};
-				push(@{$syms{$2}},$1);
+				my $dsym=$1;
+				my $drev=$2;
+
+				$target{$fn}=$drev if defined $trev and $dsym eq $trev;
+				$syms{$drev}=[] unless defined $syms{$drev};
+				push(@{$syms{$drev}},$dsym);
+
+				if($trev eq $dsym) {
+					$drev =~ s/\.0\.\d+$//; # 1.2.3.4
+
+					push(@{$syms{$drev}},$trev); 
+					$pre = $drev  # 1.2.0.3
+						if $drev =~ s/\.(\d+)\.\d+$/.0.$1/;
+				}
 				next;
 			} else {
+				if($pre) {
+					die "Kein Vor-Symbol '$pre' in '$fn'\n" unless $syms{$pre};
+					$tpre{$syms{$pre}[0]}++;
+				}
 				$state=3;
 			}
 		}
 		if($state >= 2 and $x =~ /^\-+\s*$/) {
 			$state=4;
-			proc1($fn,$dt,$rev,$cmt,$autor,$syms{$rev}) if $dt;
-			$dt=0; $cmt="";
+			proc1($fn,$dt,$rev,$cmt,$autor,$syms{$rev}) if $dt and not $skip;
+			$dt=0; $cmt=""; $skip=0;
 			next;
 		}
-		if($state == 4 and $x =~ /^revision\s+(\d+\.\d+)(?:$|\s+)/) {
+		if($state == 4 and $x =~ /^revision\s+([\d\.]+)(?:$|\s+)/) {
 			$rev=$1;
 			$state=5;
 			next;
 		}
-		if($state == 5 and $x =~ /^date:\s+(\d+)\/(\d+)\/(\d+)\s+(\d+)\:(\d+)\:(\d+)\s*\;\s+author\:\s+(\S+)\;/) {
+		if($state == 5 and $x =~ /^date:\s+(\d+)\/(\d+)\/(\d+)\s+(\d+)\:(\d+)\:(\d+)\s*\;\s+author\:\s+(\S+)\;\s+state\:\s+(\S+)\;/) {
+			$skip=$1 if lc($8) eq "dead";
 			$autor = $7;
 			my($y,$m,$d,$hh,$mm,$ss)=($1,$2,$3,$4,$5,$6);
 			$y-=1900 if $y>=1900; $m--;
 			$dt=timelocal($ss,$mm,$hh,$d,$m,$y);
 			die "Datum: $x" unless $dt;
+			$cutoff{$fn}=$dt if $rev eq "1.2";
 			$state = 6;
 			next;
 		}
@@ -333,21 +404,35 @@ sub proc(@) {
 			next;
 		}
 	}
-	proc1($fn,$dt,$rev,$cmt,$autor,$syms{$rev}) if $dt; $dt=0;
+	proc1($fn,$dt,$rev,$cmt,$autor,$syms{$rev}) if $dt and not $skip; $dt=0;
 }
 
 my $tmpcv = "/var/cache/cvs";
 
-if(-f "$tmpcv/$cn.data") {
+my $tmppn="/var/cache/cvs/bk/$pn";
+if(-f "$tmppn.data") {
 	print STDERR "Reading stored CVS log\n";
-	$cset = retrieve("$tmpcv/$cn.data");
+	$cset = retrieve("$tmppn.data");
+
+	foreach my $x (@$cset) {
+		if($x->{sym}) {
+			foreach my $s(@{$x->{sym}}) {
+				$symdate{$s}=$x->{wann};
+			}
+		}
+		my $ff=$x->{files};
+		foreach my $f (keys %$ff) {
+			$cutoff{$f}=$x->{wann}
+				if $ff->{$f}{rev} eq "1.2";
+		}
+	}
 } else {
 	$cset=[];
 	print STDERR "Processing CVS log\n";
 	my $mr=1;
 	while(1) {
 		my $done=0;
-		foreach my $x (1,2) {
+		foreach my $x (qw(1 1.2.1)) {
 			mkpath("$tmpcv/$mr.$x",1,0755);
 			
 			print STDERR "Fetch CVS files $mr.$x...\n";
@@ -395,13 +480,12 @@ if(-f "$tmpcv/$cn.data") {
 	foreach my $sym(keys %symdate) {
 		push(@{add_date($symdate{$sym})},$sym);
 	}
-	nstore($cset,"$tmpcv/$cn.data");
+	nstore($cset,"$tmppn.data");
 }
 chdir("/");
 
 dateset($cset->[0]{wann});
 
-my $tmppn="/var/cache/cvs/bk/$cn";
 unless(-d "$tmppn/BitKeeper") {
 	system("bk clone -q $ENV{BK_REPOSITORY}/$pn $tmppn");
 
@@ -517,15 +601,16 @@ sub process($$$$) {
 			}
 		}
 		foreach my $rev(keys %rev) {
+			my %d;
 			my @f = @{$rev{$rev}};
-			print STDERR "  Processing $len: $cvsdate $rev @f\n";
-			while(@f) {
-				my $i = undef;
-				$i=50 if @f>60;
-				my @ff = splice(@f,0,$i||(1+@f));
-				bk("get","-egq", @ff);
-				unlink(@ff);
-				cvs("get","-r",$rev, map { "$cne/$_" } @ff);
+			foreach my $f(@f) {
+				push(@{$d{dirname($f)}}, basename($f));
+			}
+			foreach my $d(keys %d) {
+				@f = @{$d{$d}};
+				bk("get","-egq", map { "$d/$_" } @f);
+				unlink(@f);
+				cvs("get","-A","-d",$d,"-r",$rev, map { ($d eq ".") ? "$cne/$_" : "$cne/$d/$_" } @f);
 			}
 			push(@gone, grep {
 					-e dirname($_)."/SCCS/s.".basename($_) and ! -e $_ }
@@ -614,17 +699,18 @@ END
 			} elsif($line =~ /^bk new (.+)$/) {
 				push(@new,$1);
 			} elsif($line =~ /^bk mv (.+) (.+)$/) {
-				my $cmt1=$adt->{$1}{cmt};
-				my $cmt2=$adt->{$2}{cmt};
+				my $o=$1;
+				my $n=$2;
+				my $cmt1=$adt->{$o}{cmt};
+				my $cmt2=$adt->{$n}{cmt};
 				if(defined $cmt1 and $cmt1 ne "") {
 					$cmt1.=$cmt2 if defined $cmt2 and $cmt2 ne "" and $cmt1 ne $cmt2;
 				} else {
 					$cmt1=$cmt2;
 				}
-				$cmt1="CVS: $cvsdate" if defined $scmt and $cmt1 eq $scmt;
-				my $n=$2;
+				$cmt1="" if defined $scmt and $cmt1 eq $scmt;
 				rename($n,"x.$$");
-				bk("mv",$1,$n);
+				bk("mv",$o,$n);
 				bk("get","-geq",$n);
 				rename("x.$$",$n);
 
@@ -632,7 +718,7 @@ END
 					$ocmt =~ s/\001//g;
 					bk(ci => '-qG', "-y$ocmt", @onew) if @onew;
 					@onew=();
-					$ocmt=$cmt1;
+					$ocmt="CVS: ".$adt->{$o}{rev}." => ".$adt->{$n}{rev}."\n".$cmt1;
 				}
 				push(@onew,$n);
 			}
@@ -645,7 +731,8 @@ END
 		my $ocmt=""; my @onew=();
 		foreach my $new(@new) {
 			my $cmt = $adt->{$new}{cmt};
-			$cmt = "CVS: $cvsdate" if $cmt eq "" or (defined $scmt and $cmt eq $scmt);
+			$cmt = "" if $cmt eq "" or (defined $scmt and $cmt eq $scmt);
+			$cmt="CVS: ".$adt->{$new}{rev}."\n".$cmt;
 			if($cmt ne $ocmt) {
 				$ocmt =~ s/\001//g;
 				bk(delta => '-i', "-y$ocmt", "-q", @onew) if @onew;
@@ -665,7 +752,8 @@ END
 	my $ocmt=""; my @onew=();
 	foreach my $f(bkfiles("cg")) {
 		my $cmt = $adt->{$f}{cmt};
-		$cmt = "CVS: $cvsdate" if $cmt eq "" or (defined $scmt and $cmt eq $scmt);
+		$cmt = "" if $cmt eq "" or (defined $scmt and $cmt eq $scmt);
+		$cmt="CVS: ".$adt->{$f}{rev}."\n".$cmt;
 
 		if($cmt ne $ocmt) {
 			$ocmt =~ s/\001//g;
@@ -693,6 +781,29 @@ END
 #	bk("-r","unget");
 #	bk("-r","unedit");
 #	bk("-r","unlock");
+}
+
+if($trev ne "" and $ENV{BK_TARGET_NEW}) { # tag must not exist
+	# Rollback bis hinter das Zieldatum
+	$DB::single=1;
+	die "Tag '$trev' exists" if bk("prs","-hd:I:", "-r$trev","ChangeSet");
+
+	$dt_done=$symdate{$trev};
+	die "kein Datum für '$trev'\n" unless $dt_done;
+	my($ss,$mm,$hh,$d,$m,$y)=localtime($dt_done);
+	$m++; $y+=1900; ## zweistellig wenn <2000
+	my $tdate = sprintf "%04d-%02d-%02d %02d:%02d:%02d",$y,$m,$d,$hh,$mm,$ss;
+	foreach my $pre(keys %tpre) {
+		die "Kein Vorläufer-Branch '$pre' für '$trev' gefunden\n"
+			unless bk("prs","-hd:I:", "-r$pre","ChangeSet");
+	}
+	my $b_rev=bk("prs","-hd:I:", "-r$tdate","ChangeSet");
+	die "Keine Revisionsnummer für '$trev' '$tdate' gefunden.\n" unless $b_rev;
+	bk("undo","-sfqa$b_rev");
+
+	bk("tag",$trev);
+} elsif($trev ne "") { # tag must exist
+	die "Tag '$trev' doesn't exists" unless bk("prs","-hd:I:", "-r$trev","ChangeSet");
 }
 
 my %last;
@@ -743,7 +854,9 @@ while(@$cset) {
 
 			# JETZT aber: Sammle Änderungen.
 			foreach my $fn(keys %$f) {
-				$adt{$fn}=$f->{$fn};
+				$adt{$fn}=$f->{$fn}
+					if $f->{$fn}{rev} !~ /^1\.1\.1\.\d+$/
+						or $y->{wann} < $cutoff{$fn};
 			}
 			$last{$autor}=$ldiff=$y->{wann};
 			
@@ -782,4 +895,4 @@ if($ENV{BKCVS_PUSH}) {
 	bk("push","-q");
 }
 print STDERR "OK                                                 \n";
-unlink("$tmpcv/$cn.data");
+unlink("$tmppn.data");

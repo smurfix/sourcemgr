@@ -9,9 +9,10 @@ Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -d Paket ]
        [ -l (kein PSERVER) ]
        [ -n # (Intermediate-Push alle # Importe; Default 100; 0=garnicht) ]
-#      [ -r Fork (im CVS) ]
+       [ -r Fork (im CVS) ]
 	   [ -s (shell instead of renametool) ] [ -S (kein Renametool) ]
        [ -v releasename (cvs) ]
+       [ -w neuer releasename ]
        [ -e CVS-Fudge-Sekunden (Default 120) ]
        [ -D (Debug) ] [ -Z (keine Kompression) ]
        woher  was
@@ -28,6 +29,7 @@ dir=
 vers=cvs
 push=100
 rvers=
+nvers=
 run="$0.pl"
 comp=-z3
 diff=
@@ -36,7 +38,7 @@ shells=0
 loc=
 df=0
 
-   eval set -- "$(getopt "d:v:r:hDZln:e:sS" "$@")"
+   eval set -- "$(getopt "d:v:w:r:hDZln:e:sS" "$@")"
    for i
    do
 	   case "$i"
@@ -57,9 +59,10 @@ df=0
 			   shift; dir="$1"; shift;;
 		   -v)
 			   shift; vers="$1"; shift;;
+		   -w)
+			   shift; nvers="$1"; shift;;
 		   -r)
-		   		exit 1
-			   shift; rvers="-r $1"; shift;;
+			   shift; rvers="$1"; shift;;
 			-n)
 				shift; push=$1 ; shift ;;
 			-l)
@@ -92,14 +95,30 @@ trap 'usage; exit 1' 0
 mkdir -p /var/cache/cvs/bk/tmp
 tmp="/var/cache/cvs/bk/tmp/$$"
 rm -rf "$tmp"
-dest=/var/cache/cvs/bk/"$dir-$vers"
+
+if test -n "$nvers"; then
+	wset="-w $nvers"
+	dv="-$nvers"
+elif test -n "$vers" ; then
+	dv="-$vers"
+fi
+if shlock /var/lock/bcvs-$was$dv  ; then : ; else
+	echo "$was$dv: Locked." >&2
+	exit 1
+fi
+
+test -d /var/cache/cvs/bk/$was$dv || b.get -d $dir -v $vers $wset /var/cache/cvs/bk/$was$dv || true
 
 export BK_REPOSITORY=bk://bitkeeper.noris.de
 export CVS_REPOSITORY="$woher"
 export BKCVS_COMP=$comp
+export BK_TARGET_REV="$rvers"
 export BKCVS_SHELLS=$shells
-test -d /var/cache/cvs/bk/$was || b.get -d $dir -v $vers /var/cache/cvs/bk/$was || true
+if test -n "$nvers" ; then
+	vers="$nvers"
+	export BK_TARGET_NEW=1
+fi
 test -n $diff && test -z "$BKCVS_DIFF" && export BKCVS_DIFF=$diff
 test -z "$BKCVS_PUSH" && export BKCVS_PUSH=$push
 test -z "$BKCVS_NORENAME" && export BKCVS_NORENAME=$rename
-exec $run "$was" "$dir-$vers"
+exec $run "$was" "$dir$dv"

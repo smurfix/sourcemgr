@@ -86,7 +86,7 @@ fi
 if test "$nvers" != "gibts/nicht" ; then
 	echo Kopiere Quelldaten...
 	cd "$ddir"
-	bk lclone -q . $BK_REPOSITORY/$what$ndv
+	bk clone -q . $BK_REPOSITORY/$what$ndv
 	bk parent $BK_REPOSITORY/$what$ndv
 else
 	cd "$ddir"
