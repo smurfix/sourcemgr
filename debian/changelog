@@ -1,8 +1,13 @@
+sourcemgr (1.290) unstable; urgency=low
+
+  * depend on Perl shlock
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon, 10 Nov 2003 13:09:21 +0100
+
 sourcemgr (1.289) unstable; urgency=low
 
   * b.pull:
        Schleife zum Funktionieren bringen
-  * 
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Sat, 11 Oct 2003 10:06:13 +0200
 
@@ -11,7 +16,6 @@ sourcemgr (1.288) unstable; urgency=low
   * bin/b.debuild, bin/debu:
        Calling "apt-get build-dep" with a package name 
            would be a good idea
-  * 
 
  -- Matthias Urlichs <smurf@debian.org>  Fri,  3 Oct 2003 14:14:51 +0200
 
