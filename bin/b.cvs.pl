@@ -12,6 +12,7 @@ use Storable qw(nstore retrieve);
 
 my $debug=0;
 my $diff=$ENV{BKCVS_DIFF}||60; # Zeitraum für "gleichzeitige" Änderungen im CVS
+my $shells=$ENV{BKCVS_SHELLS}||0;
 
 sub Usage() {
 	print STDERR <<END;
@@ -299,7 +300,7 @@ sub proc(@) {
 			$dt=0; $cmt="";
 			next;
 		}
-		if($state == 4 and $x =~ /^revision\s+(\d+\.\d+)\s*$/) {
+		if($state == 4 and $x =~ /^revision\s+(\d+\.\d+)(?:$|\s+)/) {
 			$rev=$1;
 			$state=5;
 			next;
@@ -335,7 +336,7 @@ if(-f "$tmpcv.data") {
 		
 		print STDERR "Fetch CVS files $mr...\n";
 		chdir("/var/cache/cvs/bk");
-		cvs("get","-r$mr.1",$cn);
+		cvs("get","-A","-r$mr.1",$cn);
 		chdir($tmpcv);
 		print STDERR "processing $mr...\n";
 		my @buf = ();
@@ -484,7 +485,7 @@ sub process($$$$) {
 				my $i = undef;
 				$i=50 if @f>60;
 				my @ff = splice(@f,0,$i||(1+@f));
-				bk("get","-egq", @ff) if $rev !~ /^\d+\.1$/;
+				bk("get","-egq", @ff);
 				unlink(@ff);
 				cvs("get","-r",$rev, map { "$cn/$_" } @ff);
 			}
@@ -530,13 +531,26 @@ sub process($$$$) {
 		# print STDERR ">>> bk -qeg @gone\n";
 		# print $rename $d->{major}.".".$d->{minor}."\n";
 		my $tmf="/tmp/bren.$$";
-		open(RN,"|env @AU @DT bk renametool -p > $tmf");
-		foreach my $f(sort { $a cmp $b } @gone) { print RN "$f\n"; }
-		print RN "\n";
-		foreach my $f(sort { $a cmp $b } @new) { print RN "$f\n"; }
-		close(RN);
-		# print $rename "\n";
-		confess "No rename" if $? or not -s $tmf;
+		if($shells) {
+			print <<END;
+Do your actions.
+OLD: @gone
+NEW: @new
+echo "bk mv/new/rm FILENAME(s)" > $tmf
+exit.
+
+END
+			system($ENV{SHELL} || "/bin/sh","-i");
+			$shells--;
+		} else {
+			open(RN,"|env @AU @DT bk renametool -p > $tmf");
+			foreach my $f(sort { $a cmp $b } @gone) { print RN "$f\n"; }
+			print RN "\n";
+			foreach my $f(sort { $a cmp $b } @new) { print RN "$f\n"; }
+			close(RN);
+			# print $rename "\n";
+			confess "No rename" if $? or not -s $tmf;
+		}
 
 		my $cmds="";
 		my $T = IO::File->new($tmf,"r");
@@ -622,7 +636,7 @@ sub process($$$$) {
 	# $scmt =~ s/\'/\"/g;
 	open(FP,"|-") or do {
 		$scmt =~ s/\001//g;
-		exec("env", @DT,@AU, "bk", "cset", "-q", "-y$scmt");
+		exec("env", @DT,@AU, "bk", "cset", "-y$scmt");
 		exit(99);
 	};
 	open(P,"bk sfiles -pC |");

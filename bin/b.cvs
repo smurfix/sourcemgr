@@ -9,12 +9,10 @@ Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -d Paket ]
        [ -l (kein PSERVER) ]
        [ -n # (Intermediate-Push alle # Importe; Default 10; 0=garnicht) ]
-       [ -p parent-Repository ]
-       [ -r Fork (im CVS) ]
-       [ -v releasename (cvs / extern) ]
-       [ -w releasename (cvs) ]
+#      [ -r Fork (im CVS) ]
+	   [ -s (shell instead of renametool) ]
+       [ -v releasename (cvs) ]
        [ -e CVS-Fudge-Sekunden (Default 120) ]
-       [ -V (verbose) ]
        [ -D (Debug) ] [ -Z (keine Kompression) ]
        woher  was
 
@@ -30,16 +28,14 @@ dir=
 vers=cvs
 push=10
 rvers=
-rdir=
-parent=
 run="$0.pl"
-quiet=-q
 comp=-z3
 diff=
+shells=0
 loc=
 df=0
 
-   eval set -- "$(getopt "Vd:v:r:hDZln:p:e:" "$@")"
+   eval set -- "$(getopt "d:v:r:hDZln:e:s" "$@")"
    for i
    do
 	   case "$i"
@@ -48,12 +44,10 @@ df=0
 		       exit 1 ;;
 		   -Z)
 		   	   shift; comp="" ;;
-		   -V)
-		   	   shift; quiet="" ;;
+		   -s)
+		   	   shift; shells=$(expr $shells + 1) ;;
 		   -D)
 			   shift; run="perl -d $(type -p "$0.pl")" ;;
-		   -p)
-			   shift; parent="$1"; shift;;
 		   -e)
 			   shift; diff="$1"; shift;;
 		   -d)
@@ -61,7 +55,8 @@ df=0
 		   -v)
 			   shift; vers="$1"; shift;;
 		   -r)
-			   shift; rvers="-r $1"; rdir="-$1"; shift;;
+		   		exit 1
+			   shift; rvers="-r $1"; shift;;
 			-n)
 				shift; push=$1 ; shift ;;
 			-l)
@@ -82,9 +77,9 @@ fi
 test -n "$2"
 test -z "$3"
 if test -z "$loc" ; then
-woher=":pserver:$1"
+	woher=":pserver:$1"
 else
-woher="$1"
+	woher="$1"
 fi
 was="$2"
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
@@ -99,6 +94,7 @@ dest=/var/cache/cvs/bk/"$dir-$vers"
 export BK_REPOSITORY=bk://bitkeeper.noris.de
 export CVS_REPOSITORY="$woher"
 export BKCVS_COMP=$comp
+export BKCVS_SHELLS=$shells
 test -d /var/cache/cvs/bk/$was || b.get -d $dir -v $vers /var/cache/cvs/bk/$was || true
 test -n $diff && test -z "$BKCVS_DIFF" && export BKCVS_DIFF=$diff
 test -z "$BKCVS_PUSH" && export BKCVS_PUSH=$push
