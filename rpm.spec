@@ -88,6 +88,8 @@ make -f Makefile.Linux install
 /usr/local/bin/gen.rdist
 /usr/local/bin/gen.distfile
 /usr/local/bin/gen.flist.rpm
+/usr/local/bin/b.cvs
+/usr/local/bin/b.cvs.pl
 /usr/local/bin/b.exists
 /usr/local/bin/b.get
 /usr/local/bin/b.import
@@ -97,8 +99,10 @@ make -f Makefile.Linux install
 /usr/local/bin/b.name
 /usr/local/bin/b.new
 /usr/local/bin/b.put
+/usr/local/bin/b.rev
 /usr/local/bin/b.rpm
 /usr/local/bin/b.rpmenv
+/usr/local/bin/b.upversion
 /usr/local/bin/p.add
 /usr/local/bin/p.bk
 /usr/local/bin/p.bk.filter
