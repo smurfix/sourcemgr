@@ -1,0 +1,15 @@
+#!/bin/sh
+K=$1
+shift
+
+cd /boot
+for host ; do
+	scp linux-$K disk-$K root@$host:/boot
+done
+
+cd /lib/modules
+for host ; do
+	tar cf - $K | ssh -x root@$host tar xfCv - /lib/modules
+done
+
+rm -f /tmp/md.$$ /tmp/mf.$$

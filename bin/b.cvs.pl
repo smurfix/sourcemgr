@@ -523,7 +523,7 @@ sub process($$$$) {
 #
 	my @new=();
 	foreach my $n (grep { if(-l $_) { unlink $_; undef; } else { 1; } } bkfiles("x")) {
-		if($adt->{$n}{rev} =~ /^\d+\.1$/) {
+		if($adt->{$n}{rev} eq "1.1" or $ENV{BKCVS_NORENAME}) {
 			push(@new,$n);
 			next;
 		}
