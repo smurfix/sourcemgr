@@ -1,6 +1,6 @@
 kernel:base
 gnu:make
-gnu:bash2
+gnu:bash
 gnu:cpio
 gnu:diffutils
 gnu:file

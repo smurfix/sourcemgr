@@ -2,7 +2,7 @@
 
 dest=$1
 src=$2
-pack=$dest/var/adm/packages
+pack=$dest/var/lib/packages
 set -ex
 test -d $pack
 sk=/tmp/skipped.$$

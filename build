@@ -82,7 +82,6 @@ v-1-5 kernel/bdflush
 v-01 kernel/freeramdisk
 v-2-9 kernel/hdparm
 v-0-91 kernel/kbd
-v-2-0-30 kernel/linux-pci 
 v-0-6 kernel/hfs-pci
 r-43 kernel/isdn-pci
 v-2-2 kernel/makedev
@@ -139,7 +138,6 @@ v-3-5-f server/xntp
 v-0-75-a x11/lesstif	Ich hasse Motif.
 v-212	x11/xmt	ftp.ora.com/pub/examples/xbook/Xmt
 v-3-10-a	x11/xv	ftp.cis.upenn.edu/pub/xv
-v-2-0-30 kernel/linux-adaptec
 v-2-0-30 kernel/linux-at
 v-2-0-30 kernel/linux-test
 v-2-1-6 kernel/linux-2_1
@@ -431,5 +429,20 @@ v-1 misc/colm
 *	x11/fvwm	*	FVWM	2-0-43	-
 *	x11/xfree386/contrib	*	X11-contrib	3-3	-
 *	gnu/m4	*	GNU M4	1-4	ftp://ftp.gnu.org
-*	misc/perl/qt	*	PerlQt	CPAN
-*0.26	misc/perl/nntp	*	NNTP-Client	CPAN
+*	misc/perl/qt	*	PerlQt	1.06	CPAN
+*	misc/perl/nntp	*	NNTP-Client	0.26	CPAN
+*	misc/perl/newsrc	*	NewsRC-Zugriffsfunktionen	1.05	CPAN
+*	kernel/psmisc	*	kernel/psmisc	12	?
+x	kernel/linux 	*	Master-Kernelsource	2.0.33/2.1.77	ftp.kernel.org
+*	kernel/linux-pci 	*	Kernel für Standardrechner	-	-
+*	kernel/linux-pcmcia	*	Kernel für (moderne) Laptops	-	-
+*	kernel/linux-adaptec	*	Kernel für Uraltkisten	-	-
+*	kernel/procps	*	kernel/procps	0-99-a	?
+*	kernel/kbd	*	kernel/kbd	0-91	?
+*	kernel/rocket	*	kernel/rocket	1-10	?
+*	misc/strace	*	misc/strace	3-0-11	?
+*	misc/aps	*	misc/aps	491	?
+*	misc/glimpse	*	misc/glimpse	4-0	?
+*	server/plp	*	server/plp	3-4-13	?
+*	gnu/ed	*	gnu/ed	0-2	?
+*	gnu/groff	*	gnu/groff	1-09	?

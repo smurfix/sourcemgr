@@ -21,7 +21,7 @@ cd /usr/src || die "No sources"
 if test $# -eq 0 ; then usage ; fi
 
 size=3500
-imgsize=1440
+imgsize=
 fifo=/tmp/pipe.$$
 fd=
 run=

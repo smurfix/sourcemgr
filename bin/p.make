@@ -109,10 +109,10 @@ if test -z "$islocal" ; then
 		echo "$desc: Altes Programm, wird nicht angefaßt."
 		exit 1
 	fi
-	if test -f "STATUS/to-install/$desc" -a -z "$doinstall" ; then
-		echo "$desc: Muß installiert werden."
-		exit 0
-	fi
+#	if test -f "STATUS/to-install/$desc" -a -z "$doinstall" ; then
+#		echo "$desc: Muß installiert werden."
+#		exit 0
+#	fi
 	echo $(hostname) $$ > STATUS/work/$desc
 	if test -f "STATUS/fail/$desc" ; then
 		cat STATUS/fail/$desc >> STATUS/work/$desc 
