@@ -300,7 +300,7 @@ if test -z "$again" -a -z "$qpack" ; then
 			grep -qs "^Group:" $FR/rpm.tags || echo "Group: noris"
 			grep -qs "^Source:" $FR/rpm.tags || echo "Source: BK::$archive"
 			grep -qs "^Packager:" $FR/rpm.tags || echo "Packager: $USER@noris.net"
-			grep -qs "^Vendor:" $FR/rpm.tags || echo "Vendor: noris network GmbH"
+			grep -qs "^Vendor:" $FR/rpm.tags || echo "Vendor: noris network AG"
 			grep -qs "^Prefix:" $FR/rpm.tags || echo "Prefix: /usr"
 
 			cat <<END

@@ -5,11 +5,11 @@ Name: sourcemgr
 Version: $VERSION$
 Release: $RELEASE$
 
-Copyright: 2000, Matthias Urlichs @ noris network GmbH
+Copyright: 2000, Matthias Urlichs @ noris network AG
 Group: noris
 Source: BK::$ARCHIVE$
 Packager: smurf@noris.net
-Vendor: noris network GmbH
+Vendor: noris network AG
 Prefix: /usr
 Requires: rpm
 ## rpm-noris nur wenn RPMs gebaut werden sollen

@@ -277,7 +277,7 @@ if test -z "$again" -a -z "$qpack" ; then
 			grep -qs "^Group:" $FR/rpm.tags || echo "Group: noris"
 			grep -qs "^Source:" $FR/rpm.tags || echo '# $Format: "Source: PRCS::$Project$::$ProjectVersion$"$'; echo "Source: PRCS::$what::$vers"
 
-			grep -qs "^Vendor:" $FR/rpm.tags || echo "Vendor: noris network GmbH"
+			grep -qs "^Vendor:" $FR/rpm.tags || echo "Vendor: noris network AG"
 			grep -qs "^Prefix:" $FR/rpm.tags || echo "Prefix: /usr"
 
 			cat <<END
