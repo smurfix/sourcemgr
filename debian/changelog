@@ -1,3 +1,10 @@
+sourcemgr (1.303) unstable; urgency=low
+
+  * b.upversion: did not work for textual commits because they
+       store their comments somewhere else. Fixed.
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon, 26 Jan 2004 14:10:26 +0100
+
 sourcemgr (1.302) unstable; urgency=low
 
   * b.cvs.pl:

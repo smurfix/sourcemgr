@@ -60,7 +60,12 @@ BF=debian/changelog; F=debian/SCCS/s.changelog
 if ! test -f $F ; then exit 0; fi
 
 test -s "$F" || exit 0
-test -s "SCCS/c.ChangeSet" || exit 0
+if test -s "SCCS/c.ChangeSet" ; then
+	cmf="SCCS/c.ChangeSet"
+else
+	cmf=$(ls -t BitKeeper/tmp/bk_comments_* | head -1)
+	test -s "$cmf" || exit 0
+fi
 if grep -q '^'"$F"'|' "$BK_PENDING" ; then exit 0; fi
 
 FULL_NAME="$DEBFULLNAME"; test -n "$FULL_NAME" || \
@@ -84,7 +89,7 @@ $PACKAGE_NAME ($NEW_VERSION) unstable; urgency=low
 
 END
 	
-	sed -e 's/^/  * /' -e 's/^  \*  /    /' <SCCS/c.ChangeSet
+	sed -e 's/^/  * /' -e 's/^  \*  /    /' < "$cmf"
 	DATE="$(822-date)"
 	cat <<END
 
