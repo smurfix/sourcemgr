@@ -234,7 +234,14 @@ if test -z "$islocal" ; then
 else
 	cd $(bk root)
 fi
-test -f Makefile.$ARCH || { echo "+ bk -r get -q" ; bk -r get -q }
+if test -f Makefile.$ARCH ; then : ; else
+	echo "+ bk -r get -q"
+	bk -r get -q
+	if test -f Makefile.$ARCH  ; then : ; else
+		echo "Makefile.$ARCH nicht gefunden!" >&2
+		exit 2
+	fi
+fi
 
 bad=
 if test -f Makefile.$ARCH ; then
