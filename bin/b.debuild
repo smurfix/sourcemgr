@@ -1,17 +1,22 @@
 #!/bin/bash
 test -n "$BK_REPOSITORY" || export BK_REPOSITORY=bk://bitkeeper.noris.de
 
-set -ex
+set -e
 trap 'test -n "$superset" && kill $SUPERPID; usage; exit 1' 0
 
 RPM="-v --rcfile /usr/src/STATUS/rpmrc"
 BUILD=/usr/src/redhat/BUILD
+
+if test -f /usr/local/bin/ssh-agent-start.sh ; then
+	source /usr/local/bin/ssh-agent-start.sh
+fi
 
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Baue Debian-Source-Pakete.
 	   [ -d Paket ]  [ -v release ]
 	   [ -t HOST (upload there) ]
+	   [ -b (build a binary) ]
 END
     trap "" 0
     exit 1
@@ -21,8 +26,9 @@ dir=
 defvers=noris
 vers=
 dest=local
+bin=
 
-   eval set -- "$(getopt "d:t:v:h" "$@")"
+   eval set -- "$(getopt "bd:t:v:h" "$@")"
    if test $? != 0
    then
 	   exit 1
@@ -33,6 +39,8 @@ dest=local
 	   in
 		   -h)
 		       exit 1 ;;
+		   -b)
+		   		shift; bin=y ;;
 		   -d)
 			   shift; recargs="$recargs -d $1"; dir="$1"; shift;;
 		   -v)
@@ -99,30 +107,31 @@ T="/tmp/ex.$$"
 trap 'rm -rf $T' 0 1 2 15
 N="$ddir"
 E="$(bk prs -rEXTERN -h -d:SHORTKEY: ChangeSet)" || true
+A="$(dpkg-architecture -qDEB_BUILD_ARCH)"
+
+b.uplog
+
+DV="$V"
+V="$(echo $DV | sed -ne 's/\(..*\)-..*/\1/p' )"
+if test -z "$V" ; then E=""; V="$DV"; fi
+bk export -T -w -tplain -r+ . "$T/$N-$V"
+mv debian/changelog "$T/$N-$V"/debian
+( cd "$T/$N-$V" ; rm debian/users debian/version )
 if test -n "$E" ; then # non-original package
-	V="$(echo $V | sed -ne 's/\(..*\)-..*/\1/p' )"
-	test -n "$V"
 	bk export -T -w -tplain -rEXTERN . "$T/$N-$V.orig"
-	cp debian/changelog "$T/$N-$V.orig"/debian
-	( cd "$T/$N-$V.orig"; rm -f debian/users debian/version )
-	( cd $T; tar cfvz - "$T/$N-$V.orig" > "${N}_$V.orig.tar.gz" )
-	bk export -T -w -tplain -r+ . "$T/$N-$V"
-	( cd "$T/$N-$V"; rm -f debian/users debian/version;
-	  dpkg-source -b -sa "$N-$V" )
-else # original package
-	bk export -T -w -tplain -r+ . "$T/$N-$V"
-	cp debian/changelog "$T/$N-$V"/debian
-	( cd "$T/$N-$V" ; rm debian/users debian/version )
-	( cd $T ;  dpkg-source -b -sn "$N-$V" )
 fi
-( cd "$T/$N-$V" ; dpkg-genchanges -S > "../${N}_${V}_source.changes" )
-( cd $T;  debsign "${N}_${V}_source.changes" )
+( cd $T; dpkg-source -b -sa "$N-$V" )
+( cd "$T/$N-$V" ; fakeroot dpkg-buildpackage -S )
+( cd "$T/$N-$V" ; dpkg-genchanges -S > "../${N}_${DV}_source.changes" )
+( cd "$T/$N-$V" ; test -z "$bin" || fakeroot dpkg-buildpackage -nc -b )
+#( cd $T; debsign "${N}_${DV}_source.changes" )
+#( cd $T; test -z "$bin" || debsign "${N}_${DV}_$A.changes" )
 ( cd $T ; for i in * ; do if test -d $i; then rm -rf $i; fi; done )
 echo "Built:"
 ls $T
 echo ""
 #mv $T/* ..
-( cd $T; dput $dest "${N}_${V}_source.changes" )
+( cd $T; for f in *.changes; do dput $dest "$f"; done )
 
 #dpkg-buildpackage -S -rfakeroot -IPENDING -Idebian/users -Idebian/version -IBitkeeper -ISCCS "$@"
 
