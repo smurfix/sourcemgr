@@ -140,7 +140,7 @@ rm -f /tmp/bn.$$
 
 what=$(echo $dir | sed -e 's/:/_/g'  -e 's/\//_/g' -e 's/_*$//')
 desc=$(echo $dir | sed -e 's/_/:/g'  -e 's/\//:/g' -e 's/:*$//')
-#dir=$(echo $desc | sed -e 's/:/\//g')
+dir=$(echo $desc | sed -e 's/:/\//g')
 
 trap 'test -n "$superset" && kill $SUPERPID' 0
 
