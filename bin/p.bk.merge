@@ -3,4 +3,8 @@
 ## 'old' is on the main branch, 'new' is on the to-be-merged branch.
 
 # echo Fake-Merge: "$@" >&2
-exec bk get -p -k -r$3 "$4" >"$4"
+if test -f "$1" ; then
+	exec cp "$1" "$4" 
+else
+	exec bk get -p -k -r$1 "$4" >"$4"
+fi
