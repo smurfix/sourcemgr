@@ -303,10 +303,10 @@ if test -n "$SEPARATE" ; then
   echo build.patch >>debian/patches/00list
   ( cd ..; diff -ruN -x debian "$N-$VV.orig" "$N-$VV" ) > debian/patches/build.patch
   cat debian/patches/build.patch | ( cd ../"$N-$VV.orig"; patch -p1 -f -E )
-  cd ..; dpkg-source $opt_s -b "$N-$VV" "$N-$VV.orig"
+  cd ..; dpkg-source $SEPARATE $opt_s -b "$N-$VV" "$N-$VV.orig"
   cd "$N-$VV"
 else
-  fakeroot dpkg-buildpackage -S $opt_s -uc -us $SEPARATE
+  fakeroot dpkg-buildpackage -S $opt_s -uc -us
 fi
 
 if test -n "$bin"; then

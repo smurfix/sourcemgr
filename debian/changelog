@@ -1,3 +1,10 @@
+sourcemgr (1.360) unstable; urgency=low
+
+  * b.debuild: yet another stupid bug
+  * 
+
+ -- Matthias Urlichs <smurf@debian.org>  Sat, 10 Jul 2004 21:25:02 +0200
+
 sourcemgr (1.359) unstable; urgency=low
 
   * b.debuild:
