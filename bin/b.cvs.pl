@@ -185,17 +185,18 @@ sub new {
 	bless($self,$what);
 
 	$repo =~ s#/+$##;
-	if($repo =~ s/^:pserver:(?:(.*?)(?::(.*?))?@)?(.*?)(?::\(\d+\))?//) {
+	if($repo =~ s/^:pserver:(?:(.*?)(?::(.*?))?@)?([^:\/]*)(?::(\d*))?//) {
 		my($user,$pass,$serv,$port) = ($1,$2,$3,$4);
 		$user="anonymous" unless defined $user;
 		$port=2401 unless $port;
-		my $rr = ":pserver:$user\@$serv:$port/$repo";
+		my $rr = ":pserver:$user\@$serv:$port$repo";
 
 		unless($pass) {
 			open(H,$ENV{'HOME'}."/.cvspass") and do {
 				while(<H>) {
+					chomp;
 					s/^\/\d+\s+//;
-					my ($w,$p) = split;
+					my ($w,$p) = split(/\s/,$_,2);
 					if($w eq $rr) {
 						$pass = $p;
 						last;
