@@ -66,10 +66,8 @@ read dir overs < /tmp/bn.$$
 if test -z "$vset" ; then vers="$overs" ; fi
 rm -f /tmp/bn.$$
 
-what=$(echo $dir | sed -e 's/:/_/g'  -e 's/\//_/g' -e 's/_*$//')
-desc=$(echo $dir | sed -e 's/_/:/g'  -e 's/\//:/g' -e 's/:*$//')
-dir=$(echo $desc | sed -e 's/:/\//g')
-ddir="$(basename $dir)"
+what=$(echo $dir | sed -e 's/[:\/]/_/g' -e 's/_*$//')
+dir=$(echo $what | sed -e 's/_/\//g')
 
 test -n "$vers" || vers=$defvers
 # does not work
@@ -97,7 +95,12 @@ trap '' 0
 #test "$(bk changes -d':I:\n' -R | wc -l)" -eq 0
 
 # Tag this release with the current version and push it
+bk get -q debian/version debian/control
 V="$(head -1 debian/version)"
+
+N="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
+test -n "$N" || N="$(basename "$dir")"
+
 test -n "$V"
 if bk prs -r+ -d'$if(:TAG:){$each(:TAG:){:TAG:\\n}}' -h ChangeSet | fgrep -xqs "DEBIAN-$V"
 then : ; else
@@ -108,7 +111,6 @@ fi
 # Now build the source archives
 T="/tmp/ex.$$"
 trap 'rm -rf $T' 0 1 2 15
-N="$ddir"
 E="$(bk prs -rEXTERN -h -d:SHORTKEY: ChangeSet)" || true
 A="$(dpkg-architecture -qDEB_BUILD_ARCH)"
 

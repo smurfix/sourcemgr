@@ -11,9 +11,9 @@ test -n "$pn" || pn="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
 test -n "$pn" || pn="$(basename "$(pwd)")"
 
 rm -f debian/changelog
-bk prs -h -d':CSETKEY:\n' debian/version | while read a ; do
-	a=$(bk r2c -r"$a" debian/version)
-	bk prs -r"$a" -h -d"$pn"' (_>:I:<_) unstable; urgency=low\n\n$each(:C:){  * (:C:)\n}\n -- BK_Importer <:USER:@:HOST:>  :Dd: :DM: :Dy: :T: +0000\n\n' ChangeSet
+bk prs -h -d':CSETKEY:\n' debian/version | while read cv ; do
+	v=$(bk r2c -r"$cv" debian/version)
+	bk prs -r"$v" -h -d"$pn ($(bk get -q -p -r$cv debian/version | head -1))"' unstable; urgency=low\n\n$each(:C:){  * (:C:)\n}\n -- BK_Importer <:USER:@:HOST:>  :Dd: :DM: :Dy: :T: +0000\n\n' ChangeSet
 done |
 
 perl >debian/changelog -e'
