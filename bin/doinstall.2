@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . /fd/STATUS
+disk=${disk:-sda}
 
 PATH=/cd/usr/src/STATUS/bin:/bin:/sbin:/usr/sbin:/cd/bin:/cd/sbin:/cd/usr/bin:/cd/usr/sbin
 
@@ -13,21 +14,28 @@ loadkeys /cd/usr/share/kbd/keytables/de-latin1-nodeadkeys.map
 	echo "und scsi-Module..."
 insmod /cd/lib/modules-$who/$(uname -r)/scsi/scsi_mod.o
 insmod /cd/lib/modules-$who/$(uname -r)/scsi/sd_mod.o
-insmod /cd/lib/modules-$who/$(uname -r)/scsi/ncr*.o
-# war mal der 'andere' Treiber, aber der tut besser
+insmod /cd/lib/modules-$who/$(uname -r)/scsi/ncr53c8xx.o ncr53c8xx=wide:0
+# das war mal der 'andere' Treiber, aber dieser tut besser
 insmod /cd/lib/modules-$who/$(uname -r)/scsi/aic7xxx.o
 insmod /cd/lib/modules-$who/$(uname -r)/scsi/aha1542.o
+insmod /cd/lib/modules-$who/$(uname -r)/block/ide-mod.o
+insmod /cd/lib/modules-$who/$(uname -r)/block/ide-probe.o
+insmod /cd/lib/modules-$who/$(uname -r)/block/ide-disk.o
+rmmod ide-probe
 	echo -n "...done. "
-swapoff -a
+#swapoff -a
 echo -n "Alles OK? "
 read ans
 if test "$ans" = "n" ; then exit 1 ; fi
 
-echo "fdisk startet -- Root wird /dev/${disk}1."
+echo "fdisk startet."
 fdisk /dev/$disk
 
 echo -n "Swap <${disk}2>: "; read swap; swap=${swap:-${disk}2}
 echo "Swap nach /dev/$swap"
+
+echo -n "Root <${disk}1>: "; read root; root=${root:-${disk}1}
+echo "Root in dev/$root"
 
 /sbin/update
 echo "Swapspace."
@@ -35,8 +43,8 @@ mkswap /dev/$swap
 swapon /dev/$swap
 
 # test -d /sbin/fs/ || ln -s /cd/sbin/fs /sbin/
-/cd/sbin/fs/mkfs.ext2 /dev/${disk}1
-mount -t ext2 /dev/${disk}1 /mnt
+/cd/sbin/fs/mkfs.ext2 -r 1 -s 1 -b 1024 /dev/${root}
+mount -t ext2 /dev/${root} /mnt
 
 mkdir -p /mnt/proc /mnt/var /mnt/var/tmp /mnt/var/run /mnt/cd
 ln -s /proc/mounts /mnt/var/run/mtab
@@ -51,14 +59,14 @@ set -xe
 
 mkdir /mnt/etc
 cat >/mnt/etc/fstab <<EOF
-/dev/${disk}1       /                         ext2            defaults   1   1
+/dev/${root}       /                         ext2            defaults   1   1
 /dev/$swap       swap                      swap            defaults   0   0
 none            /proc                     proc            defaults   0   0
 EOF
 pp=3; for i in $a ; do
 	if test "x$i" != "x-" ; then
 		mkdir -p /mnt/$i
-		/cd/sbin/fs/mkfs.ext2 /dev/${disk}$pp
+		/cd/sbin/fs/mkfs.ext2 -r 1 -s 1 -b 1024 /dev/${disk}$pp
 		mount -t ext2 /dev/${disk}$pp /mnt/$i
 		echo "/dev/${disk}$pp       $i                         ext2            defaults   2   2" >>/mnt/etc/fstab
 	fi

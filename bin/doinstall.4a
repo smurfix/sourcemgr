@@ -1,5 +1,4 @@
 #!/bin/sh
-. /fd/STATUS
 
 PATH=/cd/usr/src/STATUS/bin:/usr/bin:/bin:/sbin:/usr/sbin:/cd/bin:/cd/sbin:/cd/usr/bin:/cd/usr/sbin
 
@@ -8,6 +7,7 @@ PATH=/cd/usr/src/STATUS/bin:/usr/bin:/bin:/sbin:/usr/sbin:/cd/bin:/cd/sbin:/cd/u
 
 set -ex
 . /fd/STATUS
+eth=${eth:-eth0}
 
 ldconfig -X
 if test -b /dev/sdd ; then : ; else
@@ -17,16 +17,22 @@ if test -b /dev/sdd ; then : ; else
 		cpio -iv <dev/DEVICES
 	else
     	./MAKEDEV -v generic
-    	cd /
 	fi
 fi
 cd /
-test -d boot -o -L boot || ln -s boot-$who boot
-cd /lib; test -d modules -o -L modules || ln -s modules-$who modules
-cd /
+if test -n "$boot" ; then
+  test -d boot -o -L boot || ln -s boot-$who boot
+  cd /lib; test -d modules -o -L modules || ln -s modules-$who modules
+  cd /
+fi
+if test -n "$KERNEL" ; then
+  cp -av /cd/boot/linux-$KERNEL /boot/
+  cp -av /cd/boot/disk-$KERNEL /boot/
+  cp -av /cd/lib/modules/$KERNEL /lib/modules/
+fi
 
 #    who=$who master=$master slave=$slave mask=$mask imask=$netbits
-#    broad=$broad netz=$netz def=$def name=$name
+#    broad=$broad netz=$netz def=$def name=$name eth=$eth
 
 cat <<END >/tmp/cf.$$
 ##
@@ -62,8 +68,10 @@ fi
 cd /etc
 . ./rc.config
 
+LOCAL=${LOCAL:-LOCAL}
+
 mkdir -p $LOCAL
-echo alias $eth blafasel.o > $LOCAL/modules.conf
+test -s $LOCAL/modules.conf || echo alias $eth blafasel.o > $LOCAL/modules.conf
 vi lilo.conf $LOCAL/modules.conf
 cp -av fstab $LOCAL
 /sbin/sysconfig -f
@@ -82,7 +90,8 @@ cd /
 rm mnt && mkdir mnt
 rm pop && mkdir pop
 chmod 755 /
-umount -a
-umount /proc
+sync
+echo "Jetzt noch irgendwas zu tun? Wenn nein => Control-D."
+/bin/bash -i
 sync
 

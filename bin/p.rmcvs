@@ -5,11 +5,11 @@ trap 'usage; exit 1' 0
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- Löscht CVS-Unterverzeichnisse
+Usage: $(basename $0)  -- Löscht alle CVS-Unterverzeichnisse
 END
 }
 
-   set -- $(getopt "h" $*)
+   eval set -- "$(getopt "h" "$@")"
    for i
    do
 	   case "$i"

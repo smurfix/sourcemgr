@@ -6,9 +6,12 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Statusinfo eines Archivs
-       [ -d dest-directory ]
+       [ -d Paket ]
        [ -v releasename ]
        [ -q (quick status: release+date header) ]
+
+"-v releasename.@" gibt nur den Status der neuesten Version aus.
+Ohne -v-Option wird Info zu allen releasenamen ausgegeben.
 END
 }
 
@@ -16,7 +19,7 @@ vers=
 longopt="-l"
 dir=
 
-   set -- $(getopt "d:v:hq" $*)
+   eval set -- "$(getopt "d:v:hq" "$@")"
    if test $? != 0
    then
 	   usage; exit 1

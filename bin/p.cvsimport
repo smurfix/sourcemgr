@@ -6,12 +6,12 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Importieren eines CVS-Archivs
-       [ -d dest-directory ]
-       [ -V origreleasename ]
-       [ -v releasename ]
+       [ -d Paket ]
+       [ -v originalreleasename (base) ]
+       [ -w norisreleasename (noris) ]
        [ -t CVS-Dateiname ]
        [ -u URL ]
-       [ -g (goto Source and do internal version too) ]
+       [ -g (goto Source und hole die norisversion) ]
        [ Beschreibungstext ]
 END
 }
@@ -25,7 +25,7 @@ cfile=
 LV=/tmp/lv.$$
 goto=
 
-   set -- $(getopt "gd:t:V:v:hu:" $*)
+   eval set -- "$(getopt "gd:t:v:w:hu:" "$@")"
    for i
    do
 	   case "$i"
@@ -40,9 +40,9 @@ goto=
 			   shift; url="$1"; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
-		   -v)
+		   -w)
 			   shift; vers="$1"; shift;;
-		   -V)
+		   -v)
 			   shift; overs="$1"; shift;;
 		   --)
 		       shift; break ;;
@@ -70,7 +70,7 @@ fi
 set +e
 
 export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
-what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
+what=$(echo $dir | sed -e 's/:/_/g'  -e 's/\//_/g' -e 's/_*$//')
 
 cd /tmp/; mkdir x.$$; cd x.$$
 
@@ -196,7 +196,7 @@ perl -p -e '
 
 vi $what.prj </dev/tty
 prcs checkin -r$vers $what </dev/tty
-prcs admin compress $what
+# prcs admin compress $what
 redo $dir
 
 fi

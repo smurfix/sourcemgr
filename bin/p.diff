@@ -6,10 +6,10 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Diffs zur letzten Version
-       [ -d dest-directory ]
-       [ -b (suppress differences in blanks) ]
-       [ -v fromreleasename ]
-       [ -w toreleasename ]
+       [ -d Paket ]
+       [ -b (unterschiedliche Leerstellenzahl ignorieren) ]
+       [ -v vonreleasename ]
+       [ -w nachreleasename ]
 END
 }
 
@@ -18,7 +18,7 @@ vers=
 b=
 dir=
 
-   set -- $(getopt "d:bv:w:h" $*)
+   eval set -- "$(getopt "d:bv:w:h" "$@")"
    for i
    do
 	   case "$i"
@@ -54,5 +54,5 @@ export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 set -x
 trap '' 0
 
-prcs diff -f $overs $vers $what "$@" -- -u -b 2>&1 |less -p "^Index"
+prcs diff -f $overs $vers $what "$@" -- -u $b 2>&1 |less -p "^Index"
 

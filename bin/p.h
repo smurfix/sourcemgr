@@ -18,10 +18,10 @@ p.merge     Update lokaler Sourcen bei Konflikten beim Checkin
 p.oget      holt Original-Sourcecode aus dem Archiv
 p.patch     Patchen (normalerweise externer) Sourcen
 p.put       Speichern von Änderungen im Archiv
-p.rcvsget   updatet PRCS aus Remote-CVS, zwecks Eintrag in crontab
+p.rcvsget   updatet PRCS aus Remote-CVS
 p.rdist     Verteile an alle betroffenen Rechner
 p.rmcvs     Rekursives Löschen von CVS-spezifischen Subdirectories
-p.scvsget   updatet PRCS aus CVSUP, zwecks Eintrag in crontab
-p.update    Update lokaler Sourcen nach externen Änderungen
-p.unchecked	Listet fertiggebaute aber noch vorhandene Verzeichnisse
+p.scvsget   updatet PRCS aus CVSUP
+p.unchecked Listet fertiggebaute aber noch vorhandene Verzeichnisse
+p.version   holt aktuelle Version aus der .prj-Datei
 END

@@ -6,13 +6,13 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- editiere die .prj-Datei
-       [ -d dest-directory ]
+       [ -d Paket ]
 END
 }
 
 dir=
 
-   set -- $(getopt "d:h" $*)
+   eval set -- "$(getopt "d:h" "$@")"
    for i
    do
 	   case "$i"

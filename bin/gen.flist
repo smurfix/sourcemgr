@@ -128,7 +128,7 @@ foreach $file(sort fmode keys %files) {
 	$file =~ s#/+d1/+#/usr/#;
 
 	next if $file !~ m#^/#;
-	next if $file =~ m#^/+usr/+src#;
+	next if $file =~ m#/src/#;
 	next if $file =~ m#^/+dev/# and $file ^~ m#^/+dev/+MAKEDEV$#;
 	next if $file =~ m#/tmp/#;
 	next if $file =~ m#\.old$#i;

@@ -6,16 +6,17 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- überschüssige Dateien löschen
-       [ -d dest-directory ]
-       [ -n (NICHT wirklich löschen) ]
+       [ -d Paket ] [ -f (force) ]
+       [ -n (Dateien NUR im Archiv löschen) ]
        Datei...
 END
 }
 
 rm=rm
+force=
 dir=
 
-   set -- $(getopt "d:nh" $*)
+   eval set -- "$(getopt "d:nhf" "$@")"
    for i
    do
 	   case "$i"
@@ -24,6 +25,8 @@ dir=
 		   	   exit 1 ;;
 		   -d)
 			   shift; dir="$1"; shift;;
+		   -f)
+		   	   force="-f"; shift;;
 		   -n)
 		   	   rm=":"; shift;;
 		   --)
@@ -45,9 +48,9 @@ fi
 
 export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 
-set -x
 trap '' 0
+set -x
 
-prcs depopulate $what $*
+prcs depopulate $force $what "$@"
 $rm $*
 

@@ -5,11 +5,11 @@ trap 'usage; exit 1' 0
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- holt noris-Sourcecode aus dem Archiv
-       [ -d dest-directory ]
-       [ -v releasename ]
-       [ -i (Import, holt nur .prj) ]
-       [ -n (holt nach /usr/src) ]
+Usage: $(basename $0)  -- holt Sourcecode aus dem Archiv
+       [ -d Paket ]
+       [ -v releasename ]  [ -f (force, wenn ohne Terminal) ]
+       [ -i (für Import, holt nur .prj) ]
+       [ -n (holt direkt nach /usr/src) ]
 END
 }
 
@@ -17,8 +17,9 @@ vers=noris
 imp=
 mkdir=
 dir=
+force=
 
-   set -- $(getopt "d:v:ihn" $*)
+   eval set -- "$(getopt "d:v:ihnf" "$@")"
    for i
    do
 	   case "$i"
@@ -29,6 +30,8 @@ dir=
 			   shift; dir="$1"; shift;;
 		   -i)
 			   shift; imp=y ;;
+		   -f)
+			   shift; force="-f" ;;
 		   -n)
 			   shift; mkdir=y ;;
 		   -v)
@@ -65,5 +68,7 @@ fi
 
 set -x
 
-prcs checkout -r$vers $what.prj $imp "$@"
+prcs checkout $force -r$vers $what.prj $imp "$@"
 # prcs execute -r$vers --match :tag=project -- p.sub -v$vers $what '{}'
+
+test -z "$mkdir" || redo $dir

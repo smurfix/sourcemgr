@@ -13,6 +13,7 @@ sub procsub($$) {
 	my($who,$where) = @_;
 	my($ff) = $fh++;
 	$where = "STATUS/hosts/$where";
+	$where = "STATUS/packages/$where" unless -f $where;
 	next unless -f $where;
 	open($ff,$where);
 	while(<$ff>) {
@@ -163,6 +164,16 @@ while(($_ = &$dir) ne "") {
 	$newdist .= "HOSTS= (\n";
 	%thishosts = ();
 	if(open(HOSTS,"STATUS/hosts/$w")) {
+		while(<HOSTS>) {
+			chop;
+			s/#.*//;
+			next if /^\s*$/;
+			next if $thishosts{$_};
+			$newdist .= "\t$_\n";
+			$thishosts{$_}++;
+		}
+		close HOSTS;
+	} elsif(open(HOSTS,"STATUS/packages/$w")) {
 		while(<HOSTS>) {
 			chop;
 			s/#.*//;

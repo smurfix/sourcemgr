@@ -6,9 +6,9 @@ set -e
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- neue Dateien hinzufügen
-       [ -d dest-directory ]
-       [ -u (Update, löscht unbekannte Dateien) ]
-       [ -k (no keywords) ]
+       [ -d Paket ] [ -f (force) ]
+       [ -u (Update, löscht nichtexistierende Dateien aus dem Archiv) ]
+       [ -k (keine Keywords, d.h. externe oder binäre Datei) ]
        Datei...
 END
 }
@@ -16,8 +16,9 @@ END
 update=
 keys=
 dir=
+force=
 
-   set -- $(getopt "d:huk" $*)
+   eval set -- "$(getopt "d:hufk" "$@")"
    for i
    do
 	   case "$i"
@@ -26,6 +27,8 @@ dir=
 		   	   exit 1 ;;
 		   -k)
 			   keys="y"; shift;;
+		   -f)
+			   force="-f"; shift;;
 		   -u)
 			   update="-d"; shift;;
 		   -d)
@@ -49,7 +52,7 @@ fi
 export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 
 #cp -f $what.prj $what.backup
-prcs populate -f $update $what.prj $*
+prcs populate $force $update $what.prj "$@"
 #prcs depopulate -f $what.prj $what.backup
 
 trap '' 0

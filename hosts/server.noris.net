@@ -1,13 +1,5 @@
-router
-users
-gnu:uucp
-net:dns:bind8
-gnu:ghostscript
-kernel:linux-pci
-net:www:squid
-kernel:rocket-pci
-net:mail:sendmail
+base
+kernel:linux-2.1
+net:mail:qmail
 newsserver
-net:ftp:wu-ftpd
-fax
 misc:bind-inaddr

@@ -6,21 +6,23 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Patchen externer Sourcen
-       [ -d dest-directory ]
-       [ -W origreleasename ]
-       [ -V neworigreleasename ] | [ -v releasename ]
+       [ -d Paket ]
+       [ -v origreleasename (base) ]
+       [ -w neworigreleasename (=origreleasename) ] 
        [ -pX (Argument für patch) ]
-       [ neueVersionsnummer ]
+       [ -z (gunzip) ]
+       [ neue Versionsnummer ]
 END
 }
 
 dir=
 overs=base
-nvers=base
-vers=
+nvers=
 patchdepth=
+zip=cat
+force=
 
-   set -- $(getopt "d:V:W:hv:r:p:" $*)
+   eval set -- "$(getopt "d:v:w:hr:p:zf" "$@")"
    for i
    do
 	   case "$i"
@@ -28,15 +30,17 @@ patchdepth=
 		   -h)
 		       exit 1 ;;
 		   -p)
-			   shift; patchdepth="$1"; shift;;
+			   shift; patchdepth="-p$1"; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
-		   -W)
-			   shift; overs="$1"; shift;;
-		   -V)
-			   shift; nvers="$1"; shift;;
+		   -f)
+		   	   shift; force=y ;;
+		   -z)
+		   	   shift; zip=gunzip ;;
 		   -v)
-			   shift; vers="$1"; shift;;
+			   shift; overs="$1"; shift;;
+		   -w)
+			   shift; nvers="$1"; shift;;
 		   --)
 		   	   shift; break;
 	   esac
@@ -44,6 +48,7 @@ patchdepth=
 
 dir="$(p.name "$dir")"
 test -n "$*"
+if test -z "$nvers"; then nvers=$overs; fi
 
 desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 
@@ -63,8 +68,18 @@ cd /tmp/$what.$$
 prcs checkout -f -r $overs.@ $what
 cp $what.prj ../$what.prj.$$
 
-if test -n "$patchdepth" ; then patchdepth="-p$patchdepth"; fi
-patch $patchdepth -E -l
+if $zip | patch $patchdepth -E -l ; then
+	echo OK.
+	x=y
+elif test -n "$force" ; then
+	echo "Fehler... mache aber trotzdem weiter."
+	x=x
+else
+	echo "Fehler... weiter?"
+	read x </dev/tty
+fi
+
+if test "$x$force" != "n" ; then
 
 prcs populate -f -d $what
 
@@ -74,7 +89,8 @@ perl -p -i -e '
    s/^  \((.*)\(\)\)/  ($1() :no-keywords)/;
 ' $what.prj
 
-echo prcs checkin -r $vers.@ $what </dev/tty
+prcs checkin -r $nvers $what </dev/tty
+fi
 
 cd ..
 rm -rf $what.prj.$$ $what.$$ &

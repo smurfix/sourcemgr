@@ -3,6 +3,8 @@
 insmod /modules/floppy.o; insmod /modules/ext2.o; mount -t ext2 /dev/fd0 /fd
 insmod /modules/sunrpc.o; insmod /modules/lockd.o; insmod /modules/nfs.o
 
+eth=eth0
+
 if test ! -s /fd/STATUS ; then
 	echo "keine Statusdatei gefunden, lege sie an."
 
@@ -39,6 +41,9 @@ fi
 
 . /fd/STATUS
 
+ifconfig lo 127.0.0.1
+route add 127.0.0.1 dev lo
+
 found=
 while read a b ; do 
 	if test "$a" = "${eth}:" ; then found=ja; fi
@@ -70,7 +75,7 @@ if test -d /cd/bin ; then
 	echo "/cd/bin gefunden."
 else
 	echo -n "/cd/bin nicht gefunden => mount "
-   mount -o timeo=20,hard,intr ${master}:/ /cd
+   mount -o timeo=20,hard,intr,nolock ${master}:/ /cd
 	echo done.
 fi
 

@@ -34,7 +34,9 @@ mkfifo dev/initctl || true
 fi
 
 chroot /mnt /cd/usr/src/STATUS/bin/doinstall.4
-
 umount -av
 sync
 echo Reboot. Jetzt. Mal sehen was passiert...
+/cd/sbin/killall5
+umount -av
+sleep 3

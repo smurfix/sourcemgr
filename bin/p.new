@@ -6,30 +6,31 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Initiales Installieren von eigenen Sourcen im Archiv
-       [ -d dest-directory ]
+       [ -d Paket ]
        [ -v releasename ]
-       [ -r Versionsbezeichnung ]
+       [ -e (editiere .prj-Datei) ]
        einzeilige Beschreibung
 END
 }
 
 dir=
 vers=noris
-desc="Neu angelegt."
+desc=
+edit=
 
-   set -- $(getopt "d:v:hr:" $*)
+   eval set -- "$(getopt "d:v:eh" "$@")"
    for i
    do
 	   case "$i"
 	   in
 		   -h)
 		       exit 1 ;;
-		   -r)
-			   shift; desc="$1"; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
 			   shift; vers="$1"; shift;;
+		   -e)
+		       shift; edit=y ;;
 	       --)
 		       shift; break ;;
 	   esac
@@ -52,11 +53,8 @@ fi
 export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 trap '' 0
 
-echo + prcs checkout -r$vers $what
 prcs checkout -r$vers $what
-echo + prcs populate $what
 prcs populate $what
-prcs admin compress $what
 
 cat <<END >>$what.prj
 ;;*
@@ -66,13 +64,14 @@ END
 
 perl -p -i -e '
 	s/^\(Project-Description\s+""\)/(Project-Description "'"$*"'")/;
-	s/^\(New-Version-Log\s+""\)/(New-Version-Log "'"$desc"'")/;
 ' $what.prj
 
-if test -n "$*" ; then
-	echo "*	$dir	*	$*	file://" >> /usr/src/STATUS/build
+if test -n "$desc" ; then
+	echo "*	$dir	*	$desc	nix://gibts" >> /usr/src/STATUS/build
 fi
 
 ## ist neu, also tu nix
-# prcs checkin -r$vers $what </dev/tty
+test -z "$edit" || vi $what.prj
+prcs checkin -f -r$vers $what || true
+#prcs admin compress $what
 

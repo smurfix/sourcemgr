@@ -6,18 +6,24 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Update lokaler Sourcen bei Konflikten beim Checkin
-       [ -d dest-directory ]
+       [ -d Paket ]
        [ -v releasename ]
-       [ -e (edit each file with conflicts immediately) ]
-       [ -m (resolve what-to-do manually) ]
+       [ -e (editiere alle Dateien mit Konflikten sofort) ]
+       [ -m (manuelle Angabe der Aktionen) ]
+       [ -o (lösche "obsolete"-Unterverzeichnisse NICHT) ]
+       [ -r (rekursiv nach weiteren Projekten suchen) ]
+       [ -R (dito, Basis auslassen) ]
 END
 }
 
 dir=
 vers=
 auto=-f
+skipobs=
+rec=
+recopt=
 
-   set -- $(getopt "d:v:hem" $*)
+   eval set -- "$(getopt "d:v:hemorR" "$@")"
    for i
    do
 	   case "$i"
@@ -27,11 +33,17 @@ auto=-f
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
-			   shift; vers="-r $1"; shift;;
+			   shift; recopt="$recopt -v $1" ; vers="-r $1"; shift;;
+			-o)
+				shift; recopt="$recopt -o" ; skipobs=y ;;
 			-m)
-				shift; auto= ;;
+				shift; recopt="$recopt -m" ; auto= ;;
 			-e)
-				shift; export PRCS_CONFLICT_EDITOR=vi ;;
+				shift; recopt="$recopt -e" ; export PRCS_CONFLICT_EDITOR=vi ;;
+			-R)
+				shift; recopt="$recopt -r" ; rec=only ;;
+			-r)
+				shift; recopt="$recopt -r" ; rec=y ;;
 			--)
 				shift; break;
 	   esac
@@ -52,7 +64,21 @@ fi
 export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 
 trap '' 0
-set -x
 
-exec prcs merge $auto $vers $what
+if [ "$rec" != "only" ] ; then
+	echo + prcs merge $auto $vers $what
+	prcs merge $auto $vers $what
+	test -n "$skipobs" || find . -name obsolete -type d -print0 | xargs -0r rm -r
+fi
+
+if [ -n "$rec" ] ; then
+	for i in * ; do
+		if test -f "$i/${what}_$i.prj" ; then
+			( cd $i; p.merge $recopt -d $dir/$i )
+		fi
+	done
+fi
+
+rm -f /usr/src/STATUS/checkout/$desc
+rm -f /usr/src/STATUS/checkout/${desc}_*
 

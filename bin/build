@@ -32,7 +32,7 @@ END
 }
 
 
-set -- `getopt ih $*`
+set -- `getopt ihp: $*`
 if test $? != 0
 then
 	usage
@@ -47,12 +47,15 @@ for i ; do
 						usage; exit 2;;
                 -i)
                         doinstall=y; shift;;
+				-p)
+						prefix=$2; shift; shift ;;
                 --)
                         shift; break;;
         esac
 done
 
 cd /usr/src/STATUS
+if test "$prefix" = "" ; then cat build ; else grep $prefix build; fi |
 while read ver dir rest ; do 
 	if test "$ver" = "*" ; then
 		desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
@@ -70,7 +73,7 @@ while read ver dir rest ; do
 			p.make -gi "$dir"
 		fi
 	fi
-done < build
+done
 
 exit 0
 		if test -z "$noupdate" -a -f STATUS/legacy/$tag ; then # {

@@ -6,15 +6,15 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- holt Original-Sourcecode aus dem Archiv
-       [ -d dest-directory ]
-       [ -V origreleasename ]
+       [ -d Paket ]
+       [ -v origreleasename (base) ]
 END
 }
 
 dir=
 vers=base
 
-   set -- $(getopt "d:V:h" $*)
+   eval set -- "$(getopt "d:v:h" "$@")"
    for i
    do
 	   case "$i"
@@ -23,7 +23,7 @@ vers=base
 		       exit 1 ;;
 		   -d)
 			   shift; dir="$1"; shift;;
-		   -V)
+		   -v)
 			   shift; vers="$1"; shift;;
 		   --)
 		       shift; break ;;

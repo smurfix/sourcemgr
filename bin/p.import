@@ -6,21 +6,20 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- update externer Sourcen
-       [ -d dest-directory ]
-       [ -W origreleasename ]
-       [ -V neworigreleasename ] | [ -v releasename ]
+       [ -d Paket ]
+       [ -v releasename (base) ]
+       [ -w neworigreleasename (=releasename) ]
        [ -e (editiere Projektdatei) ]
        [ Kurzbeschreibung ]
 END
 }
 
 dir=
-overs=
-nvers=base
-vers=
+overs=base
+nvers=
 edit=
 
-   set -- $(getopt "d:V:W:hv:e" $*)
+   eval set -- "$(getopt "d:v:hw:e" "$@")"
    for i
    do
 	   case "$i"
@@ -29,14 +28,12 @@ edit=
 		       exit 1 ;;
 		   -d)
 			   shift; dir="$1"; shift;;
-		   -W)
+		   -v)
 			   shift; overs="$1"; shift;;
-		   -V)
+		   -w)
 			   shift; nvers="$1"; shift;;
 		   -e)
 		       edit=y; shift;;
-		   -v)
-			   shift; vers="$1"; test -n "$overs" || overs="$1"; shift;;
 		   --)
 		       shift; break ;;
 	   esac
@@ -44,18 +41,19 @@ edit=
 
 set -e
 dir="$(p.name "$dir")"
-if test -z "$overs" ; then overs=base; fi
-if test -z "$vers" ; then
-vers=$(echo $nvers | \
-	perl -pe '
-	tr/-_/./; if(/([^-\.]*)\.(.*)/) {
-		$base=$1; $wha=$2;
-		$wha =~ tr/abcdefghijklmnopqrstuvwxyz/123456789/;
-		s/\.0*([0-9])/.$1/g;
-		$_ = "$base.$wha";
-	}
-' )
-fi
+if test -z "$nvers" ; then nvers=$overs; fi
+
+#if test -z "$vers" ; then
+#vers=$(echo $nvers | \
+#	perl -pe '
+#	tr/-_/./; if(/([^-\.]*)\.(.*)/) {
+#		$base=$1; $wha=$2;
+#		$wha =~ tr/abcdefghijklmnopqrstuvwxyz/123456789/;
+#		s/\.0*([0-9])/.$1/g;
+#		$_ = "$base.$wha";
+#	}
+#' )
+#fi
 
 export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
@@ -85,5 +83,5 @@ fi
 
 set -x
 
-prcs checkin -r $vers.@ $what </dev/tty
+prcs checkin -r $nvers.@ $what </dev/tty
 

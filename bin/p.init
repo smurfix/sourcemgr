@@ -6,18 +6,18 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Initiales Installieren von externem Source im Archiv
-       [ -d dest-directory ]
-       [ -v releasename ]
-       [ -V origreleasename ]
+       [ -d Paket ]
+       [ -v originalreleasename (base) ]
+       [ -w norisreleasename (noris) ]
        [ -e (nur extern) ]
        [ -i (nur intern) ]
        [ -u URL ]
-       [ -a SUBDIST (append to distrib file ('perl', 'router', 'user'...),
-                     see \$(src)/STATUS/hosts/*. ]
-       [ -p Perl-Makefile anlegen ]
+       [ -a SUBDIST (hinzufügen zu Paketliste ('perl', 'router', 'user'...),
+                     siehe \$(src)/STATUS/hosts/*. ]
+       [ -p (Perl-Makefile anlegen) ]
        [ -k Kurzbeschreibung ]
 	   [ -E (editiere Projectfiles) ]
-	   Version
+	   Versionsname
 
 Wenn die Kurzbeschreibung angegeben ist, wird ein Eintrag in
          STATUS/build generiert.
@@ -35,7 +35,7 @@ perl=
 edit=
 dfile=
 
-   set -- $(getopt "d:v:V:eihu:pk:Ea:" $*)
+   eval set -- "$(getopt "d:v:w:eihu:pk:Ea:" "$@")"
    for i
    do
 	   case "$i"
@@ -47,7 +47,7 @@ dfile=
 		   -p)
 		       perl=y; shift ;;
 		   -a)
-		       shift; dfile=$1; shift ;;
+		       shift; dfile="$1"; shift ;;
 		   -u)
 			   shift; url="$1"; shift;;
 		   -d)
@@ -55,9 +55,9 @@ dfile=
 		   -k)
 		       shift; info="$1"; shift;;
 		   -v)
-			   shift; vers="$1"; shift;;
-		   -V)
 			   shift; overs="$1"; shift;;
+		   -w)
+			   shift; vers="$1"; shift;;
 		   -e)
 		       shift; into=x ;;
 		   -i)
@@ -73,11 +73,14 @@ export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 dist=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 
+test -z "$dfile" || test -f "/usr/src/STATUS/packages/$dfile"
+test -n "$*"
+
 trap '' 0
 
 if test -z "$exto" ; then
 
-prcs checkout -r $overs.@ $what
+prcs checkout -r $overs.@ $what $what.prj
 prcs populate $what
 
 perl -p -i -e '
@@ -95,7 +98,7 @@ cat <<END >>$what.prj
 END
 test -z "$edit" || vi $what.prj
 prcs checkin -r$overs.@ $what </dev/tty
-prcs admin compress $what
+#prcs admin compress $what
 
 else
 prcs checkout -r $overs $what $what.prj
@@ -158,7 +161,7 @@ prcs populate $what
 test -z "$edit" || vi $what.prj
 
 prcs checkin -r$vers.@ $what </dev/tty
-prcs admin compress $what
+#prcs admin compress $what
 
 fi
 
@@ -166,7 +169,7 @@ if test -n "$info" ; then
 	echo "*	$dir	$*	$info	$url" >> /usr/src/STATUS/build
 fi
 if test -n "$dfile" ; then
-	echo "$dist" >> /usr/src/STATUS/hosts/$dfile
+	echo "$dist" >> /usr/src/STATUS/packages/$dfile
 fi
 ## * kernel/base * Code zum Bauen der Standarddistribution -
 
