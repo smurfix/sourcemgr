@@ -610,4 +610,3 @@ x	kernel/linux 	*	Master-Kernelsource	2.0.33/2.1.77	ftp.kernel.org
 *	x11/gnome/emusic	Version DR-0.9	Musikspieler	http://www.icom.net/~smelecat/emp3/downloads.html
 *	net/mail/drac	Version 1.9	POP3-nach-SMTP	ftp://ftp.cc.umanitoba.ca/src/drac.tar.Z
 *	lib/tcl/itcl	Version 3.0a1	incrTCL	ftp://ftp.tcltk.com/pub/itcl/
-*	lib/tcl/itcl	Version 3.0a1	incrTCL	ftp://ftp.tcltk.com/pub/itcl/

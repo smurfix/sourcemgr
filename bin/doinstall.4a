@@ -52,6 +52,11 @@ HOSTNAME=$(echo $name | sed -e 's#\..*##')
 ##
 NETWORK="$eth,$slave,$imask,$def"
 ##
+##
+## Bootdisk? (für lilo)
+##
+BOOTDISK=$disk
+
 END
 fillup /etc/rc.config /tmp/cf.$$ || true
 rm /tmp/cf.$$
@@ -71,11 +76,17 @@ cd /etc
 LOCAL=${LOCAL:-LOCAL}
 
 mkdir -p $LOCAL
-test -s $LOCAL/modules.conf || echo alias $eth blafasel.o > $LOCAL/modules.conf
-vi lilo.conf $LOCAL/modules.conf
+if test -s $LOCAL/modules.conf; then : ; else
+	set -- $etherconf
+	ethconf=$(echo $1 | sed -e 's/\.o$//')
+	shift
+	echo alias $eth $ethconf > $LOCAL/modules.conf
+	if test -n "$*" ; then
+		echo options $ethconf "$*" >> $LOCAL/modules.conf
+	fi
+fi
 cp -av fstab $LOCAL
 /sbin/sysconfig -f
-/sbin/mklilo
 
 # hostname $HOSTNAME
 # 

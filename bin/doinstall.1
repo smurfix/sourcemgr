@@ -55,8 +55,11 @@ else
 	echo "Ethernettreiber nicht gefunden => installiere und konfiguriere."
    set -e
 
+   if test -z "$ETHER" ; then
    echo -n "Ethernet-Treiber (wd.o): "
-   read foo
+   read ETHER
+   echo export ETHER=\""$ETHER"\" >>/fd/STATUS
+   fi
 
 	echo -n "insmod "
    insmod /modules/${foo:-wd.o}

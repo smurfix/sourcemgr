@@ -43,7 +43,7 @@ mkswap /dev/$swap
 swapon /dev/$swap
 
 # test -d /sbin/fs/ || ln -s /cd/sbin/fs /sbin/
-/cd/sbin/fs/mkfs.ext2 -r 1 -s 1 -b 1024 /dev/${root}
+/cd/sbin/fs/mkfs.ext2 -r 1 -s 1 -b 4096 -i 8192 /dev/${root}
 mount -t ext2 /dev/${root} /mnt
 
 mkdir -p /mnt/proc /mnt/var /mnt/var/tmp /mnt/var/run /mnt/cd
@@ -66,7 +66,7 @@ EOF
 pp=3; for i in $a ; do
 	if test "x$i" != "x-" ; then
 		mkdir -p /mnt/$i
-		/cd/sbin/fs/mkfs.ext2 -r 1 -s 1 -b 1024 /dev/${disk}$pp
+		/cd/sbin/fs/mkfs.ext2 -r 1 -s 1 -b 4096 -i 8192 /dev/${disk}$pp
 		mount -t ext2 /dev/${disk}$pp /mnt/$i
 		echo "/dev/${disk}$pp       $i                         ext2            defaults   2   2" >>/mnt/etc/fstab
 	fi
