@@ -1,3 +1,12 @@
+sourcemgr (1.262) unstable; urgency=low
+
+  * bin/b.cvs.pl
+       skip CVS file stuff
+  * 
+  * 
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Wed, 16 Jul 2003 11:11:41 +0200
+
 sourcemgr (1.261) unstable; urgency=low
 
   * TEST: cvs clone pull via WWW

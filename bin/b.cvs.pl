@@ -342,8 +342,14 @@ sub rev_ok($$) {
 # Bearbeite den Log-Eintrag EINER Datei
 sub proc1($$$$$$) {
 	my($fn,$dt,$rev,$cmt,$autor,$syms) = @_;
-	return unless rev_ok($fn,$rev);
 
+	return if 
+		 $fn =~ m#^CVS/# or
+		 $fn =~ m#/CVS/# or
+		 $fn =~ m#^CVSROOT/# or
+		 $fn =~ m#/CVSROOT/# or
+		 0;
+	return unless rev_ok($fn,$rev);
 	add_date($dt,$fn,$rev,$autor,$cmt);
 	foreach my $sym(@$syms) {
 		$symdate{$sym}=$dt if not defined $symdate{$sym} or $symdate{$sym}<$dt;
