@@ -1,3 +1,10 @@
+sourcemgr (1.320) unstable; urgency=low
+
+  * b.exists: check _ized pathnames too
+  * 
+
+ -- Matthias Urlichs <smurf@debian.org>  Thu,  5 Feb 2004 09:22:33 +0100
+
 sourcemgr (1.319) unstable; urgency=low
 
   * fix b.name

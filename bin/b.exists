@@ -46,7 +46,7 @@ fi
 if test "$vers" = "-" ; then vers="" ; fi
 
 #desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
-#what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
+what2=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 what=$dir
 
 trap '' 0
@@ -54,8 +54,12 @@ trap '' 0
 test -z "$vers" -o "$vers" = "-" || dv="-$vers"
 if bk changes -r+ "$BK_REPOSITORY/$what$dv" >/dev/null 2>&1 ; then
 	: # OK
+elif bk changes -r+ "$BK_REPOSITORY/$what2$dv" >/dev/null 2>&1 ; then
+	what=what2
 elif bk changes -r+ "$BK_REPOSITORY/public/$what$dv" >/dev/null 2>&1 ; then
 	what="public/$what"
+elif bk changes -r+ "$BK_REPOSITORY/public/$what2$dv" >/dev/null 2>&1 ; then
+	what="public/$what2"
 else
 	exit 1
 fi
