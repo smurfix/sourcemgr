@@ -48,7 +48,16 @@ sub vgrab($) {
 	$rev =~ s/\n.*//s;
 	return "($rev)";
 }
+my $skiplines=0;
 while(<>) {
+	if(/^\s*$/) {
+		$skiplines++;
+		next;
+	}
+	if($skipline) {
+		print "\n"; # x $skiplines;
+		$skiplines = 0;
+	}
 	s/BK_Importer\s+\<([\S+]+)\>(.+)\+0000/$mail{$1}$2$tz{$1}/g;
 	s/\(_\>([.0-9]+)\<_\)/vgrab($1)/eg;
 	s/^  \*(\s{2,})/  $1/;

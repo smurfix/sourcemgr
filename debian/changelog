@@ -1,3 +1,12 @@
+sourcemgr (1.263) unstable; urgency=low
+
+  * bin/b.uplog
+    Skip empty lines at the end of a changelog entry.
+    Squeeze multiple blank lines.
+  * 
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Wed, 16 Jul 2003 11:14:26 +0200
+
 sourcemgr (1.262) unstable; urgency=low
 
   * bin/b.cvs.pl
