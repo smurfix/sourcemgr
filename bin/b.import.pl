@@ -112,8 +112,12 @@ if(@new and @gone) {
 } elsif(@gone) {
 	bk(rm => @gone);
 } else {
-	if(bk("-r","sfiles","-lg") == 0) {
+	open(CH,"bk -r diffs | head -1 |");
+	my $ch = <CH>;
+	close(CH);
+	unless(defined $ch) {
 		print STDERR "...no changes.\n";
+		bk("-r","unlock","-f");
 		exit 0;
 	}
 }
