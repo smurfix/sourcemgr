@@ -2,19 +2,17 @@
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- Diffs zur letzten Version
+Usage: $(basename $0)  -- Update lokaler Sourcen bei Konflikten beim Checkin
        [ -d dest-directory ]
-       [ -V fromreleasename ]
-       [ -v toreleasename ]
+       [ -V releasename ]
 END
 exit 1
 }
 
 dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
-overs="-rnoris.@"
-vers=
+vers=base
 
-   set -- $(getopt "d:v:V:h" $*)
+   set -- $(getopt "d:V:h" $*)
    if test $? != 0
    then
 	   usage
@@ -28,11 +26,9 @@ vers=
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -V)
-			   shift; overs="-r$1"; shift;;
-		   -v)
-			   shift; vers="-r$1"; shift;;
+			   shift; vers="$1"; shift;;
 			--)
-				shift; break ;;
+				shift; break;
 	   esac
    done
 
@@ -43,5 +39,5 @@ what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
 
 set -xe
 
-prcs diff $overs $vers $what "$@" -- -u 2>&1 |less
+exec prcs merge -f -r "$vers.@" $what
 

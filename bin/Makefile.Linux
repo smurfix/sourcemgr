@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+
+flags=
+
+Makefile:
+	./configure --prefix=/usr --enable-shared --with-shared
+
+compile: Makefile
+	$(MAKE) $(flags)
+
+install: Makefile
+	$(MAKE) install $(flags)
+
+clean: Makefile
+	$(MAKE) clean $(flags)
+

@@ -1,0 +1,146 @@
+#!/bin/sh
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- Importieren eines CVS-Archivs
+       [ -d dest-directory ]
+	   [ -V origreleasename ]
+	   [ -t Beschreibungstext ]
+END
+exit 1
+}
+
+dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+overs=base
+txt="$dir"
+
+   set -- $(getopt "d:v:V:eih" $*)
+   if test $? != 0
+   then
+	   usage
+   fi
+   for i
+   do
+	   case "$i"
+	   in
+		   -h)
+		       usage ;;
+		   -d)
+			   shift; dir="$1"; shift;;
+		   -t)
+			   shift; txt="$1"; shift;;
+		   -V)
+			   shift; overs="$1"; shift;;
+	   esac
+   done
+
+if test -z "$dir"; then usage; fi
+
+export PRCS_REPOSITORY=/archiv/src/prcs
+what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
+
+cd /tmp/; mkdir x.$$; cd x.$$
+
+set -xe
+
+if test -z "$exto" ; then
+
+prcs checkout -r $overs $what </dev/tty
+perl -p -e '
+  s,\(Project-Description \"\"\),(Project-Description "'$txt'"),;
+' < $what.prj > $what.prx && mv $what.prx $what.prj
+
+cat <<END >>$what.prj
+;;*
+;;* Externe Version. 
+;;* Hier keine internen Modifiaktionen ablegen!
+;;*
+END
+
+perl -e '
+while(<>) { push(@lst,$_) if s/.*?\br-([-0-9a-z]*)($|[^-0-9a-z].*)/$1/; }
+print reverse @lst;
+' | while read sv ; do
+
+nsv=$(echo $sv | \
+  sed \
+   -e 's/-/./g' \
+   -e 'y/abcdefghijklmnopqrstuvwxyz/12345678912345678912345678/' \
+   -e 's/\.0*\([0-9]\)/.\1/g' \
+   -e 's/$/.1/'
+)
+
+echo $dir: Cleanup...
+
+find . -name $what.prj -o -type d -o -print0 | xargs -r0 rm -f
+find . -mindepth 1 -type d -depth -print0 | xargs -r0 rmdir
+
+echo $dir: Checking out $sv
+
+cvs -Q export -ko -r r-$sv -d . $dir 
+
+prcs populate -f -d $what </dev/tty
+
+perl -p -e '
+   s/\(New-Version-Log \"\"\)/(New-Version-Log "'Import\ $sv'")/;
+   s/^  \((.*)\(\)\)/  ($1() :no-keywords)/;
+' < $what.prj > $what.prx && mv $what.prx $what.prj
+
+echo $dir: Checking in $nsv '<=' $sv
+
+prcs checkin -f -r$overs.$nsv $what </dev/tty
+
+ov="$overs.$nsv"
+
+done
+
+echo $dir: DONE, Version ist $ov
+cd ..
+rm -rf x.$$
+
+echo "* $dir $ov $txt ?" >>/usr/src/STATUS/build
+
+exit 0
+
+
+
+
+
+
+fi
+
+if test -z "$into" ; then
+
+perl -n -i -e 'print unless /^;;\*/;' $what.prj
+
+cat <<END >>$what.prj
+;;*
+;;* Interne Version. 
+;;*
+END
+
+cat <<'END' >Makefile.Linux
+#!/usr/bin/make -f
+
+flags=
+
+Makefile:
+	./configure --prefix=/usr --enable-shared --with-shared
+
+compile: Makefile
+	$(MAKE) $(flags)
+
+install: Makefile
+	$(MAKE) install $(flags)
+
+clean: Makefile
+	$(MAKE) clean $(flags)
+
+END
+prcs populate $what Makefile.Linux </dev/tty
+
+vi $what.prj </dev/tty
+prcs checkin -f -r$vers $what </dev/tty
+
+fi
+

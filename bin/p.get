@@ -31,6 +31,8 @@ imp=
 			   shift; imp=y ;;
 		   -v)
 			   shift; vers="$1"; shift;;
+			--)
+				shift; break ;;
 	   esac
    done
 
@@ -41,7 +43,7 @@ what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
 
 if test -n "$imp" ; then imp="$what.prj"; fi
 
-set -x
+set -xe
 
-prcs checkout -r$vers $what $imp
+prcs checkout -r$vers $what $imp "$@"
 

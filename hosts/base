@@ -56,3 +56,4 @@ net:meta:ucspi
 misc:syslog
 net:debug:ping
 misc:klog.console
+lib:libc5

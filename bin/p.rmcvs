@@ -23,4 +23,6 @@ exit 1
 	   esac
    done
 
-exec find . -type d -name CVS -print0 | xargs -0 rm -rf
+set -ex
+
+find . -type d -name CVS -print0 | xargs -0 rm -rf

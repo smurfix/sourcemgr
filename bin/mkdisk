@@ -5,7 +5,7 @@ PATH=/usr/src/STATUS/bin:/usr/sbin:/sbin:$PATH
 usage() {
 cat >&2 <<END
 Usage: $0
-       [ -f | -F /dev/fd0 | -I(mage) ]
+       [ -f | -F /dev/fd0 | -I(mage) ] [ -m MEMSIZE ]
        [ -s ramdisksize ]  [ -S imagesize ]
        [ -l(ilo) ] [ -v Kernelversion ] [ -p(rerun the disk's shell) ]
        [ -n(et) -d(ebug) -w X (serial wire X, usually 1) ]
@@ -30,13 +30,14 @@ debug=
 serial=
 prerun=
 rootdev=
+MEM=
 if test -f STATUS/done/kernel:lilo ; then
 wherelilo=done
 else
 wherelilo=legacy
 fi
 
-   set -- $(getopt dfF:Ilnps:S:rR:v:w: $*)
+   set -- $(getopt dfF:Ilnps:S:rR:v:w:m: $*)
    if test $? != 0
    then
 	   usage
@@ -69,6 +70,8 @@ fi
 			   net="net-"; shift;;
 		   -R)
 			   rootdev=$2; shift; shift;;
+		   -m)
+			   MEM="mem=${2}M"; shift; shift;;
 		   -l)
 			   lilo=y; shift;;
 		   --)
@@ -121,6 +124,7 @@ usr
 usr/lib
 usr/sbin
 cd
+fd
 var
 var/run
 END
@@ -300,7 +304,6 @@ net/eexpress.o
 net/ewrk3.o
 net/ne.o
 net/wd.o
-net/de4x5.o
 net/depca.o
 net/smc-ultra.o
 net/smc9194.o
@@ -308,6 +311,7 @@ net/tulip.o
 fs/nfs.o
 block/floppy.o
 END
+# net/de4x5.o
 
 else ## kein Netz
 
@@ -481,12 +485,12 @@ END
 
 if test -n "$serial" ; then
 cat <<END >>$disk/etc/lilo.conf
-append="ramdisk=$size console=$serial,9600 reboot=hard,bios"
+append="ramdisk=$size $MEM console=$serial,9600 reboot=hard,bios"
 serial = 1,9600n8
 END
 else
 cat <<END >>$disk/etc/lilo.conf
-append="ramdisk=$size reboot=hard,bios"
+append="ramdisk=$size $MEM reboot=hard,bios"
 END
 fi
 cat <<END >>$disk/etc/lilo.conf

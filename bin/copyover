@@ -12,7 +12,7 @@ while read a ; do
 	if test -f $pack/$a ; then
 		: echo "$a: bereits installiert"
 	elif test -f STATUS/out/$a ; then
-		sed -e "s|^/*||" < STATUS/out/$a | (cd $src; cpio -pamdv $dest ) | sed -e "s|^$dest|/|" > $pack/$a
+		sed -e "s|^/*||" < STATUS/out/$a | (cd $src; cpio -pamdv $dest 2>&1 ) | sed -e "s|^$dest|/|" > $pack/$a
 	elif test -f STATUS/hosts/$a ; then
 		STATUS/bin/copyover $dest $src < STATUS/hosts/$a
 	else

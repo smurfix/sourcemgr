@@ -1,26 +1,32 @@
 #!/bin/sh
 
-export who=${who:-smurf}
-export master=${master:-193.141.166.3:/home/smurf}
+. /fd/STATUS
 
 PATH=/cd/usr/src/STATUS/bin:/bin:/sbin:/usr/sbin:/cd/bin:/cd/sbin:/cd/usr/bin:/cd/usr/sbin
 
+if test -d /mnt/etc ; then
+	echo "/mnt/etc gefunden."
+else
+	echo -n "kein /mnt/etc => konfiguriere deutsche Tastatur "
+
 loadkeys /cd/usr/lib/kbd/keytables/de-latin1-nodeadkeys.map 
+	echo "und scsi-Module..."
 insmod /cd/lib/modules-$who/$(uname -r)/scsi/scsi_mod.o
 insmod /cd/lib/modules-$who/$(uname -r)/scsi/sd_mod.o
 insmod /cd/lib/modules-$who/$(uname -r)/scsi/ncr*.o
 # war mal der 'andere' Treiber, aber der tut besser
 insmod /cd/lib/modules-$who/$(uname -r)/scsi/aic7xxx.o
 insmod /cd/lib/modules-$who/$(uname -r)/scsi/aha1542.o
-
+	echo -n "...done. "
 swapoff -a
-echo "/ == sda1   !!!"
+	echo "fdisk startet -- Root wird /dev/sda1."
 fdisk
 
 echo -n "Swap <sda2>: "; read swap; swap=${swap:-sda2}
 echo "Swap nach /dev/$swap"
 
 /sbin/update
+echo "Swapspace."
 mkswap /dev/$swap
 swapon /dev/$swap
 
@@ -35,6 +41,8 @@ mkdir -p /var/tmp /usr/bin; ln -sf /cd/usr/bin/perl /usr/bin; ln -sf var/tmp /tm
 
 echo -n "Mountpoints nach (ab sda3; '-' überspringt)...: "
 read a
+
+set -xe
 
 mkdir /mnt/etc
 cat >/mnt/etc/fstab <<EOF
@@ -55,5 +63,7 @@ mkdir -p /mnt/var/run /mnt/var/adm/packages /mnt/var/tmp /mnt/var/log/root
 ln -sf /proc/mounts /mnt/var/run/mtab
 mkdir -p /mnt/lib/modules-$who; ln -s modules-$who /mnt/lib/modules
 mkdir -p /mnt/boot-$who; ln -s boot-$who /mnt/boot
+
+fi
 
 exec /cd/usr/src/STATUS/bin/doinstall.3

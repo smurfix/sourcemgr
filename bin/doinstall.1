@@ -1,23 +1,66 @@
 #!/bin/sh
-export who=${1:-${who:-pci}}
-export master=${master:-"193.141.54.132:/"}
 
-if test ! -d /cd/bin ; then
-set -e
-echo "Installiere Krempel für $who von $master"
+insmod /modules/floppy.o; mount -t ext2 /dev/fd0 /fd
 
-echo -n "Ethernet-Treiber: "
-read foo
-set -x
+if test ! -s /fd/STATUS ; then
+	echo "keine Statusdatei gefunden, lege sie an."
 
-if test -n "$foo" ; then insmod /modules/$foo; fi
-ifconfig eth0 193.141.54.134 netmask 255.255.255.224
-route add -net 193.141.54.128 netmask 255.255.255.224
-route add default gw 193.141.54.133
-mount $master /cd
-echo -n "Running ldconfig..."
-ldconfig -X >/dev/null 2>&1
-echo done.
+	echo -n "System (pci): "; read who; if test -z "$who"; then who="pci"; fi
+	echo -n "Quelle (192.109.102.36): "; read master; if test -z "$master"; then master="192.109.102.36"; fi
+	echo -n "Ziel (193.141.54.134): "; read slave; if test -z "$slave"; then slave="193.141.54.134"; fi
+	echo -n "Netz (193.141.54.128): "; read netz; if test -z "$netz"; then netz="193.141.54.128"; fi
+	echo -n "Netmask (255.255.255.224): "; read mask; if test -z "$mask"; then mask="255.255.255.224"; fi
+	echo -n "Broadcast (193.141.54.159): "; read broad; if test -z "$broad"; then broad="193.141.54.159"; fi
+	echo -n "Defaultrouter (193.141.54.143): "; read def; if test -z "$def"; then def="193.141.54.143"; fi
+	echo -n "Hostname (install.noris.de): "; read name; if test -z "$name"; then name="install.noris.de"; fi
+
+	echo "### " >/fd/STATUS 
+
+	echo "export who=$who" >>/fd/STATUS
+	echo "export master=$master" >>/fd/STATUS
+	echo "export slave=$slave" >>/fd/STATUS
+	echo "export mask=$mask" >>/fd/STATUS
+	echo "export broad=$broad" >>/fd/STATUS
+	echo "export netz=$netz" >>/fd/STATUS
+	echo "export def=$def" >>/fd/STATUS
+	echo "export name=$name" >>/fd/STATUS
+fi
+
+. /fd/STATUS
+
+found=
+while read a b ; do 
+	if test "$a" = "eth0:" ; then found=ja; fi
+done < /proc/net/dev
+
+if test -n "$found" ; then
+	echo "Ethernettreiber ist geladen."
+else
+	echo "Ethernettreiber nicht gefunden => installiere und konfiguriere."
+   set -e
+
+   echo -n "Ethernet-Treiber (wd.o): "
+   read foo
+
+	echo -n "insmod "
+   insmod /modules/${foo:-wd.o}
+fi
+	echo -n "ifconfig "
+ifconfig eth0 $slave netmask $mask
+	echo -n "netroute "
+route add -net $netz netmask $mask
+	echo -n "defaultroute "
+route add default gw $def
+	echo done.
+
+if test -d /cd/bin ; then
+	echo "/cd/bin gefunden."
+else
+	echo -n "/cd/bin nicht gefunden => mount "
+   mount ${master}:/ /cd
+   echo -n "ldconfig "
+   ldconfig -X >/dev/null 2>&1
+	echo done.
 fi
 
 exec /cd/usr/src/STATUS/bin/doinstall.2

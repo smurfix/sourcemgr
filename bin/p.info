@@ -35,7 +35,7 @@ if test -z "$dir"; then usage; fi
 export PRCS_REPOSITORY=/archiv/src/prcs
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
 
-set -x
+set -xe
 
 prcs info -l $vers $what
 

@@ -1,6 +1,5 @@
 #!/bin/sh
-export who=${who:-smurf}
-export master=${master:-193.141.166.3:/home/smurf}
+. /fd/STATUS
 
 PATH=/cd/usr/src/STATUS/bin:/bin:/sbin:/usr/sbin:/cd/bin:/cd/sbin:/cd/usr/bin:/cd/usr/sbin
 
@@ -8,6 +7,7 @@ PATH=/cd/usr/src/STATUS/bin:/bin:/sbin:/usr/sbin:/cd/bin:/cd/sbin:/cd/usr/bin:/c
 # aber das macht nix. ;-)
 
 set -ex
+. /fd/STATUS
 
 ldconfig -X
 if test -b /dev/sdd ; then : ; else
@@ -15,18 +15,42 @@ if test -b /dev/sdd ; then : ; else
     ./MAKEDEV -v generic
     cd /
 fi
-mklilo
+/sbin/mklilo
 
 cd /dev
 ln -sf tty1 syscons
-if test -d /etc/ssh ; then : ; else
+if test ! -d /etc/ssh ; then
 	mkdir -p /etc/ssh; chmod 755 /etc/ssh
 fi
-if test -f /etc/ssh/ssh_host_key ; then : ; else 
+if test ! -f /etc/ssh/ssh_host_key ; then
 	ssh-keygen -b 1024 -f /etc/ssh/ssh_host_key -N ''
 fi
-if test -f /etc/ssh/sshd_config ; then : ; else 
+if test ! -f /etc/ssh/sshd_config ; then
 	cp /cd/etc/ssh/sshd_config /etc/ssh
+fi
+
+xname=$(perl -e '$name="'"$name"'"; $name =~ s/\..*//; print $name; ')
+perl -p -i -e "
+	s/^FQHOSTNAME=.*/FQHOSTNAME=$name/;
+	s/^HOSTNAME=.*/HOSTNAME=$xname/;
+	s/^MOUSE=.*/#MOUSE=\/dev\/ttyS0/;
+	s/^MODEM=.*/#MODEM=\/dev\/ttyS1/;
+	s/^IPADDR_0=.*/IPADDR_0=$slave/;
+	s/^IFCONFIG_0=.*/IFCONFIG_0=\"$slave broadcast $broad netmask $mask\"/;
+	s/^NETWORK_0=.*/NETWORK_0=\"-net $netz netmask $mask\"/;
+	s/^GATEWAY_0=.*/GATEWAY_0=$def/;
+	s/^SMTP=.*/SMTP=qmail/;
+	s/^CREATE_FVWM_CONFIG=.*/CREATE_FVWM_CONFIG=no/;
+	s/^X11=.*/X11=no/;
+	s/^REMOTELOG=.*/REMOTELOG=no/;
+" /etc/rc.config
+
+. /etc/rc.config
+
+hostname $HOSTNAME
+
+if test ! -f /etc/inetd.conf ; then
+	cp -a /cd/etc/inetd.conf /etc
 fi
 
 cd /
@@ -36,3 +60,6 @@ fi
 if killproc -TEST /usr/sbin/sshd ; then : ; else
 	/usr/sbin/sshd
 fi
+
+
+/sbin/sysconfig

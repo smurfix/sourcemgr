@@ -1,6 +1,6 @@
-NEW /lib/libc.so.5.4.1
+NEW /lib/libc.so.5.4.33
 NEW /lib/libc.so.5
 NEW /lib/libm.so.5.0.5
 NEW /lib/libm.so.5
-NEW /lib/ld-linux.so.1.8.1
+NEW /lib/ld-linux.so.1.9.1
 NEW /lib/ld-linux.so.1

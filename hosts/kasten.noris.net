@@ -1,0 +1,4 @@
+router
+kernel:linux-adaptec
+kernel:mrouted
+net:backup:amanda:server

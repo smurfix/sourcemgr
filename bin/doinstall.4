@@ -1,6 +1,5 @@
 #!/bin/sh
-export who=${who:-smurf}
-export master=${master:-193.141.166.3:/home/smurf}
+. /fd/STATUS
 
 PATH=/cd/usr/src/STATUS/bin:/bin:/sbin:/usr/sbin:/cd/bin:/cd/sbin:/cd/usr/bin:/cd/usr/sbin
 
@@ -8,9 +7,10 @@ PATH=/cd/usr/src/STATUS/bin:/bin:/sbin:/usr/sbin:/cd/bin:/cd/sbin:/cd/usr/bin:/c
 # aber das macht nix. ;-)
 
 set -ex
+. /fd/STATUS
 ldconfig -X
 
 cd /cd/usr/src
-copyover / /cd < STATUS/hosts/install.smurf.noris.de
+# copyover / /cd < STATUS/hosts/$name
 
 exec /cd/usr/src/STATUS/bin/doinstall.4a

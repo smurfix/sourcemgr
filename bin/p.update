@@ -4,14 +4,12 @@ usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Update lokaler Sourcen nach externen Änderungen
        [ -d dest-directory ]
-       [ -v releasename ]
        [ -V origreleasename ]
 END
 exit 1
 }
 
 dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
-vers=noris
 overs=base
 
    set -- $(getopt "d:v:V:h" $*)
@@ -27,8 +25,6 @@ overs=base
 		   	   usage ;;
 		   -d)
 			   shift; dir="$1"; shift;;
-		   -v)
-			   shift; vers="$1"; shift;;
 		   -V)
 			   shift; overs="$1"; shift;;
 	   esac
@@ -39,7 +35,7 @@ if test -z "$dir"; then usage; fi
 export PRCS_REPOSITORY=/archiv/src/prcs
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
 
-set -x
+set -xe
 
-prcs merge -f -r"$overs.@" $what
+prcs merge -f -r "$overs.@" $what
 
