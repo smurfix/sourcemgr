@@ -34,6 +34,6 @@ install:
 	@install -d $(DESTDIR)/usr/src/STATUS/RPM/RPMS/i586
 	@install -d $(DESTDIR)/usr/src/STATUS/RPM/RPMS/i686
 
-	@install -m 1777 -d $(DESTDIR)/var/cache/bk
-	@install -m 1777 -d $(DESTDIR)/var/cache/cvs
-	@install -m 1777 -d $(DESTDIR)/var/cache/cvs/bk
+	@install -m 2775 -g src -d $(DESTDIR)/var/cache/bk
+	@install -m 2775 -g src -d $(DESTDIR)/var/cache/cvs
+	@install -m 2775 -g src -d $(DESTDIR)/var/cache/cvs/bk
