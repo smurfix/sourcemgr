@@ -16,6 +16,7 @@ Prefix: /usr
 Requires: rpm-noris
 Requires: prcs-noris
 Requires: sudo
+Requires: shlock
 
 %description
  Noris: Version noris.@
