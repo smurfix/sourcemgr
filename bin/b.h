@@ -18,4 +18,5 @@ b.rpmenv    return RPM environment variables
 b.rpmget    get BK archive for RPM processing
 b.upversion install as BitKeeper/triggers/pre-commit.upversion
             to auto-increment a version number in file 'rpm.version'
+b.version   get version number of the current directory
 END
