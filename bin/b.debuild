@@ -23,6 +23,7 @@ Usage: $(basename $0)  -- Baue Debian-Source-Pakete.
 	   [ -d Paket ]  [ -v release ]
 	   [ -t HOST (upload there) ]
 	   [ -b (build a binary) ]
+	   [ -s? (pass to dpkg-*) ]
 END
     trap "" 0
     exit 1
@@ -33,6 +34,7 @@ defvers=noris
 vers=
 dest=local
 bin=
+opt_s=
 
    eval set -- "$(getopt "bd:t:v:h" "$@")"
    if test $? != 0
@@ -47,8 +49,10 @@ bin=
 		       exit 1 ;;
 		   -b)
 		   		shift; bin=y ;;
+		   -s)
+			   shift; opt_s="-s$1"; shift;;
 		   -d)
-			   shift; recargs="$recargs -d $1"; dir="$1"; shift;;
+			   shift; dir="$1"; shift;;
 		   -v)
 			   shift; vset=1; basev="$1"; shift;;
 			--)
@@ -129,8 +133,8 @@ if test -n "$E" ; then # non-original package
 	bk export -T -w -tplain -rEXTERN . "$T/$N-$V.orig"
 fi
 ( cd $T; dpkg-source -b -sa "$N-$V" )
-( cd "$T/$N-$V" ; fakeroot dpkg-buildpackage -S )
-( cd "$T/$N-$V" ; dpkg-genchanges -S > "../${N}_${DV}_source.changes" )
+( cd "$T/$N-$V" ; fakeroot dpkg-buildpackage -S $opt_s )
+( cd "$T/$N-$V" ; dpkg-genchanges -S $opt_s > "../${N}_${DV}_source.changes" )
 ( cd "$T/$N-$V" ; test -z "$bin" || fakeroot dpkg-buildpackage -nc -b )
 ( cd $T; echo y | debsign "${N}_${DV}_source.changes" )
 #( cd $T; test -z "$bin" || debsign "${N}_${DV}_$A.changes" )
