@@ -187,8 +187,12 @@ fi
 #test "$(bk changes -d':I:\n' -R | wc -l)" -eq 0
 
 # Tag this release with the current version and push it
-if ! bk get -q debian/control debian/changelog ; then
-	echo "Could not check out debian/control and debian/changelog files." >&2
+if ! test -w debian/control && ! bk get -q debian/control ; then
+	echo "Could not check out debian/control." >&2
+	exit 1
+fi
+if ! test -w debian/changelog && ! bk get -q debian/changelog ; then
+	echo "Could not check out debian/changelog." >&2
 	exit 1
 fi
 V="$(dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*//p')"

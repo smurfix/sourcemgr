@@ -1,3 +1,10 @@
+sourcemgr (1.291) unstable; urgency=low
+
+  * b.debuild:
+       Allow writeable debian/control and changelog.
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 11 Nov 2003 09:38:50 +0100
+
 sourcemgr (1.290) unstable; urgency=low
 
   * depend on Perl shlock
