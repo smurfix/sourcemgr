@@ -1,3 +1,9 @@
+sourcemgr (1.345) unstable; urgency=low
+
+  * b.get: set parent correctly after cloning
+
+ -- Matthias Urlichs <smurf@debian.org>  Sat, 27 Mar 2004 14:05:22 +0100
+
 sourcemgr (1.344) unstable; urgency=low
 
   * b.cvs.pl: cleanup
