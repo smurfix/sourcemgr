@@ -975,9 +975,11 @@ while(@$cset) {
 			$done++;
 		}
 	}
+	system("bk -anhd:KEY: -r+ ChangeSet > BitKeeper/etc/SCCS/x.lmark");
 } continue {
 	shift @$cset;
 	last if -f $ENDFILE;
+
 	if($ENV{BKCVS_PUSH} and $done >= $ENV{BKCVS_PUSH}) {
 		$ddone += $done;
 		print STDERR "$CLR $pn: Push $ddone\r" if $verbose;
