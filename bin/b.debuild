@@ -4,9 +4,6 @@ test -n "$BK_REPOSITORY" || export BK_REPOSITORY=bk://bitkeeper.noris.de
 set -e
 trap 'test -n "$superset" && kill $SUPERPID; usage; exit 1' 0
 
-RPM="-v --rcfile /usr/src/STATUS/rpmrc"
-BUILD=/usr/src/redhat/BUILD
-
 if test -f /usr/local/bin/gpg-agent-start.sh ; then
 	source /usr/local/bin/gpg-agent-start.sh
 fi
@@ -19,13 +16,21 @@ fi
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- Baue Debian-Source-Pakete.
-		[ -d Paket ]  [ -v release ]  [ -t HOST (upload there) ]
-		[ -b (build a binary) ]  [ -B (with pbuilder) ]
-			[ -i (install binaries afterwards) ]
-		[ -s? (pass to dpkg-*) ]  [ -k (keep tempdir) ]
-		[ -n (ignore lintan errors) ]  [ -S (don't sign ]
-		[ -V VERS -- include changes since VERS ]
+Usage: $(basename $0)  -- Build Debian source(+binary) packages.
+    [ -b (build a binary) | -B (build with pbuilder) 
+        [ -i (install the binaries afterwards) ] ]
+    [ -s? (passed to dpkg-*) ]  [ -k (keep temporary directory) ]
+    [ -n (ignore lintan errors) ]  [ -S (don't sign the result) ]
+    [ -V VERS -- include changelog since VERS ]
+    [ -w http://where/ever/ -- possible source for .orig.tar.gz file ]
+    [ -W http://where/ever/ -- third source to try (first is '..') ]
+    [ -t HOST (upload to here: first arg to 'dput') ]
+    [ -T dir (save here; default: parent directory if local, empty if not) ]
+    [ -l ] | [ -d Paket ]  [ -v release ]
+
+'-l' says to use the current repository.
+(This is the default if you're not smurf@debian.org. ;-)
+
 END
     trap "" 0
     exit 1
@@ -34,7 +39,8 @@ END
 dir=
 defvers=noris
 vers=
-dest=local
+dest=
+destdir=
 inst=
 bin=
 pbin=
@@ -43,105 +49,148 @@ keep=
 lwarn=
 nosign=
 opt_v=
+local=
+web1=http://smurf.noris.de/code/debian/unstable/source/
+web2=http://smurf.noris.de/code/debian/public/
 
-   eval set -- "$(getopt "bBd:ikns:St:v:V:h" "$@")"
-   if test $? != 0
-   then
-	   exit 1
-   fi
-   for i
-   do
-	   case "$i"
-	   in
-		   -h)
-		       exit 1 ;;
-		   -n)
-		   		shift; lwarn=y ;;
-		   -i)
-		   		shift; inst=y ;;
-		   -b)
-		   		shift; bin=y ;;
-		   -k)
-		   		shift; keep=y ;;
-		   -B)
-		   		shift; pbin=y ;;
-		   -S)
-		   		shift; nosign=y ;;
-		   -V)
-			   shift; opt_v="-v$1"; shift;;
-		   -s)
-			   shift; opt_s="-s$1"; shift;;
-		   -d)
-			   shift; dir="$1"; shift;;
-		   -v)
-			   shift; vset=1; basev="$1"; shift;;
-			--)
-				shift; break;;
-	   esac
-   done
+if test "$DEBEMAIL" = "smurf@debian.org" ; then
+	ddestdir=""
+	ddest="local"
+else
+	local=y
+	ddestdir="$(pwd)/.."
+	ddest=""
+fi
+
+eval set -- "$(getopt "bBd:iklns:St:T:v:V:w:W:h" "$@")"
+if test $? != 0
+then
+	exit 1
+fi
+for i
+do
+	case "$i"
+	in
+		-h)
+			exit 1 ;;
+		-n)
+			shift; lwarn=y ;;
+		-l)
+			shift; local=y; ddest=""; ddestdir="$(pwd)/.." ;;
+		-i)
+			shift; inst=y ;;
+		-b)
+			shift; bin=y ;;
+		-k)
+			shift; keep=y ;;
+		-B)
+			shift; pbin=y ;;
+		-S)
+			shift; nosign=y ;;
+		-t)
+			shift; dest="$1"; shift;;
+		-T)
+			shift; destdir="$1"; shift;;
+		-V)
+			shift; opt_v="-v$1"; shift;;
+		-w)
+			shift; web1="$1"; shift;;
+		-W)
+			shift; web2="$1"; shift;;
+		-s)
+			shift; opt_s="-s$1"; shift;;
+		-d)
+			shift; dir="$1"; shift;;
+		-v)
+			shift; vset=1; basev="$1"; shift;;
+		--)
+			shift; break;;
+	esac
+done
 
 if test -n "$inst" -a -z "$bin$pbin" ; then
 	usage
 fi
 
-if test -n "$basev" -a -z "$vers"; then
-	vers=$basev
-	basev=$defbase
-else
-	test -n "$vers" || vers=$defvers
-	test -n "$basev" || basev=$defbase
+if test -n "$local" -a -n "$dir$vers" ; then
+	usage
 fi
+
+if test -z "$local" ; then
+	if test -n "$basev" -a -z "$vers"; then
+		vers=$basev
+		basev=$defbase
+	else
+		test -n "$vers" || vers=$defvers
+		test -n "$basev" || basev=$defbase
+	fi
+fi
+
+test -n "$dest" || dest="$ddest"
+test -n "$destdir" || destdir="$ddestdir"
 
 if test -z "$dir" -a -z "$vset" ; then # from current directory
 	if test $(bk sfiles -xgc | fgrep -v '/SCCS/' | wc -l) -gt 0 ; then
 		trap "" 0
-		echo "Unsaved files." >&2
+		echo "'bk sfiles -cgx' says there are unsaved files." >&2
+		echo "Please fix this before proceeding." >&2
 		exit 1
 	fi
-	bk pull
+	test -n "$local" || bk pull
 	if test -d RESYNC ; then
-		echo "Unmergeable changes." >&2
+		echo "There's a RESYNC directory, i.e. unmerged changes." >&2
+		echo "Please fix this before proceeding." >&2
 		exit 1
 	fi
-	echo -n "Pushing local version to "; bk parent -p
-	bk push -q
+	if test -z "$local" ; then
+		echo -n "Pushing local version to "; bk parent -p
+		bk push -q
+	fi
 fi
 
-b.name "$dir" > /tmp/bn.$$
-read dir overs < /tmp/bn.$$
-if test -z "$vset" ; then vers="$overs" ; fi
-rm -f /tmp/bn.$$
+if test -z "$local" ; then
+	b.name "$dir" > /tmp/bn.$$
+	read dir overs < /tmp/bn.$$
+	if test -z "$vset" ; then vers="$overs" ; fi
+	rm -f /tmp/bn.$$
 
-what=$(echo $dir | sed -e 's/[:\/]/_/g' -e 's/_*$//')
-dir=$(echo $what | sed -e 's/_/\//g')
+	what=$(echo $dir | sed -e 's/[:\/]/_/g' -e 's/_*$//')
+	dir=$(echo $what | sed -e 's/_/\//g')
 
-test -n "$vers" || vers=$defvers
-# does not work
-#read what bkrel <(b.exists -d "$what" -v "$vers")
+	test -n "$vers" || vers=$defvers
+	# does not work
+	#read what bkrel <(b.exists -d "$what" -v "$vers")
 
-b.exists -d "$what" -v "$vers" >/tmp/b.rpm.$$
-read what bkrel </tmp/b.rpm.$$
-rm -f /tmp/b.rpm.$$
+	b.exists -d "$what" -v "$vers" >/tmp/b.rpm.$$
+	read what bkrel </tmp/b.rpm.$$
+	rm -f /tmp/b.rpm.$$
 
-if test -z "$bkrel" ; then
-	vget=""
-else
-	vget="-v $bkrel"
+	if test -z "$bkrel" ; then
+		vget=""
+	else
+		vget="-v $bkrel"
+	fi
+
+	cd "$(b.cache -d "$what" $vget)"
 fi
-
-cd "$(b.cache -d "$what" $vget)"
 trap '' 0
 
 ## no longer needed, as we just called 'b.cache'
 ## Make sure we're in the BK root
-#test -d BitKeeper
+if ! test -d BitKeeper ; then
+	echo "You do not seem to be in a BitKeeper repository." >&2
+	exit 1
+fi
 ## Make sure there are no outstanding changes
 #test "$(bk sfiles -xcg | wc -l)" -eq 0
 ## Make sure the remote repository doesn't have more than we do
 #test "$(bk changes -d':I:\n' -R | wc -l)" -eq 0
 
 # Tag this release with the current version and push it
-bk get -q debian/control debian/changelog
+if ! bk get -q debian/control debian/changelog ; then
+	echo "Could not check out debian/control and debian/changelog files." >&2
+	exit 1
+fi
 V="$(dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*//p')"
 
 N="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
@@ -151,7 +200,7 @@ test -n "$V"
 if bk prs -r+ -d'$if(:TAG:){$each(:TAG:){:TAG:\\n}}' -h ChangeSet | fgrep -xqs "DEBIAN-$V"
 then : ; else
 	bk tag -r+ DEBIAN-$V
-	bk push -q
+	test -n "$local" || bk push -q
 fi
 
 # Now build the source archives
@@ -174,20 +223,24 @@ VV="$(echo "$V" | sed -e 's/^[0-9][0-9]*://')"
 DV="$(echo "$DV" | sed -e 's/^[0-9][0-9]*://')"
 
 bk export -T -w -tplain -r+ . "$T/$N-$VV"
+
+# If there's a "debian/exporter" script, run it.
 if test -x "$T/$N-$VV"/debian/exporter ; then
 	"$T/$N-$VV"/debian/exporter "$T/$N-$VV" "+"
 fi
+
 test -f "$T/$N-$VV"/debian/changelog || mv debian/changelog "$T/$N-$VV"/debian
 
 if test -n "$E" ; then # non-original package
 	if \
+	   cp ../${N}_$VV.orig.tar.gz "$T/" 2>&/dev/null ||
+ 	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
+		"${web1}${N}_$VV.orig.tar.gz" ||
 	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
-		"http://smurf.noris.de/code/debian/unstable/source/${N}_$VV.orig.tar.gz" ||
-	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
-		"http://smurf.noris.de/code/debian/public/${N}_$VV.orig.tar.gz" ||
+		"${web2}${N}_$VV.orig.tar.gz" ||
 	   false
 	then
-		echo + get original source via HTTP
+		echo + get original source from .. or via HTTP
 	else
 		echo + create new original source archive
 		rm -f "$T/${N}_$VV.orig.tar.gz"
@@ -200,7 +253,7 @@ fi
 
 cd "$T/$N-$VV"
 rm -f debian/users debian/version debian/exporter debian/changelog.old || true
-cd $T
+# cd "$T"
 # dpkg-source -b -sa "$N-$VV"
 cd "$T/$N-$VV"
 fakeroot dpkg-buildpackage -S $opt_s -uc -us
@@ -211,22 +264,20 @@ fi
 test -z "$pbin" || pdebuild --buildresult "$T" -- --debbuildopts "-nc -b"
 if test -z "$bin$pbin" ; then
 	dpkg-genchanges $opt_v -S $opt_s > "../${N}_${DV}_source.changes"
-	cd $T
+	cd "$T"
 	test -n "$nosign" || echo y | debsign "${N}_${DV}_source.changes"
 	test -n "$nosign" -o -z "$pbin$bin" || echo y | debsign "${N}_${DV}_$A.changes"
 else
 	dpkg-genchanges $opt_v $opt_s > "../${N}_${DV}.changes"
-	cd $T
+	cd "$T"
 	test -n "$nosign" || echo y | debsign "${N}_${DV}.changes"
 	test -n "$nosign" -o -z "$pbin$bin" || rm "${N}_${DV}_$A.changes"
 fi
 
-cd $T
 for i in * ; do if test -d $i; then rm -rf $i; fi; done
 echo "Built:"
 ls 
 echo ""
-#mv $T/* ..
 
 for f in *.changes; do
 	if lintian -viI "$f" && linda -viI "$f" || test -n "$lwarn" ; then : ; else
@@ -235,11 +286,16 @@ for f in *.changes; do
 	fi
 done
 
-for f in *.changes; do
-	dput $dest "$f"
-done
+if test -n "$dest" ; then
+	for f in *.changes; do
+		dput $dest "$f"
+	done
+fi
 if test -n "$inst" ; then
 	sudo dpkg -i *.deb
+fi
+if test -n "$destdir" ; then
+	mv * "$destdir"
 fi
 
 #dpkg-buildpackage -S -rfakeroot -IPENDING -Idebian/users -Idebian/version -IBitkeeper -ISCCS "$@"

@@ -1,3 +1,10 @@
+sourcemgr (1.287) unstable; urgency=low
+
+  * bin/b.debuild
+       Build locally.
+
+ -- Matthias Urlichs <smurf@debian.org>  Thu,  2 Oct 2003 21:36:44 +0200
+
 sourcemgr (1.286) unstable; urgency=low
 
   * Neu: b.pull
