@@ -170,8 +170,11 @@ mv debian/changelog "$T/$N-$VV"/debian
 
 if test -n "$E" ; then # non-original package
 	cd "$T"
-	wget "http://smurf.noris.de/code/debian/public/${N}_$VV.orig.tar.gz" ||
-	bk export -T -w -tplain -rEXTERN . "$T/$N-$VV.orig"
+	if wget "http://smurf.noris.de/code/debian/public/${N}_$VV.orig.tar.gz"
+	then : ; else
+		cd "$T/$N-$VV"
+		bk export -T -w -tplain -rEXTERN . "$T/$N-$VV.orig"
+	fi
 fi
 
 cd "$T/$N-$VV"
