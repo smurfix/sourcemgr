@@ -666,6 +666,7 @@ sub process($$$$) {
 			my $rev = $adt->{$f}{rev};
 			if(exists $adt->{$f}{gone}) {
 				unlink($f);
+				push(@gone,$f);
 			} else {
 				push(@{$rev{$rev}}, $f);
 			}
@@ -717,9 +718,6 @@ sub process($$$$) {
 				}
 				utime($wann,$wann,@ff);
 			}
-			push(@gone, grep {
-					-e dirname($_)."/SCCS/s.".basename($_) and ! -e $_ }
-				@{$rev{$rev}});
 		} continue {
 			--$rcnt;
 		}
