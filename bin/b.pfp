@@ -55,12 +55,13 @@ while(<>) {
 		$who=$2; $where=$3;
 		$when=parsedate($4,WHOLE=>1,GMT=>1,DATE_REQUIRED=>1,UK=>1,NO_RELATIVE=>1,VALIDATE=>1) or die "No time parse";
 		@DT = ("LD_PRELOAD=/usr/lib/datefudge.so","DATEFUDGE=".(time-$when));
+		$where .= ".somewhere" unless $where =~/\./;
 		push(@DT,"BK_USER=$who","BK_HOST=$where");
 	} elsif($state==1 and /^$/) {
 		$state=11;
 	} elsif(($state==11 or $state==12) and not /^$/) {
 		$state=12;
-		s/^\s+//;
+		s/^\t//;
 		$cmt .= "$_\n";
 	} elsif($state==12 and /^$/) {
 		$state=13;
@@ -84,12 +85,12 @@ while(<>) {
 }
 die "Problem: Status $state" if $state != 7;
 if($ENV{REV}) {
-	open(P,"| patch -R -p1");
+	open(P,"| patch -R -E -p1");
 } else {
-	open(P,"| patch -g1 -p1");
+	open(P,"| patch -g1 -p1 -E -f");
 }
 print P $_ while(<>);
-close(P) or die "Patch close: $?";
+close(P) ;#or die "Patch close: $?";
 
 exit(0) if $ENV{REV};
 
@@ -99,26 +100,14 @@ sub bkfiles($) {
 	my @new = grep {
 		 m#/SCCS/#
 		? undef
-		: ( chmod((0600|0777&((stat $_)[2])),$_) or 1 );
+		: 1
 	} bk(sfiles=>"-U$f");
 	@new;
 }
 
 my @new = grep { if(-l $_) { unlink $_; undef; } else { 1; } } bkfiles("x");
 my @cur = ();
-my @gone = grep { 
-	if(-e $_) {
-		push(@cur,$_);
-		if(@cur >= 100) {
-			bk(get => "-qeg",@cur);
-			@cur = ();
-		}
-		undef;
-	} else {
-		1;
-	}
-} bkfiles("g");
-bk(get => "-qeg",@cur) if @cur;
+my @gone = grep { not -e $_ } bkfiles("g");
 
 if(@new and @gone) {
 	bk(get=>"-qeg",@gone);
@@ -143,6 +132,16 @@ if(@new and @gone) {
 	}
 }
 
-bk('-r', ci => '-qG', "-y$cmt");
-bk(undef,"bk sfiles -pC | env @DT bk cset -q -y\"$cmt\"");
+bk(ci => '-qG', "-y$cmt", bkfiles("gl"));
+# bk(undef,"bk sfiles -pC | env @DT bk cset -q -y\"$cmt\"");
+open(FP,"|-") or do {
+	$cmt =~ s/\001//g;
+	exec("env", @DT, "bk", "cset", "-y$cmt");
+	exit(99);
+};
+open(P,"bk sfiles -pC |");
+print FP $_ while(<P>);
+close(P); close(FP);
+
+
 

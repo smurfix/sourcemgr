@@ -534,7 +534,14 @@ sub process($$$$) {
 		}
 		print "Checking if '$n' is a resurrected file...\n";
 		rename($n,"x.$$");
-		system("env",@DT,@AU,"bk","unrm","$n");
+
+		open(FP,"|-") or do {
+			exec("env",@DT,@AU,"bk","unrm","$n");
+			exit(99);
+		};
+		print FP "y\n";
+		close(FP);
+
 		if(-f $n or not $?) {
 			unlink($n);
 			bk("get","-egq",$n);
