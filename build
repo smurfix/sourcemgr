@@ -658,3 +658,13 @@ x	kernel/linux 	*	Master-Kernelsource	2.0.33/2.1.77	ftp.kernel.org
 *	kernel/devfsd	Version 1.1.1	devfs-Daemon	ftp://ftp.atnf.csiro.au/pub/people/rgooch/linux/daemons/
 *	misc/g723	Version 5.1 ITU	G.723.1-Codec	-
 *	lib/pcre	Version 2.08	Perl-REs	-
+*	net/www/apache2	Version 2.0 a1	Neuer_Apache	-
+*	net/appletalk/netatalk	Version 1.4b2 ASUN 2.1.3	Appletalkkram	ftp.cobaltnet.com/pub/users/asun
+*	net/print/cups	cups.org Version 1.0b6	Druckersystem	-
+*	misc/perl/string	Version 1.211	IO::string.et.al	CPAN:ERYQ:IO-stringy
+*	misc/perl/string	Version 1.01	IO::string.et.al	CPAN:GAAS:IO-string
+*	misc/perl/stringy	Version 1.211	IO::string.et.al	CPAN:ERYQ:IO-stringy
+*	lib/db	Version 3.0.55	Berkeley-DB	sleepycat.com
+*	misc/perl/dav	Version 0.04	WebDAV	http://www.webdav.org/
+*	misc/perl/dav	Version 0.04	WebDAV	http://www.webdav.org/
+*	misc/perl/cgi	Version 2.45	CGI-Paket	CPAN
