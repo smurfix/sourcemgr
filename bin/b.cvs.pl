@@ -537,7 +537,7 @@ sub cleanout() {
 {
 	cleanout();
 	unlink bkfiles("g");
-	open(REV,"bk prs -anh -r+ -d ':COMMENTS:\n' ChangeSet |");
+	open(REV,"bk prs -anh -d ':COMMENTS:\n' ChangeSet |");
 	while(<REV>) {
 		chomp;
 		if(/^C CVS\:\s*(\d+)-(\d+)-(\d+)(?:\s+(\d+)\:(\d+)\:(\d+))?\s*$/) {
@@ -545,6 +545,7 @@ sub cleanout() {
 			$y -= 1900 if $y >= 1900; $m--;
 			my $dt = timelocal($ss+0,$mm+0,$hh+0,$d,$m,$y);
 			$dt_done = $dt if $dt_done < $dt;
+			last;
 		}
 	}
 	close(REV);
