@@ -413,8 +413,7 @@ else # install
 	mv -f STATUS/out/new.$desc$submode STATUS/out/$desc$submode
 	mv STATUS/removed/new.$desc$submode STATUS/removed/$desc$submode 
 
-	sudo rpm -bb --short-circuit $RPM STATUS/rpm/$desc$subtarget.spec
-		# --clean
+	sudo rpm -bb --short-circuit --clean $RPM STATUS/rpm/$desc$subtarget.spec
 fi
 
 exit 0
