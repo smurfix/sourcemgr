@@ -1,3 +1,10 @@
+sourcemgr (1.273) unstable; urgency=low
+
+  * b.put:
+       Drop pushing to cache
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Wed, 10 Sep 2003 04:49:40 +0200
+
 sourcemgr (1.272) unstable; urgency=low
 
   * b.put:
