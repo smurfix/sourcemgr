@@ -52,25 +52,23 @@ if b.exists -v "$vers" -d $dir > /tmp/tf.$$ ; then
 
 	test -z "$dv" || dv="-$dv"
 
-	if bk pull -n $BK_REPOSITORY/$what$dv 2>&1 | grep -q "Nothing to pull from " ; then
-		echo + bk push $BK_REPOSITORY/$what$dv
-		bk push -q $BK_REPOSITORY/$what$dv
-	else
+	if bk pull -n $BK_REPOSITORY/$what$dv 2>&1 | grep -q "Would receive" ; then
 		cat >&2 <<END
 Problem:
 Das Archiv "$what$dv" hat Änderungen, die du noch nicht hast.
 
 Mögliche Abhilfen:
 - Erst b.merge aufrufen
-- In einen anderen (neuen?) Zweig speichern
+- In einen anderen (neuen?) Zweig speichern (Option '-v')
 END
+	else
+		echo + bk push $BK_REPOSITORY/$what$dv
+		bk push -q $BK_REPOSITORY/$what$dv
 	fi
-
 else
 	test -z "$vers" || dv="-$vers"
 	echo Version "$vers" gibt es noch nicht -- wird neu angelegt.
 	echo + bk clone . $BK_REPOSITORY/$what$dv
 	bk clone -q . $BK_REPOSITORY/$what$dv
-	exit 1
 fi
 
