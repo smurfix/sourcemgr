@@ -13,10 +13,10 @@ Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -r Fork (im CVS) ]
        [ -v releasename (cvs / extern) ]
        [ -w releasename (cvs) ]
-       [ -e CVS-Fudge-Sekunden (Default 30) ]
+       [ -e CVS-Fudge-Sekunden (Default 120) ]
        [ -E Abstand-zwischen-Push (Default 10) ]
        [ -V (verbose) ]
-       [ -D Datum ] [ -Z (keine Kompression) ]
+       [ -D (Debug) ] [ -Z (keine Kompression) ]
        woher  was
 
 "woher" ist der Name des entfernten Repository.
@@ -33,16 +33,15 @@ nopush=
 rvers=
 rdir=
 parent=
-datum=$(date '+%Y-%m-%d')
-sdatum=now
+run="$0.pl"
 quiet=-q
 comp=-z3
 each=10
-diff=30
+diff=
 loc=
 df=0
 
-   eval set -- "$(getopt "Vd:v:r:hD:Zlnp:e:E:" "$@")"
+   eval set -- "$(getopt "Vd:v:r:hDZlnp:e:E:" "$@")"
    for i
    do
 	   case "$i"
@@ -54,8 +53,7 @@ df=0
 		   -V)
 		   	   shift; quiet="" ;;
 		   -D)
-			   shift; D=$(echo $1|sed -e 's/_/ /g'); datum="$D"; sdatum="$D";
-			   df=$(expr $(date -d "now" "+%s") - $(date -d "$D" "+%s" )); shift;;
+			   shift; run="perl -d $(type -p "$0.pl")" ;;
 		   -p)
 			   shift; parent="$1"; shift;;
 		   -e)
@@ -97,8 +95,7 @@ what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 
 trap 'usage; exit 1' 0
 
-cd /var/cache/cvs
-mkdir -p bk/tmp
+mkdir -p /var/cache/cvs/bk/tmp
 tmp="/var/cache/cvs/bk/tmp/$$"
 rm -rf "$tmp"
 dest=/var/cache/cvs/bk/"$dir-$vers"
@@ -107,6 +104,6 @@ export BK_REPOSITORY=bk://bitkeeper.noris.de
 export CVS_REPOSITORY="$woher"
 export BKCVS_COMP=$comp
 export BKCVS_EACH=$each
-export BKCVS_DIFF=$diff
-export BKCVS_NOPUSH=$nopush
-exec b.cvs.pl "$was" "$dir-$vers"
+test -n $diff && test -z "$BKCVS_DIFF" && export BKCVS_DIFF=$diff
+test -n $nopush && export BKCVS_NOPUSH=$nopush
+exec $run "$was" "$dir-$vers"

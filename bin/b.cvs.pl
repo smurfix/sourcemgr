@@ -7,12 +7,11 @@ use File::Path qw(rmtree mkpath);
 use File::Find qw(find);
 use File::Basename qw(basename dirname);
 use Time::Local;
-use IO::File;
 use Carp qw(confess);
 use Storable qw(nstore retrieve);
 
 my $debug=0;
-my $diff=$ENV{BKCVS_DIFF}||30; # Zeitraum für "gleichzeitige" Änderungen im CVS
+my $diff=$ENV{BKCVS_DIFF}||60; # Zeitraum für "gleichzeitige" Änderungen im CVS
 
 sub Usage() {
 	print STDERR <<END;
@@ -201,83 +200,6 @@ my %symdate;
 my $cset;
 my $dt_done;
 
-sub atta($$) {
-	my($i,$j)=@_; # copy $j into $i
-	my($fi,$fj);
-	$fi->{ende}=$fj->{ende} if defined $fj->{ende};
-
-	# Kommentare, pro Datei
-	$fi=$i->{cmt};
-	$fj=$j->{cmt};
-	unless($fi) {
-		$i->{cmt}=$fj;
-	} elsif($fj) {
-		foreach my $f(keys %$fj) {
-			$fi->{$f} .= $fj->{$f};
-		}
-	}
-
-	# Ein nichtexistierender Eintrag wird auf den anderen gesetzt.
-	# Ein undef-Eintrag hat Vorrang (es gibt bereits einenn Konflikt).
-	# Ungleiche Einträge resultieren in undef.
-	unless(exists $fi->{autor}) {
-		$fi->{autor} = $fj->{autor} if exists $fj->{autor};
-	} elsif(exists $fj->{autor} and defined $fi->{autor} and (not defined $fj->{autor} or $fi->{autor} ne $fj->{autor})) {
-		$fi->{autor}=undef;
-	}
-	unless(exists $fi->{scmt}) {
-		$fi->{scmt} = $fj->{scmt} if exists $fj->{scmt};
-	} elsif(exists $fj->{scmt} and defined $fi->{scmt} and (not defined $fj->{scmt} or $fi->{scmt} ne $fj->{scmt})) {
-		$fi->{scmt}=undef;
-	}
-
-	# Symbol-Liste für diese Revision.
-	$fi=$i->{sym};
-	$fj=$j->{sym};
-	unless($fi) {
-		$i->{sym}=$fj;
-	} elsif($fj) {
-		push(@$fi,@$fj);
-	}
-
-	# Revisionsnummern. Die letzte hat Vorrang.
-	$fi=$i->{rev};
-	$fj=$j->{rev};
-	unless($fi) {
-		$i->{rev}=$fj;
-	} elsif($fj) {
-		foreach my $f(keys %$fj) {
-			$fi->{$f}=$fj->{$f};
-		}
-	}
-
-
-}
-
-sub csdiff($$$$) {
-	my($i,$fn,$autor,$cmt)=@_;
-	my $df = $diff;
-	my $fi = $cset->[$i];
-	if(defined $autor and exists $fi->{autor}) {
-		unless(defined $fi->{autor}) { # Konflikt
-			$df /= 2;
-		} elsif($fi->{autor} eq $autor) { # OK
-			$df *= 2;
-		}
-	} elsif(not defined $autor) { # Tag
-		$df /= 2;
-	}
-	if(defined $cmt and exists $fi->{scmt}) {
-		unless(defined $fi->{scmt}) { # Konflikt
-			$df /= 3;
-		} elsif($fi->{scmt} eq $cmt) { # OK
-			$df *= 5;
-		}
-	}
-	$df /= 2 if defined $fn and defined $fi->{cmt}{$fn};
-	$df;
-}
-
 my %known;
 sub add_date($;$$$$) {
 	my($wann,$fn,$rev,$autor,$cmt)=@_;
@@ -291,103 +213,53 @@ sub add_date($;$$$$) {
 	}
 
 	my $i;
+	my $cs;
 	cset:
 	{
 		my($min,$max);
-		$min=-1;$max=@$cset;$i=0;
+		$min=0;$max=@$cset;$i=0;
 
 		# vor dem Anfang?
-		while($min<$max-1) {
+		while($min<$max) {
 			$i=int(($min+$max)/2);
-			last if $i==$min;
-			last if $i==$max;
-			# fünf Bereiche:
-			# A vor Anfang-Spielraum
-			# B vor Anfang
-			# C irgendwo zwischen Anfang und Ende
-			# D nach Ende
-			# E nach Ende+Spielraum
+			$cs = $cset->[$i];
+			# A vor Anfang
+			# C gleichzeitig
+			# E nach Ende
 			#
-			if($cset->[$i]{start}-csdiff($i,$fn,$autor,$cmt) > $wann) { # A: weitersuchen
-				$max=$i; $i--;
+			if($cs->{wann} > $wann) { # A: weitersuchen
+				$max=$i;
 				next;
-			} elsif($cset->[$i]{start} > $wann and !acmp($cset->[$i]{autor},$autor)) { # B: verlängern
-				if($i>0 and $cset->[$i-1]{ende}+$diff >= $wann) {
-					atta($cset->[$i-1],$cset->[$i]);
-					splice(@$cset,$i,1);
-					$i--;
-				} else {
-					$cset->[$i]{start} = $wann;
-				}
-				last cset;
-			} elsif($cset->[$i]{start} > $wann) { # B: weitersuchen
-				$max=$i; $i--;
+			} elsif($cs->{wann} < $wann) { # E: weitersuchen
+				$min=$i+1;
 				next;
-			} elsif($cset->[$i]{ende}+csdiff($i,$fn,$autor,$cmt) < $wann) { # E: weitersuchen
-				$min=$i;
-				next;
-			} elsif($cset->[$i]{ende} < $wann and !acmp($cset->[$i]{autor},$autor)) { # D: Verlängern
-				if($i < @$cset-1 and $cset->[$i+1]{start}-$diff <= $wann) {
-					atta($cset->[$i],$cset->[$i+1]);
-					splice(@$cset,$i+1,1);
-				} else {
-					$cset->[$i]{ende} = $wann;
-				}
-			} elsif($cset->[$i]{ende} < $wann) { # D: Weitersuchen
-				$min=$i;
-				next;
-			} elsif(acmp($cset->[$i]{autor},$autor)) { # Konflikt!
-				my($ss,$mm,$hh,$d,$m,$y)=localtime($wann);
-				$m++; $y+=1900; ## zweistellig wenn <2000
-				my $date = sprintf "%04d-%02d-%02d %02d:%02d:%02d",$y,$m,$d,$hh,$mm,$ss;
-				die <<END;
-
-There is a conflict!
-	date $date
-	file $fn
-	rev  $rev
-	by   $autor
-
-It falls within a change by $cset->[$i]{autor}.
-Reduce the time tolerance variables and try again.
-END
 			}
-			# ansonsten sind wir im Bereich => OK.
+			# ansonsten: Treffer.
 			last cset;
-		} continue {
-			$i++;
 		}
 		# nix gefunden
-		splice(@$cset,$i,0,{"start"=>$wann,"ende"=>$wann});
-	}
-	my $cs = $cset->[$i];
-	if(defined $autor) {
-		if(defined $cs->{autor}) {
-			$cs->{autor} = undef if $cs->{autor} ne $autor;
-		} elsif(not exists $cs->{autor}) {
-			$cs->{autor} = $autor;
-		}
-	}
-	if(defined $cmt) {
-		if(defined $cs->{scmt}) {
-			$cs->{scmt} = undef if $cs->{scmt} ne $cmt;
-		} elsif(not exists $cs->{scmt}) {
-			$cs->{scmt} = $cmt;
-		}
+		$cs={"wann"=>$wann};
+		splice(@$cset,$max,0,$cs);
 	}
 	if(defined $fn) {
-		$cs->{cmt}{$fn} .= $cmt;
-		$cs->{rev}{$fn} = $rev;
+		$autor="?" unless defined $autor;
+		$cs->{autor}={} unless ref $cs->{autor};
+		$cs->{autor}{$autor}={} unless ref $cs->{autor}{$autor};
+		$cs = $cs->{autor}{$autor};
+	
+		$cs->{$fn}{cmt} = $cmt;
+		$cs->{$fn}{rev} = $rev;
+	} else {
+		$cs->{sym} = [] unless defined $cs->{sym};
+		return $cs->{sym};
 	}
-
-	$cs;
 }
 
 # Bearbeite den Log-Eintrag EINER Datei
 sub proc1($$$$$$) {
 	my($fn,$dt,$rev,$cmt,$autor,$syms) = @_;
 
-	my $dtx = add_date($dt,$fn,$rev,$autor,$cmt);
+	add_date($dt,$fn,$rev,$autor,$cmt);
 	foreach my $sym(@$syms) {
 		$symdate{$sym}=$dt if not defined $symdate{$sym} or $symdate{$sym}<$dt;
 	}
@@ -481,13 +353,13 @@ if(-f "$tmpcv.data") {
 	}
 	rmtree($tmpcv);
 	foreach my $sym(keys %symdate) {
-		push(@{add_date($symdate{$sym})->{sym}},$sym);
+		push(@{add_date($symdate{$sym})},$sym);
 	}
 	nstore($cset,"$tmpcv.data");
 }
 chdir("/");
 
-dateset($cset->[0]{start});
+dateset($cset->[0]{wann});
 
 my $tmppn="/var/cache/cvs/bk/$cn";
 unless(-d "$tmppn/BitKeeper") {
@@ -537,11 +409,9 @@ END
 chdir($tmppn);
 
 sub cleanout() {
-	unlink bkfiles("g");
 	unlink bkfiles("x");
-	bk("-r","unget");
-	bk("-r","unedit");
-	bk("-r","unlock");
+	bk("-r","unlock","-f");
+	bk("-r","clean","-q");
 }
 
 # Finde den letzten Import
@@ -562,13 +432,30 @@ sub cleanout() {
 }
 
 
-sub process($) {
-	my($inf) = @_;
-	my($ss,$mm,$hh,$d,$m,$y)=localtime($inf->{ende});
+sub scmt($;$) {
+	my($adt,$scmt)=@_;
+
+	foreach my $f(values %$adt) {
+		my $cmt = $f->{cmt};
+		next unless defined $cmt;
+		if(not defined $scmt) {
+			$scmt=$cmt;
+		} else {
+			$scmt="" if $scmt ne $cmt;
+		}
+	}
+	$scmt;
+}
+
+sub process($$$$) {
+	my($autor,$wann,$adt,$len)=@_;
+	my $scmt = scmt($adt);
+
+	my($ss,$mm,$hh,$d,$m,$y)=localtime($wann);
 	$m++; $y+=1900; ## zweistellig wenn <2000
-	dateset($inf->{ende},$inf->{autor});
 	my $cvsdate = sprintf "%04d-%02d-%02d %02d:%02d:%02d",$y,$m,$d,$hh,$mm,$ss;
-	print STDERR " Processing: $cvsdate                        \r";
+	print STDERR " Processing $len: $cvsdate                        \r";
+	dateset($wann,$autor);
 
 	# system("(bk sfiles -gU; bk sfiles -x) | p.bk.filter | xargs -0r p.bk.mangler");
 	# Map: Revisionsnummer->Dateiname
@@ -576,8 +463,8 @@ sub process($) {
 	my @gone;
 	{
 		my %rev;
-		foreach my $f(keys %{$inf->{rev}}) {
-			my $rev = $inf->{rev}{$f};
+		foreach my $f(keys %$adt) {
+			my $rev = $adt->{$f}{rev};
 			push(@{$rev{$rev}}, $f);
 			if($ENV{CVS_REPOSITORY} =~ /\:pserver\:/) {
 				do {
@@ -591,12 +478,12 @@ sub process($) {
 		}
 		foreach my $rev(keys %rev) {
 			my @f = @{$rev{$rev}};
-			print STDERR "  Processing: $cvsdate $rev ".(0+@f)."       \r";
+			print STDERR "  Processing $len: $cvsdate $rev ".(0+@f)."       \r";
 			while(@f) {
 				my $i = undef;
 				$i=50 if @f>60;
 				my @ff = splice(@f,0,$i||(1+@f));
-				bk("get","-egq", @ff);
+				bk("get","-egq", @ff) if $rev !~ /^\d+\.1$/;
 				unlink(@ff);
 				cvs("get","-r",$rev, map { "$cn/$_" } @ff);
 			}
@@ -618,34 +505,47 @@ sub process($) {
 #	}
 #	cvs("update","-d","-D",$cvsdate) if $redo;
 #
-	my @new = grep { if(-l $_) { unlink $_; undef; } else { 1; } } bkfiles("x");
+	my @new=();
+	foreach my $n (grep { if(-l $_) { unlink $_; undef; } else { 1; } } bkfiles("x")) {
+		if($adt->{$n}{rev} =~ /^\d+\.1$/) {
+			push(@new,$n);
+			next;
+		}
+		print "Checking if '$n' is a resurrected file...\n";
+		rename($n,"x.$$");
+		system("env",@DT,@AU,"bk","unrm","$n");
+		if(-f $n) {
+			bk("get","-egq",$n);
+		} else {
+			push(@new,$n);
+		}
+		rename("x.$$",$n);
+	}
 
 	if(@new and @gone) {
-		my $cmds = $inf->{rename};
+		use IO::File;
+		# bk(get=>"-qeg",@gone); ## schon erledigt
+		# print STDERR ">>> bk -qeg @gone\n";
+		# print $rename $d->{major}.".".$d->{minor}."\n";
+		my $tmf="/tmp/bren.$$";
+		open(RN,"|env @AU @DT bk renametool -p > $tmf");
+		foreach my $f(sort { $a cmp $b } @gone) { print RN "$f\n"; }
+		print RN "\n";
+		foreach my $f(sort { $a cmp $b } @new) { print RN "$f\n"; }
+		close(RN);
+		# print $rename "\n";
+		confess "No rename" if $? or not -s $tmf;
 
-		unless($cmds) {
-			use IO::File;
-			# bk(get=>"-qeg",@gone); ## schon erledigt
-			# print STDERR ">>> bk -qeg @gone\n";
-			# print $rename $d->{major}.".".$d->{minor}."\n";
-			my $tmf="/tmp/bren.$$";
-			open(RN,"|env @AU @DT bk renametool -p > $tmf");
-			foreach my $f(sort { $a cmp $b } @gone) { print RN "$f\n"; }
-			print RN "\n";
-			foreach my $f(sort { $a cmp $b } @new) { print RN "$f\n"; }
-			close(RN);
-			# print $rename "\n";
-			confess "No rename" if $? or not -s $tmf;
-			my $T = IO::File->new($tmf,"r");
-			while(<$T>) {
-				$cmds .= $_;
-			}
-			$T->close();
-			unlink($tmf);
-
-			$inf->{rename}=$cmds;
-			nstore($cset,"$tmpcv.data");
+		my $cmds="";
+		my $T = IO::File->new($tmf,"r");
+		while(<$T>) {
+			$cmds .= $_;
 		}
+		$T->close();
+		unlink($tmf);
+
+		nstore($cset,"$tmpcv.data");
+	
 		@new=(); @gone=();
 		my $ocmt=""; my @onew;
 		foreach my $line(split(/\n/,$cmds)) {
@@ -654,14 +554,14 @@ sub process($) {
 			} elsif($line =~ /^bk new (.+)$/) {
 				push(@new,$1);
 			} elsif($line =~ /^bk mv (.+) (.+)$/) {
-				my $cmt1=$inf->{cmt}{$1};
-				my $cmt2=$inf->{cmt}{$2};
+				my $cmt1=$adt->{$1}{cmt};
+				my $cmt2=$adt->{$2}{cmt};
 				if(defined $cmt1 and $cmt1 ne "") {
 					$cmt1.=$cmt2 if defined $cmt2 and $cmt2 ne "" and $cmt1 ne $cmt2;
 				} else {
 					$cmt1=$cmt2;
 				}
-				$cmt1="CVS: $cvsdate" if defined $inf->{scmt} and $cmt1 eq $inf->{scmt};
+				$cmt1="CVS: $cvsdate" if defined $scmt and $cmt1 eq $scmt;
 				my $n=$2;
 				rename($n,"x.$$");
 				bk("mv",$1,$n);
@@ -682,8 +582,8 @@ sub process($) {
 	if(@new) {
 		my $ocmt=""; my @onew=();
 		foreach my $new(@new) {
-			my $cmt = (defined $inf->{scmt}) ? "CVS: $cvsdate" : $inf->{cmt}{$new};
-			$cmt = "CVS: $cvsdate" if not defined $cmt or $cmt eq "";
+			my $cmt = $adt->{$new}{cmt};
+			$cmt = "CVS: $cvsdate" if $cmt eq "" or (defined $scmt and $cmt eq $scmt);
 			if($cmt ne $ocmt) {
 				bk(delta => '-i', "-y$ocmt", "-q", @onew) if @onew;
 				@onew=();
@@ -700,8 +600,9 @@ sub process($) {
 #	die "ENDE ".`pwd`."env @DT @AU bk -r ci -qG -yFoo\n";
 	my $ocmt=""; my @onew=();
 	foreach my $f(bkfiles("cg")) {
-		my $cmt = (defined $inf->{scmt}) ? "CVS: $cvsdate" : $inf->{cmt}{$f};
-		$cmt = "CVS: $cvsdate" if not defined $cmt or $cmt eq "";
+		my $cmt = $adt->{$f}{cmt};
+		$cmt = "CVS: $cvsdate" if $cmt eq "" or (defined $scmt and $cmt eq $scmt);
+
 		if($cmt ne $ocmt) {
 			bk(ci => '-qG', "-y$ocmt", @onew) if @onew;
 			@onew=();
@@ -711,12 +612,15 @@ sub process($) {
 	}
 	bk(ci => '-qG', "-y$ocmt", @onew) if @onew;
 
-	my $scmt = "CVS: $cvsdate".((defined $inf->{scmt}) ? "\n".$inf->{scmt} : "");
-	$scmt =~ s/\'/\"/g;
-	bk(undef,"bk sfiles -pC | env @DT @AU bk cset -q -y'$scmt'");
-	foreach my $sym(@{$inf->{sym}}) {
-		bk("cset","-r+","-S$sym");
-	}
+	$scmt = "CVS: $cvsdate".((defined $scmt) ? "\n$scmt" : "");
+	# $scmt =~ s/\'/\"/g;
+	open(FP,"|-") or do {
+		exec("env", @DT,@AU, "bk", "cset", "-q", "-y$scmt");
+		exit(99);
+	};
+	open(P,"bk sfiles -pC |");
+	print FP $_ while(<P>);
+	close(P); close(FP);
 
 	# unlink(bkfiles("g"));
 #	bk("-r","unget");
@@ -724,25 +628,77 @@ sub process($) {
 #	bk("-r","unlock");
 }
 
-my $sum;
-my $last;
-my $step;
-foreach my $x(@$cset) {
-	if($last) {
-		my $idate = int(($last->{ende}+$x->{start})/2);
-		if($idate > $dt_done) {
-			# process($sum->{ende},$sum) if $sum;
-			$sum=undef;
-			process($last);
-			bk("push","-q") unless $ENV{BKCVS_NOPUSH} or $step++%($ENV{BKCVS_EACH}||10);
-		} else {
-			$sum={} unless ref $sum;
-			atta($sum,$last);
+my %last;
+my $x;
+$DB::single=1;
+while(@$cset) {
+	$x = $cset->[0];
+	next if $x->{wann} <= $dt_done;
+	
+	foreach my $autor(keys %{$x->{autor}}) {
+		next if defined $last{$autor} and $last{$autor} >= $x->{wann};
+
+		my %adt;
+		my %adf;
+
+		my $scmt;
+		my $ldiff=$x->{wann};
+
+		# Wir suchen nun Blöcke, die nur von einem Autor stammen,
+		# entweder denselben Kommentar haben oder ausreichend eng
+		# zusammen sind, und nicht durch Änderungen anderer Autoren oder
+		# durch Symbole unterbrochen sind.
+		my $i=0;
+		sk_add: while($i < @$cset) {
+			my $y=$cset->[$i];
+			my $f=$y->{autor}{$autor};
+
+			# Änderung dieses Autors ?
+			last sk_add unless $f;
+
+			# Doppelte Änderung?
+			foreach my $fn(keys %$f) {
+				last sk_add if $adf{$fn}++;
+			}
+
+			# anderer Kommentar?
+			$scmt = scmt($f,$scmt);
+
+			if (not defined $scmt or $scmt eq "") {
+				last sk_add if $y->{wann} - $ldiff > $diff;
+			} else {
+				last sk_add if $y->{wann} - $ldiff > 10*$diff;
+			}
+
+
+			# JETZT aber: Sammle Änderungen.
+			foreach my $fn(keys %$f) {
+				$adt{$fn}=$f->{$fn};
+			}
+			$last{$autor}=$ldiff=$y->{wann};
+			
+
+			# Abbruch, wenn Symbol
+			last sk_add if $y->{sym};
+
+			# Abbruch, wenn Änderung anderer Autoren reinkommt.
+			foreach my $a(keys %{$y->{autor}}) {
+				last sk_add if $a ne $autor and (not defined $last{$a} or $last{$a} < $y->{wann});
+	}
+		} continue {
+			$i++;
+		}
+		process($autor,$ldiff,\%adt,0+@$cset);
+	}
+
+	if(defined $x->{sym}) {
+		foreach my $sym(@{$x->{sym}}) {
+			bk("cset","-r+","-S$sym");
 		}
 	}
-	$last = $x;
+} continue {
+	shift @$cset;
 }
-process($last) if $last;
 bk("push","-q") unless $ENV{BKCVS_NOPUSH};
 print STDERR "OK                                                 \n";
 unlink("$tmpcv.data");
