@@ -8,7 +8,6 @@ sourcemgr (1.326) unstable; urgency=low
 
   * bin/b.cvs.pl
        TEMP: call shell after renametool run
-  * 
 
  -- Matthias Urlichs <smurf@debian.org>  Sat, 28 Feb 2004 14:53:04 +0100
 
@@ -21,7 +20,6 @@ sourcemgr (1.325) unstable; urgency=low
 sourcemgr (1.324) unstable; urgency=low
 
   * b.get: Make "-w -" work
-  * 
 
  -- Matthias Urlichs <smurf@debian.org>  Wed, 18 Feb 2004 05:22:48 +0100
 
@@ -46,7 +44,6 @@ sourcemgr (1.321) unstable; urgency=low
 sourcemgr (1.320) unstable; urgency=low
 
   * b.exists: check _ized pathnames too
-  * 
 
  -- Matthias Urlichs <smurf@debian.org>  Thu,  5 Feb 2004 09:22:33 +0100
 
@@ -59,7 +56,7 @@ sourcemgr (1.319) unstable; urgency=low
 sourcemgr (1.318) unstable; urgency=low
 
   * recommend bitkeeper, not just suggest it :-/
-  * 
+
   * drop PRCS support, it's too ancient
 
  -- Matthias Urlichs <smurf@debian.org>  Tue,  3 Feb 2004 05:43:59 +0100
@@ -67,7 +64,6 @@ sourcemgr (1.318) unstable; urgency=low
 sourcemgr (1.317) unstable; urgency=low
 
   * b.put: don't be quiet doing a put, it's too dangerous
-  * 
 
  -- Matthias Urlichs <smurf@debian.org>  Tue,  3 Feb 2004 05:43:18 +0100
 
@@ -75,7 +71,6 @@ sourcemgr (1.316) unstable; urgency=low
 
   * b.cache, b.exists:
        fix cache handling and public/
-  * 
 
  -- Matthias Urlichs <smurf@debian.org>  Tue,  3 Feb 2004 05:43:03 +0100
 
@@ -89,7 +84,6 @@ sourcemgr (1.315) unstable; urgency=low
 sourcemgr (1.314) unstable; urgency=low
 
   * b.debuild: Handle EXTERN tag vs. externalized version number better
-  * 
 
  -- Matthias Urlichs <smurf@debian.org>  Sat, 31 Jan 2004 09:56:05 +0100
 
@@ -110,8 +104,7 @@ sourcemgr (1.312) unstable; urgency=low
 sourcemgr (1.311) unstable; urgency=low
 
   * b.version required write access to the archive.
-  * 
-  * Fixed.
+    Fixed.
 
  -- Matthias Urlichs <smurf@debian.org>  Wed, 28 Jan 2004 15:49:24 +0100
 
@@ -158,9 +151,7 @@ sourcemgr (1.305) unstable; urgency=low
 
 sourcemgr (1.304) unstable; urgency=low
 
-  * b.upversion:
-       don't complain if debian/changelog is missing
-  * 
+  * b.upversion: don't complain if debian/changelog is missing
 
  -- Matthias Urlichs <smurf@debian.org>  Mon, 26 Jan 2004 15:37:16 +0100
 
@@ -182,10 +173,10 @@ sourcemgr (1.302) unstable; urgency=low
 sourcemgr (1.301) unstable; urgency=low
 
   * b.cvs.pl just skipped deleted files (except for 1.1 versions)
-  * which breaks down when a file is added to a branch.
-  * 
-  * Fixed by explicitly skipping those files.
-  * NOTE: Saved .data files are obsoleted by this.
+    which breaks down when a file is added to a branch.
+    
+    Fixed by explicitly skipping those files.
+    NOTE: Saved .data files are obsoleted by this.
 
  -- Matthias Urlichs <smurf@debian.org>  Thu, 22 Jan 2004 08:01:01 +0100
 
@@ -246,8 +237,7 @@ sourcemgr (1.292) unstable; urgency=low
 
 sourcemgr (1.291) unstable; urgency=low
 
-  * b.debuild:
-       Allow writeable debian/control and changelog.
+  * b.debuild: Allow writeable debian/control and changelog.
 
  -- Matthias Urlichs <smurf@debian.org>  Tue, 11 Nov 2003 09:38:50 +0100
 
@@ -259,8 +249,7 @@ sourcemgr (1.290) unstable; urgency=low
 
 sourcemgr (1.289) unstable; urgency=low
 
-  * b.pull:
-       Schleife zum Funktionieren bringen
+  * b.pull: Schleife zum Funktionieren bringen
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Sat, 11 Oct 2003 10:06:13 +0200
 
@@ -274,8 +263,7 @@ sourcemgr (1.288) unstable; urgency=low
 
 sourcemgr (1.287) unstable; urgency=low
 
-  * bin/b.debuild
-       Build locally.
+  * bin/b.debuild: Build locally.
 
  -- Matthias Urlichs <smurf@debian.org>  Thu,  2 Oct 2003 21:36:44 +0200
 
@@ -292,7 +280,6 @@ sourcemgr (1.285) unstable; urgency=low
        Use apt-get build-dep and dpkg-checkbuilddeps
   * bin/b.debuild
        Build an inclusive .changes file with -b/-B
-  * 
 
  -- Matthias Urlichs <smurf@debian.org>  Mon, 29 Sep 2003 09:34:57 +0200
 
@@ -329,7 +316,6 @@ sourcemgr (1.280) unstable; urgency=low
 
   * b.debuild:
        Test debian/exporter for execute
-  * 
 
  -- Matthias Urlichs <smurf@debian.org>  Fri, 12 Sep 2003 21:05:40 +0200
 
@@ -343,7 +329,6 @@ sourcemgr (1.278) unstable; urgency=low
 
   * bin/b.debuild:
        Call b.exporter with a tag and on the original release too.
-  * 
 
  -- Matthias Urlichs <smurf@debian.org>  Fri, 12 Sep 2003 20:54:08 +0200
 
@@ -357,7 +342,7 @@ sourcemgr (1.277) unstable; urgency=low
 sourcemgr (1.276) unstable; urgency=low
 
   * b.rpm, b.rpmenv:
-  * 	Lies debian/version, dann rpm.version
+    	Lies debian/version, dann rpm.version
 
  -- Matthias Urlichs <smurf@debian.org>  Wed, 11 Sep 2002 16:06:11 +0200
 
@@ -365,8 +350,6 @@ sourcemgr (1.275) unstable; urgency=low
 
   * b.debuild:
        Call debian/exporter if present
-  * 
-  * 
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Wed, 10 Sep 2003 11:33:07 +0200
 
@@ -387,16 +370,13 @@ sourcemgr (1.272) unstable; urgency=low
 
   * b.put:
        Call b.cache with -d and -v
-  * 
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Wed, 10 Sep 2003 04:30:46 +0200
 
 sourcemgr (1.271) unstable; urgency=low
 
-  * b.cache:
-       Clean up cache directory
-  * b.upversion:
-       Fix shell thinko
+  * b.cache: Clean up cache directory
+  * b.upversion: Fix shell thinko
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Wed, 10 Sep 2003 03:28:06 +0200
 
@@ -407,7 +387,6 @@ sourcemgr (1.270) unstable; urgency=low
   * b.upversion:
        Use version number from debian/changelog
            if debian/version doesn't exist
-  * 
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Wed, 10 Sep 2003 03:16:02 +0200
 
@@ -421,7 +400,6 @@ sourcemgr (1.268) unstable; urgency=low
 
   * b.cache
        umask setzen
-  * 
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Tue, 22 Jul 2003 06:34:31 +0200
 
@@ -434,17 +412,13 @@ sourcemgr (1.267) unstable; urgency=low
 
 sourcemgr (1.266) unstable; urgency=low
 
-  * bin/b.cvs
-       Thinko, this is sh not perl
-  * 
+  * bin/b.cvs: Thinko, this is sh not perl
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Sat, 19 Jul 2003 11:31:48 +0200
 
 sourcemgr (1.265) unstable; urgency=low
 
-  * b.cvs:
-    Use anon login if no username given
-  * 
+  * b.cvs: Use anon login if no username given
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Sat, 19 Jul 2003 11:20:00 +0200
 
@@ -467,8 +441,7 @@ sourcemgr (1.263) unstable; urgency=low
 
 sourcemgr (1.262) unstable; urgency=low
 
-  * bin/b.cvs.pl
-       skip CVS file stuff
+  * bin/b.cvs.pl: skip CVS file stuff
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Wed, 16 Jul 2003 11:11:41 +0200
 
@@ -480,63 +453,49 @@ sourcemgr (1.261) unstable; urgency=low
 
 sourcemgr (1.260) unstable; urgency=low
 
-  * bin/b.cache
-       drop superfluous local files in cache
-  * 
+  * bin/b.cache: drop superfluous local files in cache
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Sun, 13 Jul 2003 23:08:44 +0200
 
 sourcemgr (1.259) unstable; urgency=low
 
-  * bin/b.cvs
-       Korrektur Usernamensangabe
-  * 
+  * bin/b.cvs: Korrektur Usernamensangabe
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Tue,  8 Jul 2003 19:24:49 +0200
 
 sourcemgr (1.258) unstable; urgency=low
 
-  * bin/b.cvs
-       Username; SSH statt anon-CVS
-  * 
+  * bin/b.cvs: Username; SSH statt anon-CVS
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Tue,  8 Jul 2003 08:24:20 +0200
 
 sourcemgr (1.257) unstable; urgency=low
 
-  * bin/b.debuild
-       Originale vernuenftig holen
-  * 
+  * bin/b.debuild: Originale vernuenftig holen
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Sat, 28 Jun 2003 08:35:08 +0200
 
 sourcemgr (1.256) unstable; urgency=low
 
-  * b.debuild:
-    Ignore SCCS spuriousities.
-  * 
+  * b.debuild: Ignore SCCS spuriousities.
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Fri, 13 Jun 2003 11:29:24 +0200
 
 sourcemgr (1.255) unstable; urgency=low
 
-  * b.debuild:
-    Use existing debian/changelog if present
+  * b.debuild: Use existing debian/changelog if present
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Fri, 13 Jun 2003 10:29:04 +0200
 
 sourcemgr (1.254) unstable; urgency=low
 
-  * b.upversion:
-    repariert
+  * b.upversion: repariert
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Fri, 13 Jun 2003 10:21:26 +0200
 
 sourcemgr (1.253) unstable; urgency=low
 
-  * debian/control
-       require dh-make
-  * 
+  * debian/control: require dh-make
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Fri, 13 Jun 2003 10:20:33 +0200
 
@@ -545,7 +504,6 @@ sourcemgr (1.252) unstable; urgency=low
   * Updated b.deb
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Fri, 13 Jun 2003 10:08:19 +0200
->>>>>>>
 
 sourcemgr (1.251) unstable; urgency=low
 
@@ -574,15 +532,13 @@ sourcemgr (1.248) unstable; urgency=low
 
 sourcemgr (1.247) unstable; urgency=low
 
-  * b.debuild
-       shut up wget
+  * b.debuild: shut up wget
 
  -- Matthias Urlichs <smurf@noris.de>  02 Jun 2003 06:51:53 +0200
 
 sourcemgr (1.246) unstable; urgency=low
 
-  * b.debuild
-       new archive layout!
+  * b.debuild: new archive layout!
 
  -- Matthias Urlichs <smurf@noris.de>  02 Jun 2003 06:44:26 +0200
 
