@@ -10,6 +10,7 @@ pn="$1"
 test -n "$pn" || pn="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
 test -n "$pn" || pn="$(basename "$(pwd)")"
 
+export BK_YEAR4=1
 rm -f debian/changelog
 bk prs -h -d':CSETKEY:\n' debian/version | while read cv ; do
 	v=$(bk r2c -r"$cv" debian/version)
@@ -54,7 +55,7 @@ while(<>) {
 }
 '
 
-chmod 444 debian/changelog
 bk get -p -q debian/changelog.old >> debian/changelog 2>/dev/null || true
+chmod 444 debian/changelog
 
 exit 0
