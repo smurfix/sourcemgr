@@ -23,7 +23,6 @@ fi
 
 if test -f debian/SCCS/s.version ; then
 	bk get -q debian/version || true
-	exit 0
 fi
 
 if test -f debian/version ; then
@@ -33,7 +32,6 @@ fi
 
 if test -f debian/SCCS/s.changelog ; then
 	bk get -q debian/changelog || true
-	exit 0
 fi
 
 if test -f debian/changelog -a -x /usr/bin/dpkg-parsechangelog ; then
@@ -43,7 +41,6 @@ fi
 
 if test -f SCCS/s.rpm.version ; then
 	bk get -q rpm.version || true
-	exit 0
 fi
 
 if test -f rpm.version ; then

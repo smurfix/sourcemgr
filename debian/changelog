@@ -1,3 +1,10 @@
+sourcemgr (1.281) unstable; urgency=low
+
+  * b.version:
+       Thinko
+
+ -- Matthias Urlichs <smurf@debian.org>  Sat, 13 Sep 2003 12:27:14 +0200
+
 sourcemgr (1.280) unstable; urgency=low
 
   * b.debuild:
