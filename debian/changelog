@@ -1,3 +1,10 @@
+sourcemgr (1.267) unstable; urgency=low
+
+  * bin/b.cache
+       Remote :KEY: doesn't work for some reason -- worked around
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Sat, 19 Jul 2003 19:17:47 +0200
+
 sourcemgr (1.266) unstable; urgency=low
 
   * bin/b.cvs

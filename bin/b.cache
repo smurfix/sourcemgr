@@ -88,10 +88,12 @@ if test -d "$c" ; then
 		echo -n -e "... end of change list\r" >&2
 		bk sfiles -ax | while read a ; do rm -f "$a" ; done
 		bk pull -q $BK_REPOSITORY/$what$dv 
-		R=$(bk changes -r+ -d':KEY:' $(bk parent -p))
-		L=$(bk changes -r+ -d':KEY:')
+		R=$(bk changes -r+ -d':USER:@:HOST:|:G:|:UTC:|:DSUM:\n' $(bk parent -p))
+		L=$(bk changes -r+ -d':USER:@:HOST:|:G:|:UTC:|:DSUM:\n')
 		if test "$L" != "$R" ; then
-			echo "Problem: remote:$R local:$L" >&2
+			echo "Problem: changesets differ" >&2
+			echo "remote:$R" >&2
+			echo "local :$L" >&2
 			exit 1
 		fi
 	fi
