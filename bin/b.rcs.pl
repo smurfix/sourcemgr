@@ -698,7 +698,7 @@ if($trev ne "" and $ENV{BK_TARGET_NEW}) { # tag must not exist
 	my $b_rev=bk("prs","-hd:I:", "-rBranch:$trev","ChangeSet");
 	die "Keine Revisionsnummer für '$trev' gefunden.\n" unless $b_rev;
 	bk("undo","-sfqa$b_rev");
-	system("bk -anhd:KEY: -r+ ChangeSet > BitKeeper/etc/SCCS/x.lmark");
+	system("bk prs -anhd:KEY: -r+ ChangeSet | tail -1 > BitKeeper/etc/SCCS/x.lmark");
 
 	bk("tag",$trev);
 } elsif($trev ne "") { # tag must exist

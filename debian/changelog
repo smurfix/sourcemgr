@@ -1,3 +1,9 @@
+sourcemgr (1.334) unstable; urgency=low
+
+  * stupid bug in b..{cvs,rcs}.pl  :-/
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon,  8 Mar 2004 03:34:10 +0100
+
 sourcemgr (1.333) unstable; urgency=low
 
   * also tag completed changes. Grumble.

@@ -894,7 +894,7 @@ if($trev ne "" and $ENV{BK_TARGET_NEW}) { # tag must not exist
 	my $b_rev=bk("prs","-hd:I:", "-rBranch:$trev","ChangeSet");
 	die "No revision number for '$trev' found.\n" unless $b_rev;
 	bk("undo","-sfqa$b_rev");
-	system("bk -anhd:KEY: -r+ ChangeSet > BitKeeper/etc/SCCS/x.lmark");
+	system("bk prs -anhd:KEY: -r+ ChangeSet | tail -1 > BitKeeper/etc/SCCS/x.lmark");
 
 	bk("tag",$trev);
 	bk("clone",".","$ENV{BK_REPOSITORY}/$pn");
@@ -975,7 +975,7 @@ while(@$cset) {
 			$done++;
 		}
 	}
-	system("bk -anhd:KEY: -r+ ChangeSet > BitKeeper/etc/SCCS/x.lmark");
+	system("bk prs -anhd:KEY: -r+ ChangeSet | tail -1 > BitKeeper/etc/SCCS/x.lmark");
 } continue {
 	shift @$cset;
 	last if -f $ENDFILE;
