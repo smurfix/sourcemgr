@@ -260,7 +260,6 @@ sub pdate($) {
 	$date;
 }
 
-my %symldate; # limit on that symbol -- earliest
 my %symdate; # actual date - latest
 my $cset;
 my $dt_done;
@@ -310,11 +309,11 @@ sub add_date($;$$$$$) {
 		$autor="?" unless defined $autor;
 		$cs->{autor}={} unless ref $cs->{autor};
 		$cs->{autor}{$autor}={} unless ref $cs->{autor}{$autor};
-		$cs = $cs->{autor}{$autor};
+		my $csf = $cs->{autor}{$autor};
 	
-		$cs->{$fn}{cmt} = $cmt;
-		$cs->{$fn}{rev} = $rev;
-		$cs->{$fn}{gone} = 1 if $gone;
+		$csf->{$fn}{cmt} = $cmt;
+		$csf->{$fn}{rev} = $rev;
+		$csf->{$fn}{gone} = 1 if $gone;
 	} else {
 		$cs->{sym} = [] unless defined $cs->{sym};
 	}
@@ -397,6 +396,8 @@ sub proc(@) {
 			next;
 		}
 		if($state == 2) {
+#symbolic names:
+#    v0_9_1: 1.3
 			if($x =~ /^\s+(\S+)\:\s*(\S+)\s*$/) { # Branches
 				my $dsym=$1;
 				my $drev=$2;
@@ -555,7 +556,7 @@ if(-f "$tmppn.data") {
 	} continue {
 		$mr++;
 	}
-	
+
 	foreach my $sym(keys %symdate) {
 		push(@{add_date($symdate{$sym})->{sym}},$sym);
 	}
@@ -893,6 +894,14 @@ my $ddone=0;
 
 while(@$cset) {
 	$x = $cset->[0];
+	if(defined $x->{sym}) {
+		my($ss,$mm,$hh,$d,$m,$y)=localtime($x->{wann});
+		$m++; $y+=1900; ## zweistellig wenn <2000
+		my $cvsdate = sprintf "%04d-%02d-%02d %02d:%02d:%02d",$y,$m,$d,$hh,$mm,$ss;
+		foreach my $s(@{$x->{sym}}) {
+			print "$s $cvsdate     \n";
+		}
+	}
 	next if $x->{wann} <= $dt_done;
 	
 	foreach my $autor(keys %{$x->{autor}}) {
