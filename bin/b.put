@@ -64,6 +64,9 @@ END
 	else
 		echo + bk push $BK_REPOSITORY/$what$dv
 		bk push -q $BK_REPOSITORY/$what$dv
+		# Update cache now.
+		echo + bk push CACHE
+		bk push -q . $(b.cache -n)
 	fi
 else
 	test -z "$vers" || dv="-$vers"

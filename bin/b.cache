@@ -9,14 +9,15 @@ cat >&2 <<END
 Usage: $(basename $0)  -- holt Sourcecode aus dem Archiv lokale Cache
        [ -v releasename ]
        [ -d Paket ]
+       [ -n (do not update) ]
 END
 }
 
 vers=noris
 dir=
-optp=
+no_update=
 
-   eval set -- "$(getopt "d:nv:w:h" "$@")"
+   eval set -- "$(getopt "d:nv:h" "$@")"
    for i
    do
 	   case "$i"
@@ -27,7 +28,9 @@ optp=
 			   shift; dir="$1"; shift;;
 		   -v)
 			   shift; vers="$1"; shift;;
-			--)
+		   -n)
+		   	   shift; no_update=y ;;
+		   --)
 				shift; break ;;
 	   esac
    done
@@ -79,22 +82,24 @@ if test -d "$c" ; then
 	mv "$c" "$c.x"
 	cd "$c.x"
 
-	echo "$what$dv: Updating cache. Changes:" >&2
-	env PAGER=/bin/cat bk changes -R -nd":I:	:USER:@:DOMAIN:" >&2
-	echo -n -e "... end of change list\r" >&2
-	bk sfiles -ax | while read a ; do rm -f "$a" ; done
-	bk pull -q $BK_REPOSITORY/$what$dv 
-	R=$(bk changes -r+ -d':UTC:\n' $(cat BitKeeper/log/parent))
-	L=$(bk changes -r+ -d':UTC:\n')
-	if test "$L" != "$R" ; then
-		echo "Problem: remote:$R local:$L" >&2
-		exit 1
+	if test -z "$no_update" ; then
+		echo "$what$dv: Updating cache. Changes:" >&2
+		env PAGER=/bin/cat bk changes -R -nd":I:	:USER:@:DOMAIN:" >&2
+		echo -n -e "... end of change list\r" >&2
+		bk sfiles -ax | while read a ; do rm -f "$a" ; done
+		bk pull -q $BK_REPOSITORY/$what$dv 
+		R=$(bk changes -r+ -d':KEY:' $(bk parent -p))
+		L=$(bk changes -r+ -d':KEY:')
+		if test "$L" != "$R" ; then
+			echo "Problem: remote:$R local:$L" >&2
+			exit 1
+		fi
 	fi
 else
 	echo "$what$dv: Importing to cache" >&2
-	rm -rf "$c.x"
+	rm -rf "$c" "$c.x"
 	bk clone -q $BK_REPOSITORY/$what$dv "$c.x"
 fi
 mv "$c.x" "$c"
-echo "/var/cache/bk/$what$dv"
+echo "$c"
 
