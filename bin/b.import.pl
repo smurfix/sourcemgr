@@ -105,6 +105,7 @@ my @gone = grep {
 bk(get => "-qeg",@cur) if @cur;
 
 if(@new and @gone) {
+	print STDERR "  *** rename ***\r";
 	bk(get=>"-qeg",@gone);
 	open(RN,"| env @DT bk renametool");
 	foreach my $f(sort { $a cmp $b } @gone) { print RN "$f\n"; }
@@ -112,6 +113,7 @@ if(@new and @gone) {
 	foreach my $f(sort { $a cmp $b } @new) { print RN "$f\n"; }
 	close(RN);
 	confess "No rename" if $?;
+	print STDERR "                \r";
 } elsif(@new) {
 	bk(new => '-qG', "-yNew:$cmt", @new);
 } elsif(@gone) {
