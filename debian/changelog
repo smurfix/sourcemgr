@@ -1,3 +1,11 @@
+sourcemgr (1.289) unstable; urgency=low
+
+  * b.pull:
+       Schleife zum Funktionieren bringen
+  * 
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Sat, 11 Oct 2003 10:06:13 +0200
+
 sourcemgr (1.288) unstable; urgency=low
 
   * bin/b.debuild, bin/debu:
