@@ -209,7 +209,7 @@ sub cvs {
 		push(@res,$_);
 	}
 	close(FP);
-	die "CVS error: $?\n" if $?;
+	die "CVS error: $?\n" if $? and not $ENV{CVS_IGNORE_ERROR};
 	wantarray ? @res : join(" ",@res);
 }
 
