@@ -154,10 +154,15 @@ sub cvs {
 	} else {
 		push(@comp,"-z3");
 	}
+	my $do_cd=1;
+	unless(defined $_[0]) {
+		shift(@_);
+		$do_cd=0;
+	}
 	unshift(@_,"cvs",@comp,"-d",$ENV{CVS_REPOSITORY});
 	print STDERR ">>> @_\n" if $debug;
 	open(FP,"-|") or do {
-		chdir("..");
+		chdir("..") if $do_cd;
 		exec @_;
 		#exec "strace","-v","-s3000","-o","/var/tmp/prcs","-F","-f",@_;
 		exit(99);
@@ -179,6 +184,7 @@ sub bkfiles($) {
 		 m#^\.cvsignore$# or
 		 m#/\.cvsignore$# or
 		 m#\.prj$# or
+		 m#/SCCS/x\.# or
 		 m#^CVS/# or
 		 m#/CVS/# or
 		 m#^CVSROOT/# or
@@ -323,7 +329,7 @@ sub proc(@) {
 	proc1($fn,$dt,$rev,$cmt,$autor,$syms{$rev}) if $dt; $dt=0;
 }
 
-my $tmpcv = "/var/cache/cvs/$cn";
+my $tmpcv = "/var/cache/cvs/";
 
 if(-f "$tmpcv.data") {
 	print STDERR "Reading stored CVS log\n";
@@ -331,13 +337,19 @@ if(-f "$tmpcv.data") {
 } else {
 	$cset=[];
 	print STDERR "Processing CVS log\n";
-	for my $mr(1..9) {
-		rmtree($tmpcv);
+	my $mr=1;
+	while(1) {
+		mkpath("$tmpcv/$mr",1,0755);
 		
 		print STDERR "Fetch CVS files $mr...\n";
-		chdir("/var/cache/cvs/bk");
-		cvs("get","-A","-r$mr.1",$cn);
-		chdir($tmpcv);
+		chdir("$tmpcv/$mr") or die "no dir $tmpcv/$mr";
+		if(-d $cn) {
+			chdir($cn) or die "no chdir $cn: $!";
+			cvs(undef,"update","-d","-r$mr.1");
+		} else {
+			cvs(undef,"get","-r$mr.1",$cn);
+			chdir($cn) or last;
+		}
 		print STDERR "processing $mr...\n";
 		my @buf = ();
 		open(LOG,"cvs log |");
@@ -352,8 +364,9 @@ if(-f "$tmpcv.data") {
 		}
 		proc(@buf) if @buf;
 		close(LOG);
+	} continue {
+		$mr++;
 	}
-	rmtree($tmpcv);
 	foreach my $sym(keys %symdate) {
 		push(@{add_date($symdate{$sym})},$sym);
 	}
