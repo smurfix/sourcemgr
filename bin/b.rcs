@@ -9,21 +9,19 @@ usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -d Paket ]
-       [ -l (kein PSERVER) ]
        [ -n # (Intermediate-Push alle # Importe; Default 100; 0=garnicht) ]
        [ -k # (ignoriere CVS-Fehler) ]
        [ -L (kein Fehler wenn Lock nicht geht) ]
        [ -r Fork (im CVS) ]
 	   [ -s (shell instead of renametool) ] [ -S (kein Renametool) ]
-       [ -v releasename (cvs) ]
+       [ -v releasename (rcs) ]
        [ -w neuer releasename ]
        [ -e CVS-Fudge-Sekunden (Default 120) ]
        [ -q (quiet!) ]
        [ -D (Debug) ] [ -Z (keine Kompression) ] [ -b # (Limit) ]
-       woher  was
+       wo
 
-"woher" ist der Name des entfernten Repository.
-"was" ist der Name des Archivs dort.
+"wo" ist der Pfad zum RCS-Repository.
 END
 }
 
@@ -31,7 +29,7 @@ END
 PATH=/usr/src/STATUS/bin:/usr/local/bin:$PATH
 
 dir=
-vers=cvs
+vers=rcs
 push=100
 rvers=
 nvers=
@@ -43,11 +41,10 @@ comp=-z3
 diff=
 rename=
 shells=0
-loc=
 bg=
 df=0
 
-   eval set -- "$(getopt "hb:d:De:klLn:qr:sSv:w:Z" "$@")"
+   eval set -- "$(getopt "hb:d:De:kLn:qr:sSv:w:Z" "$@")"
    for i
    do
 	   case "$i"
@@ -80,8 +77,6 @@ df=0
 			   shift; rvers="$1"; shift;;
 			-n)
 				shift; push=$1 ; shift ;;
-			-l)
-				shift; loc=y ;;
 			-b)
 				shift; bg=$1; shift ;;
 			--)
@@ -97,14 +92,9 @@ if test -z "$dir" ; then
 	rm -f /tmp/bn.$$
 fi
 
-test -n "$2"
-test -z "$3"
-if test -z "$loc" ; then
-	woher=":pserver:$1"
-else
-	woher="$1"
-fi
-was="$2"
+test -n "$1"
+test -z "$2"
+wo="$1"
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 
 trap 'usage; exit 1' 0
@@ -124,7 +114,6 @@ fi
 
 test -d /var/cache/cvs/bk/$what$dv || b.get -d $dir -v $vers $wset /var/cache/cvs/bk/$what$dv || true
 
-export CVS_REPOSITORY="$woher"
 export BKCVS_COMP=$comp
 export BK_TARGET_REV="$rvers"
 export BKCVS_SHELLS=$shells
@@ -134,8 +123,8 @@ if test -n "$nvers" ; then
 fi
 test -n "$diff" && test -z "$BKCVS_DIFF" && export BKCVS_DIFF=$diff
 test -z "$BKCVS_PUSH" && export BKCVS_PUSH=$push
-test -z "$BKCVS_NORENAME" && export BKCVS_NORENAME=$rename
+export BKCVS_NORENAME=1 # no gone files, so ...
 test -n "$verbose" && export BK_VERBOSE=1
 test -n "$ignore" && export BKCVS_IGNORE_ERROR=1
 export BKCVS_LOCK=$bg
-exec $run "$was" "$what$dv"
+exec $run "$wo" "$what$dv"
