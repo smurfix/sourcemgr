@@ -13,6 +13,7 @@ use File::ShLock;
 
 my $ENDFILE = "/var/run/b.rcs.stop";
 my $verbose = $ENV{"BK_VERBOSE"};
+my @skip = split(/\s+/,$ENV{"BKCVS_SKIP"});
 
 my $lock;
 if($ENV{BKCVS_LOCK}) {
@@ -385,7 +386,14 @@ if(-f "$tmppn.data") {
 	my $mr=1;
 	chdir($cn) or die "no chdir $cn: $!";
 	find(sub {
-		return unless $File::Find::name =~ /^(?:\.\/)?(.+)\/RCS\/(.+),v$/;
+		$File::Find::name =~ s/^\.\///;
+		foreach my $d(@skip) {
+			if ($File::Find::name eq $skip) {
+				$File::Find::prune=1;
+				return;
+			}
+		}
+		return unless $File::Find::name =~ /^(.+)\/RCS\/(.+),v$/;
 		my($dir,$file)=($1,$2);
 
 		print STDERR " $pn: processing $dir/$file       |\r";
