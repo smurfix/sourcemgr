@@ -1,3 +1,11 @@
+sourcemgr (1.348) unstable; urgency=low
+
+  * b.debuild:
+    Linda no longer takes -I
+  * 
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 18 May 2004 13:21:29 +0200
+
 sourcemgr (1.347) unstable; urgency=low
 
   * b.cache: Use "bk undo" on repogca to keep the cache synchronized

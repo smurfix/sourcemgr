@@ -298,7 +298,7 @@ ls
 echo ""
 
 for f in *.changes; do
-	if lintian -viI "$f" && linda -viI "$f" || test -n "$lwarn" ; then : ; else
+	if lintian -viI "$f" && linda -vi "$f" || test -n "$lwarn" ; then : ; else
 		echo "Error in $f: Aborting.\n"; >&2
 		exit 1
 	fi
