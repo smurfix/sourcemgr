@@ -1,3 +1,12 @@
+sourcemgr (1.370) unstable; urgency=low
+
+  * b.cvs.pl: 
+       Some CVS servers send different pathnames when logging.
+       Accept that (reluctantly.)
+  * 
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon,  4 Oct 2004 21:24:24 +0200
+
 sourcemgr (1.369) unstable; urgency=low
 
   * bin/b.cvs.pl: 

@@ -683,7 +683,10 @@ sub proc(@) {
 		}
 		if($state == 0 and $x =~ s/^RCS file:\s+(\S+),v\s*$/$1/) {
 			$fn = $x;
-			die "Unknown name: $fn\n" unless $fn =~ s/^.*?\Q$re\E\///;
+			unless($fn =~ s/^\Q$re\E\/// or $fn =~ s/^.*?\Q$re\E\///) {
+				my $lre = $re; $lre =~ s#.*/#/#;
+				die "Unknown name: $fn\n" unless $fn =~ s/^.*?\Q$lre\E\///;
+			}
 			$fn =~ s#/Attic/#/#;
 			$fn =~ s#^Attic/##;
 			$state=1;
