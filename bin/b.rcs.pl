@@ -520,7 +520,7 @@ sub process($$$$) {
 		my %rev;
 		foreach my $f(keys %$adt) {
 			my $rev = $adt->{$f}{rev};
-			print STDERR " $pn: Processing $len: $cvsdate $rev $f |\r" if $verbose;
+			print STDERR " $pn: $len: $cvsdate $rev $f |\r" if $verbose;
 			bk("get","-egq",$f) if -f dirname($f)."/SCCS/s.".basename($f);
 			mkpath(dirname($f),0,0755);
 
