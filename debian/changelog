@@ -1,0 +1,466 @@
+sourcemgr (1.247) unstable; urgency=low
+
+  * b.debuild
+       shut up wget
+
+ -- Matthias Urlichs <smurf@noris.de>  02 Jun 2003 06:51:53 +0200
+
+sourcemgr (1.246) unstable; urgency=low
+
+  * b.debuild
+       new archive layout!
+
+ -- Matthias Urlichs <smurf@noris.de>  02 Jun 2003 06:44:26 +0200
+
+sourcemgr (1.245) unstable; urgency=low
+
+  * bin/b.debuild
+       logic error: no-sign vs. no-binary
+
+ -- Matthias Urlichs <smurf@noris.de>  02 Jun 2003 05:09:11 +0200
+
+sourcemgr (1.244) unstable; urgency=low
+
+  * bin/b.debuild
+       debuild -v FOO doesn't like the space
+
+ -- Matthias Urlichs <smurf@noris.de>  28 May 2003 09:12:38 +0200
+
+sourcemgr (1.243) unstable; urgency=low
+
+  * Merge
+
+ -- Matthias Urlichs <smurf@noris.de>  28 May 2003 09:06:34 +0200
+
+sourcemgr (1.242) unstable; urgency=low
+
+  * bin/debu
+       quick workaround to be able to do buggy packages
+
+ -- Matthias Urlichs <smurf@noris.de>  28 May 2003 09:02:23 +0200
+
+sourcemgr (1.241) unstable; urgency=low
+
+  * bin/debu
+       Run linda too.
+       Echo stuff.
+
+ -- Matthias Urlichs <smurf@noris.de>  28 May 2003 09:00:17 +0200
+
+sourcemgr (1.241) unstable; urgency=low
+
+  * Merge
+
+ -- Matthias Urlichs <smurf@noris.de>  27 May 2003 22:53:02 +0200
+
+sourcemgr (1.239) unstable; urgency=low
+
+  * bin/b.debuild
+       Option -S signiert nicht
+
+ -- Matthias Urlichs <smurf@noris.de>  27 May 2003 22:50:43 +0200
+
+sourcemgr (1.240) unstable; urgency=low
+
+  * bin/b.debuild:
+    pass -v to dpkg-genchanges
+
+ -- Matthias Urlichs <smurf@noris.de>  27 May 2003 21:35:16 +0200
+
+sourcemgr (1.239) unstable; urgency=low
+
+  * bin/b.debuild
+       Go to the correct directory if no external orig.tar.gz found
+
+ -- Matthias Urlichs <smurf@noris.de>  27 May 2003 19:09:40 +0200
+
+sourcemgr (1.238) unstable; urgency=low
+
+  * Also use linda.
+
+ -- Matthias Urlichs <smurf@noris.de>  27 May 2003 18:42:41 +0200
+
+sourcemgr (1.237) unstable; urgency=low
+
+  * don't try to use debian/version revs with empty csetrev
+
+ -- Matthias Urlichs <smurf@noris.de>  21 May 2003 13:46:50 +0200
+
+sourcemgr (1.236) unstable; urgency=low
+
+  * bin/b.debuild
+       Use wget to pull orig.tar.gz if it exists
+
+ -- Matthias Urlichs <smurf@noris.de>  18 May 2003 21:47:22 +0200
+
+sourcemgr (1.235) unstable; urgency=low
+
+  * Merge
+
+ -- Matthias Urlichs <smurf@noris.de>  14 May 2003 06:53:34 +0200
+
+sourcemgr (1.234) unstable; urgency=low
+
+  * b.debuild: abort on lintian error
+
+ -- Matthias Urlichs <smurf@noris.de>  21 Apr 2003 22:33:29 +0200
+
+sourcemgr (1.233) unstable; urgency=low
+
+  * fakeroot and signfile don't mix ?
+
+ -- Matthias Urlichs <smurf@noris.de>  21 Apr 2003 22:27:09 +0200
+
+sourcemgr (1.232) unstable; urgency=low
+
+  * b.debuild: Allow to skip lintian errors
+
+ -- Matthias Urlichs <smurf@noris.de>  21 Apr 2003 18:02:04 +0200
+
+sourcemgr (1.231) unstable; urgency=low
+
+  * b.debuild: Run lintian on the result
+
+ -- Matthias Urlichs <smurf@noris.de>  21 Apr 2003 17:56:25 +0200
+
+sourcemgr (1.230) unstable; urgency=low
+
+  * b.debuild: Put build tree in /var/tmp, not /tmp
+
+ -- Matthias Urlichs <smurf@noris.de>  21 Apr 2003 17:49:23 +0200
+
+sourcemgr (1.229) unstable; urgency=low
+
+  * b.debuild:
+    Option whether to keep tmpdir
+    Use correct version for signing (drop epoch, keep debianversion)
+
+ -- Matthias Urlichs <smurf@noris.de>  21 Apr 2003 17:23:44 +0200
+
+sourcemgr (1.228) unstable; urgency=low
+
+  * b.cvs: clone new branch subtree
+
+ -- Matthias Urlichs <smurf@noris.de>  21 Apr 2003 11:55:54 +0200
+
+sourcemgr (1.227) unstable; urgency=low
+
+  * Merge bk://bitkeeper.noris.de/pop_sourcemgr
+  * into smurf.noris.de:/usr/local/src/pop/sourcemgr
+
+ -- Matthias Urlichs <smurf@noris.de>  21 Apr 2003 11:32:04 +0200
+
+sourcemgr (1.227) unstable; urgency=low
+
+  * b.cvs: edit-Fehler in der Usage
+
+ -- Matthias Urlichs <smurf@noris.de>  21 Apr 2003 11:31:56 +0200
+
+sourcemgr (1.227) unstable; urgency=low
+
+  * Merge
+
+ -- Matthias Urlichs <smurf@noris.de>  20 Apr 2003 10:29:59 +0200
+
+sourcemgr (1.221) unstable; urgency=low
+
+  * b.cvs: Tag imported sources
+
+ -- Matthias Urlichs <smurf@noris.de>  20 Apr 2003 10:28:32 +0200
+
+sourcemgr (1.226) unstable; urgency=low
+
+  * b.debuild: Install binaries afterwards
+  * b.uplog: Fix check
+
+ -- Matthias Urlichs <smurf@noris.de>  20 Apr 2003 09:54:53 +0200
+
+sourcemgr (1.225) unstable; urgency=low
+
+  * b.cvs.pl: Grab x.1.1.1 in addition to x.1 and x.1.2.1
+
+ -- Matthias Urlichs <smurf@noris.de>  20 Apr 2003 09:45:40 +0200
+
+sourcemgr (1.224) unstable; urgency=low
+
+  * b.uplog:
+       get debian/control
+
+ -- Matthias Urlichs <smurf@noris.de>  20 Apr 2003 09:40:19 +0200
+
+sourcemgr (1.223) unstable; urgency=low
+
+  * debu:
+    install packages if -i is first arg
+    move built stuff to /var/tmp
+
+ -- Matthias Urlichs <smurf@noris.de>  20 Apr 2003 06:40:58 +0200
+
+sourcemgr (1.222) unstable; urgency=low
+
+  * b.uplog: Always use package name from debian/control
+
+ -- Matthias Urlichs <smurf@noris.de>  18 Apr 2003 22:38:25 +0200
+
+sourcemgr (1.221) unstable; urgency=low
+
+  * b.import: option "-t FOO": Tag the import.
+
+ -- Matthias Urlichs <smurf@noris.de>  18 Apr 2003 21:43:05 +0200
+
+sourcemgr (1.220) unstable; urgency=low
+
+  * Also bitkeeperizes Debian archives.
+
+ -- Matthias Urlichs <smurf@noris.de>  18 Apr 2003 18:56:39 +0200
+
+sourcemgr (1.219) unstable; urgency=low
+
+  * Push/Pull dance if called without arguments
+
+ -- Matthias Urlichs <smurf@noris.de>  18 Apr 2003 16:36:30 +0200
+
+sourcemgr (1.218) unstable; urgency=low
+
+  * Do not try to install dot-files (like editor temps).
+
+ -- Matthias Urlichs <smurf@noris.de>  18 Apr 2003 00:26:22 +0200
+
+sourcemgr (1.217) unstable; urgency=low
+
+  * b.get: Option -g klemmt den aktuellen Pfad vor den Namen.
+    cd .../src/foo/bar; b.get -g baz
+    => Archiv foo_bar_baz steht in ./baz
+
+ -- Matthias Urlichs <smurf@noris.de>  18 Apr 2003 00:21:16 +0200
+
+sourcemgr (1.216) unstable; urgency=low
+
+  * b.upversion: uebergebe neue Versionsnummer in NEWVERSION
+
+ -- Matthias Urlichs <smurf@noris.de>  18 Apr 2003 00:08:47 +0200
+
+sourcemgr (1.216) unstable; urgency=low
+
+  * b.debuild: left debug statement in
+
+ -- Matthias Urlichs <smurf@noris.de>  16 Apr 2003 09:37:55 +0200
+
+sourcemgr (1.215) unstable; urgency=low
+
+  * b.debuild:
+    new option -B (build binaries with pbuilder)
+
+ -- Matthias Urlichs <smurf@noris.de>  16 Apr 2003 07:28:35 +0200
+
+sourcemgr (1.214) unstable; urgency=low
+
+  * Do not depend on installing from within a BK archive
+
+ -- Matthias Urlichs <smurf@noris.de>  15 Apr 2003 15:58:38 +0200
+
+sourcemgr (1.213) unstable; urgency=low
+
+  * debian/control
+       Depend on RCS and CVS
+  * debian/users
+       Add stupid hostnames
+
+ -- Matthias Urlichs <smurf@noris.de>  07 Apr 2003 10:44:46 +0200
+
+sourcemgr (1.212) unstable; urgency=low
+
+  * b.rcs, b.rcs.pl:
+    Option -tX: Setze Tag X am Ende der Aktion
+
+ -- Matthias Urlichs <smurf@noris.de>  07 Apr 2003 10:20:09 +0200
+
+sourcemgr (1.211) unstable; urgency=low
+
+  * Updated Depends: line
+
+ -- Matthias Urlichs <smurf@noris.de>  05 Apr 2003 19:24:59 +0200
+
+sourcemgr (1.210) unstable; urgency=low
+
+  * bin/debu: Build locally
+
+ -- Matthias Urlichs <smurf@noris.de>  05 Apr 2003 18:02:13 +0200
+
+sourcemgr (1.209) unstable; urgency=low
+
+  * Merge
+
+ -- Matthias Urlichs <smurf@noris.de>  01 Apr 2003 14:26:17 +0200
+
+sourcemgr (1.208) unstable; urgency=low
+
+  * bin/b.uplog
+       Vergiss rpm.version
+
+ -- Matthias Urlichs <smurf@noris.de>  01 Apr 2003 14:25:26 +0200
+
+sourcemgr (1.207) unstable; urgency=low
+
+  * b.debuild:
+    Option -s?: pass through to dpkg-genchanges+buildpackage
+
+ -- Matthias Urlichs <smurf@noris.de>  30 Mar 2003 22:12:26 +0200
+
+sourcemgr (1.207) unstable; urgency=low
+
+  * b.debuild:
+    Option -s?: pass through to dpkg-genchanges+buildpackage
+
+ -- Matthias Urlichs <smurf@noris.de>  30 Mar 2003 19:05:38 +0200
+
+sourcemgr (1.206) unstable; urgency=low
+
+  * uplog:
+    set BK_YEAR4 environment variable
+    append to changelog _before_ read-only-ing it
+
+ -- Matthias Urlichs <smurf@noris.de>  30 Mar 2003 09:19:03 +0200
+
+sourcemgr (1.205) unstable; urgency=low
+
+  * b.uplog:
+    Fixed a typo
+
+ -- Matthias Urlichs <smurf@noris.de>  30 Mar 2003 09:13:22 +0200
+
+sourcemgr (1.204) unstable; urgency=low
+
+  * b.upversion
+    Don't update the version when NO_NEW_VERSION is set
+
+ -- Matthias Urlichs <smurf@noris.de>  30 Mar 2003 09:05:56 +0200
+
+sourcemgr (1.203) unstable; urgency=low
+
+  * b.debuild:
+    Set ssh key
+
+ -- Matthias Urlichs <smurf@noris.de>  29 Mar 2003 21:59:58 +0200
+
+sourcemgr (1.202) unstable; urgency=low
+
+  * b.uplog b.debuild:
+    Handle old changelog
+
+ -- Matthias Urlichs <smurf@noris.de>  29 Mar 2003 21:56:15 +0200
+
+sourcemgr (1.201) unstable; urgency=low
+
+  * b.debuild:
+    answer Y if a file is already signed
+
+ -- Matthias Urlichs <smurf@noris.de>  29 Mar 2003 21:55:14 +0200
+
+sourcemgr (1.200) unstable; urgency=low
+
+  * b.uplog b.debuild:
+    Build fixes
+
+ -- Matthias Urlichs <smurf@noris.de>  29 Mar 2003 21:53:33 +0200
+
+sourcemgr (1.196) unstable; urgency=low
+
+  * b.debuild:
+    Start gpg agent if possible
+
+ -- Matthias Urlichs <smurf@noris.de>  29 Mar 2003 09:31:54 +0200
+
+sourcemgr (1.195) unstable; urgency=low
+
+  * b.debuild:
+    push quietly after setting the DEBIAN tag
+
+ -- Matthias Urlichs <smurf@noris.de>  29 Mar 2003 09:23:59 +0200
+
+sourcemgr (1.194) unstable; urgency=low
+
+  * b.debuild:
+       Use ssh agent if necessary/possible
+       Cleanup binary build
+
+ -- Matthias Urlichs <smurf@noris.de>  29 Mar 2003 09:14:41 +0200
+
+sourcemgr (1.193) unstable; urgency=low
+
+  * bin/b.uplog
+    Only use debian/version-ized entries
+  * bin/b.upversion
+    Fix version number in change entry
+
+ -- Matthias Urlichs <smurf@noris.de>  29 Mar 2003 07:44:07 +0200
+
+sourcemgr (1.192) unstable; urgency=low
+
+  * bin/b.debuild
+       Delete unused variables
+       Delete useless code
+
+ -- Matthias Urlichs <smurf@noris.de>  28 Mar 2003 12:23:50 +0200
+
+sourcemgr (1.191) unstable; urgency=low
+
+  * bin/b.debuild
+       Added dput destination
+       Use debsign correctly
+       Use dput corrctly :-/
+
+ -- Matthias Urlichs <smurf@noris.de>  28 Mar 2003 12:15:44 +0200
+
+sourcemgr (1.190) unstable; urgency=low
+
+  * bin/b.debuild
+       Complete build and upload
+
+ -- Matthias Urlichs <smurf@noris.de>  28 Mar 2003 12:02:59 +0200
+
+sourcemgr (1.189) unstable; urgency=low
+
+  * extended b.debuild
+
+ -- Matthias Urlichs <smurf@noris.de>  28 Mar 2003 10:50:07 +0200
+
+sourcemgr (1.188) unstable; urgency=low
+
+  * bin/b.debuild
+       Set BK tag
+
+ -- Matthias Urlichs <smurf@noris.de>  28 Mar 2003 10:39:13 +0200
+
+sourcemgr (1.187) unstable; urgency=low
+
+  * bin/b.debuild
+       do not archive debian/version file
+
+ -- Matthias Urlichs <smurf@noris.de>  26 Mar 2003 11:33:33 +0200
+
+sourcemgr (1.186) unstable; urgency=low
+
+  * bin/b.debuild
+       use fakeroot
+
+ -- Matthias Urlichs <smurf@noris.de>  24 Mar 2003 21:56:35 +0200
+
+sourcemgr (1.185) unstable; urgency=low
+
+  * b.debuild
+
+ -- Matthias Urlichs <smurf@noris.de>  24 Mar 2003 21:55:33 +0200
+
+sourcemgr (1.184) unstable; urgency=low
+
+  * Versionsnummern-Update vergessen ??
+
+ -- Matthias Urlichs <smurf@noris.de>  13 Mar 2003 10:01:08 +0200
+
+sourcemgr (1.183) unstable; urgency=low
+
+  * Versionsdatei...
+
+ -- Matthias Urlichs <smurf@noris.de>  04 Mar 2003 18:00:35 +0200
+

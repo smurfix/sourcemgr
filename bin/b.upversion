@@ -18,26 +18,60 @@ if ! test -f $F ; then BF=debian/version; F=debian/SCCS/s.version; fi
 test -n "$BK_PENDING" || exit 0
 test -s "$BK_PENDING" || exit 0
 test -s "$F" || exit 0
+
+if grep -q '^'"$F"'|' "$BK_PENDING" ; then
+	NEW_VERSION="$(head -1 $BF)"
+else
+	if test -z "$NEW_VERSION" ; then 
+		set -- $(bk get -qp "$BF" | head -1 | sed -e 's/\([0-9][0-9]*\)$/ \1/')
+		V="$1"
+		W="$2"
+		if test -z "$W" ; then
+			if test -n "$V" ; then
+				V="$V."
+			else
+				V="1."
+			fi
+			W="0"
+		fi
+		W="$(expr $W + 1)" ## 1.2.3 => 1.2.4
+		NEW_VERSION="$V$W"
+	fi
+	bk edit -qg "$BF"
+	( echo "$NEW_VERSION"; bk get -qp "$BF" | tail +2 ) > "$BF"
+
+	bk ci -q -y"Version $NEW_VERSION" "$BF" >/dev/null
+	bk sfiles -pC "$BF" >> "$BK_PENDING"
+fi
+
+## now update the changelog if possible
+
+BF=debian/changelog; F=debian/SCCS/s.changelog
+if ! test -f $F ; then exit 0; fi
+
+test -s "$F" || exit 0
+test -s "SCCS/c.ChangeSet" || exit 0
 if grep -q '^'"$F"'|' "$BK_PENDING" ; then exit 0; fi
 
-if test -z "$NEW_VERSION" ; then 
-	set -- $(bk get -qp "$BF" | head -1 | sed -e 's/\([0-9][0-9]*\)$/ \1/')
-	V="$1"
-	W="$2"
-	if test -z "$W" ; then
-		if test -n "$V" ; then
-			V="$V."
-		else
-			V="1."
-		fi
-		W="0"
-	fi
-	W="$(expr $W + 1)" ## 1.2.3 => 1.2.4
-	NEWVERSION="$V$W"
-fi
 bk edit -qg "$BF"
-( echo "$NEWVERSION"; bk get -qp "$BF" | tail +2 ) > "$BF"
+(
+	PACKAGE_NAME="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
+	cat <<END
+$PACKAGE_NAME ($NEW_VERSION) unstable; urgency=low
+
+END
+	
+	sed -e 's/^/  * /' -e 's/^  \*  /    /' <SCCS/c.ChangeSet
+	DATE="$(822-date)"
+	cat <<END
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  $DATE
+
+END
+	bk get -qp "$BF" 
+) > "$BF"
 
 bk ci -q -y"Version $V$W" "$BF" >/dev/null
 bk sfiles -pC "$BF" >> "$BK_PENDING"
+
 exit 0
