@@ -107,7 +107,7 @@ else
 	rm -rf "$c" "$c.x"
 	if bk clone -q $BK_REPOSITORY/$what$dv "$c.x" ; then
 		: # OK
-	elif test -z "$BK_REMOTE_REPOSITORY" then
+	elif test -z "$BK_REMOTE_REPOSITORY" ; then
 		exit 1
 	else
 		bk clone -q $BK_REMOTE_REPOSITORY/$what$dv "$c.x"
