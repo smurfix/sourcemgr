@@ -2,10 +2,12 @@
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- update externer Sourcen
+Usage: $(basename $0)  -- Patchen externer Sourcen
        [ -d dest-directory ]
        [ -W origreleasename ]
        [ -V neworigreleasename ] | [ -v releasename ]
+       [ -pX (Argument für patch) ]
+       neueVersionsnummer
 END
 exit 1
 }
@@ -14,8 +16,9 @@ dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
 overs=base
 nvers=base
 vers=
+patchdepth=
 
-   set -- $(getopt "d:V:W:hv:" $*)
+   set -- $(getopt "d:V:W:hv:r:p:" $*)
    if test $? != 0
    then
 	   usage
@@ -26,6 +29,8 @@ vers=
 	   in
 		   -h)
 		       usage ;;
+		   -p)
+			   shift; patchdepth="$1"; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -W)
@@ -35,34 +40,31 @@ vers=
 		   -v)
 			   shift; vers="$1"; shift;;
 		   --)
-		       shift; break ;;
+		   	   shift; break;
 	   esac
    done
 
 if test -z "$dir"; then usage; fi
-if test -n "$*"; then usage; fi;
-if test -z "$vers" ; then
-vers=$(echo $nvers | \
-	perl -pe '
-	tr/-_/./; if(/([^-\.]*)\.(.*)/) {
-		$base=$1; $wha=$2;
-		$wha =~ tr/abcdefghijklmnopqrstuvwxyz/123456789/;
-		s/\.0*([0-9])/.$1/g;
-		$_ = "$base.$wha";
-	}
-' )
-fi
+if test -z "$*" ; then usage; fi
 
 export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 
 set -xe
 
+mkdir /tmp/$what.$$
+cd /tmp/$what.$$
+prcs checkout -r $overs.@ $what
+cp $what.prj ../$what.prj.$$
+
+if test -n "$patchdepth" ; then patchdepth="-p$patchdepth"; fi
+patch $patchdepth -E -l
+
 test -f $what.prj || prcs checkout -r $overs.@ $what $what.prj
 prcs populate -f -d $what
 
 perl -p -i -e '
-   s/\(New-Version-Log \"\"\)/(New-Version-Log "'Import\ $vers'")/ if "'$vers'" ne "";
+   s/\(New-Version-Log \"\"\)/(New-Version-Log "'"Version $*"'")/ if "'$vers'" ne "";
    s/^  \((.*)\(\)\)/  ($1() :no-keywords)/;
 ' $what.prj
 
@@ -70,3 +72,5 @@ vi $what.prj
 
 prcs checkin -r $vers.@ $what
 
+cd ..
+rm -rf $what.prj.$$ $what.$$ &

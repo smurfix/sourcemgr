@@ -15,6 +15,7 @@ p.new       Initiales Installieren von eigenen Sourcen im Archiv
 p.make      Hole aus Archiv, baue, installiere, wirf Sourcen wieder weg.
 p.merge     Update lokaler Sourcen bei Konflikten beim Checkin
 p.oget      holt Original-Sourcecode aus dem Archiv
+p.patch     Patchen (normalerweise externer) Sourcen
 p.put       Speichern von Änderungen im Archiv
 p.rmcvs     Rekursives Löschen von CVS-spezifischen Subdirectories
 p.update    Update lokaler Sourcen nach externen Änderungen

@@ -2,7 +2,6 @@
 v-0-6-4 lib/ssleay
 ? net/www/squid	Cacheserver
 #-4-01 editor/nedit	GUI-Editor
-v-2-12 gnu/autoconf	Software automagisch konfigurieren
 #v-2-7-0-3 gnu/bfd	BFD-Library => cygnus
 v-1-0-10 lib/gsm	Soundkompression
 #v-2-7-0-3 gnu/binutils	as, ld und Konsorten
@@ -398,3 +397,9 @@ v-1 misc/colm
 *	x11/kde/base	*	KDE Base	ftp://ftp.kde.org/
 *	gnu/cygnus/binutils	*	GNU Binutils	2-7	-
 *	x11/gtk	*	GTK Toolkit	ftp://ftp.gimp.org/pub/gtk/
+*	x11/kde/utils	*	KDE Utilities	ftp://ftp.kde.org/
+*	x11/kde/games	*	KDE Games	ftp://ftp.kde.org/
+*	x11/kde/graphics	*	KDE Graphics	ftp://ftp.kde.org/
+*	x11/kde/multimedia	*	KDE Multimedia	ftp://ftp.kde.org/
+*	x11/kde/network	*	KDE Network	ftp://ftp.kde.org/
+*	x11/kde/support	*	KDE Supportlibraries	ftp://ftp.kde.org/
