@@ -20,17 +20,8 @@ Usage unless @ARGV;
 if($ARGV[0] =~ /^(\d\d\d\d)-(\d\d)-(\d\d)$/) {
 	my $sec = timegm(0,0,0,$3,$2-1,$1-1900);
 	shift;
-	my $dtf;
-	if(-f "/usr/lib/datefudge.so") {
-		$dtf = "/usr/lib";
-	} elsif(-f "/usr/local/lib/datefudge.so") {
-		$dtf = "/usr/local/lib";
-	} elsif(-f "/home/smurf/datefudge/datefudge.so") {
-		$dtf = "/home/smurf/datefudge";
-	} else {
-		die "No DateFudge";
-	}
-	@DT = ("LD_PRELOAD=$dtf/datefudge.so","DATEFUDGE=".(time-$sec));
+	my $dtf = $ENV{"DATEFUDGE_LIB"};
+	@DT = ("LD_PRELOAD=$dtf","DATEFUDGE=".(time-$sec));
 }
 my $cmt = "@ARGV"; $cmt =~ s/"/'/g;
 
