@@ -91,16 +91,9 @@ if test -d "$c" ; then
 		echo "$what$dv: Updating cache. Changes:" >&2
 		env PAGER=/bin/cat bk changes -R -nd":I:	:USER:@:DOMAIN:" >&2
 		echo -n -e "... end of change list\r" >&2
-		bk sfiles -ax | while read a ; do rm -f "$a" ; done
+		bk sfiles -ax | tr "\n" "\0" | xargs -0r rm -f
+		bk undo -sfqa$(bk repogca $BK_REPOSITORY/$what$dv)
 		bk pull -q $BK_REPOSITORY/$what$dv 
-		R=$(bk changes -r+ -d':USER:@:HOST:|:G:|:UTC:|:DSUM:\n' $(bk parent -p))
-		L=$(bk changes -r+ -d':USER:@:HOST:|:G:|:UTC:|:DSUM:\n')
-		if test "$L" != "$R" ; then
-			echo "Problem: changesets differ" >&2
-			echo "remote:$R" >&2
-			echo "local :$L" >&2
-			exit 1
-		fi
 	fi
 else
 	echo "$what$dv: Importing to cache" >&2

@@ -1,3 +1,9 @@
+sourcemgr (1.347) unstable; urgency=low
+
+  * b.cache: Use "bk undo" on repogca to keep the cache synchronized
+
+ -- Matthias Urlichs <smurf@debian.org>  Wed, 28 Apr 2004 09:49:48 +0200
+
 sourcemgr (1.346) unstable; urgency=low
 
   * combine_changes: bug in epoch removal
