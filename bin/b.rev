@@ -1,0 +1,45 @@
+#!/bin/bash
+
+set -e
+trap 'usage; exit 1' 0
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- Info über die aktuelle Revisionsnr, für Doku
+		(nix)        => Info zur aktuellsten Version im Archiv
+		                (Versionsnummer, Timestamp, vollständiger Key)
+		Timestamp    => Versionsnummer
+		Versionsnr   => Timestamp
+END
+}
+
+test -z "$2"
+
+trap '' 0
+
+fr() {
+	bk prs -ah '-d:I:	:UTC:\n:KEY:\n' -r$1 ChangeSet
+}
+
+if test -z "$1" ; then
+	fr +
+else
+	case "$1" in
+	20*)
+		rev=$(bk findkey -t$1 ChangeSet || true)
+		if test -z "$rev" ; then
+			echo nicht gefunden >&2
+			exit 1
+		fi
+		rev=$(echo $rev | sed -e 's/.*|//')
+		fr $rev
+		;;
+	*.*)
+		fr $1
+		;;
+	*)
+		usage
+		;;
+	esac
+fi
+exit 0
