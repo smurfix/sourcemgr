@@ -106,9 +106,9 @@ fi
 if test -n "$run" ; then
    static=y
 fi
-if test "$1" = "-" ; then sys="" ; else sys=-${1:-"pci"} ; fi
-disk=/tmp/disk-$sys
-diskfile=/tmp/diskfile-$sys
+if test "$1" = "" -o "$1" = "-" ; then sys="" ; else sys="-${1:-"pci"}" ; fi
+disk=/tmp/disk$sys
+diskfile=/tmp/diskfile$sys
 
 sver=$(echo $ver | sed -e 's/noris/n/g' -e 's/pre/p/g') 
 set -e
