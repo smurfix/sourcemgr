@@ -1,4 +1,12 @@
 #!/bin/sh
 
 set -ex
+
+V=$(cat debian/version)
+test -n "$V"
+bk tag -r+ DEBIAN-$V
+bk push
+
 dpkg-buildpackage -rfakeroot -Idebian/users -Idebian/version -IBitkeeper -ISCCS "$@"
+
+
