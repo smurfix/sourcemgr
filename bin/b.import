@@ -25,7 +25,7 @@ ext=
 parent=0
 nodelete=
 
-   eval set -- "$(getopt "d:v:w:e:h" "$@")"
+   eval set -- "$(getopt "d:nv:w:h" "$@")"
    for i
    do
 	   case "$i"
