@@ -524,13 +524,6 @@ END
 		bk("parent","$ENV{BK_REPOSITORY}/$pn");
 		bk("clone",".","$ENV{BK_REPOSITORY}/$pn");
 	}
-#	find({wanted=>sub{
-#		return unless $_ eq "SCCS";
-#		$File::Find::path="." unless defined $File::Find::path;
-#		mkpath($File::Find::path,0,0755);
-#		rename("SCCS",$tmpcv."/".$File::Find::path."/SCCS");
-#		$File::Find::prune=1;
-#	}},".");
 }
 chdir($tmppn);
 
@@ -610,48 +603,35 @@ sub process($$$$) {
 				close(R);
 			}
 		}
+		my $cnt=0;
+		my $rcnt=0+keys %rev;
 		foreach my $rev(keys %rev) {
 			my %d;
 			my @f = @{$rev{$rev}};
-#			foreach my $f(@f) {
-#				push(@{$d{dirname($f)}}, basename($f));
-#			}
-#			foreach my $d(keys %d) {
-#				@f = @{$d{$d}};
-#				bk("get","-egq", map { "$d/$_" } @f);
-				unlink(@f);
-				while(@f) {
-					my @ff;
-					if(@f > 30) {
-						@ff = splice(@f,0,25);
-					} else {
-						@ff = @f; @f = ();
-					}
-					#cvs("get","-A","-d",$d,"-r",$rev, map { ($d eq ".") ? "$cne/$_" : "$cne/$d/$_" } @f);
-					my @lf = grep { -f $_ } map { dirname($_)."/SCCS/s.".basename($_) } @ff;
- 					bk("get","-egq", @lf) if @lf;
-					cvs("-q","update","-A","-r",$rev, @ff);
-					utime($wann,$wann,@ff);
+			unlink(@f);
+			while(@f) {
+				print STDERR " Processing $len: $cvsdate $cnt ".(0+@f)." $rcnt      \r";
+				my @ff;
+				if(@f > 30) {
+					@ff = splice(@f,0,25);
+				} else {
+					@ff = @f; @f = ();
 				}
-#			}
+				$cnt += @ff;
+				#cvs("get","-A","-d",$d,"-r",$rev, map { ($d eq ".") ? "$cne/$_" : "$cne/$d/$_" } @f);
+				my @lf = grep { -f $_ } map { dirname($_)."/SCCS/s.".basename($_) } @ff;
+				bk("get","-egq", @lf) if @lf;
+				cvs("-q","update","-A","-r",$rev, @ff);
+				utime($wann,$wann,@ff);
+			}
 			push(@gone, grep {
 					-e dirname($_)."/SCCS/s.".basename($_) and ! -e $_ }
 				@{$rev{$rev}});
+		} continue {
+			--$rcnt;
 		}
 	}
 
-#	foreach my $f(keys %{$inf->{rev}}) {
-#		mkpath(dirname($f),0,0755);
-#		bk("get","-eg",$f);
-#		cvs("get","-d",dirname($f),"-r",$inf->{rev}{$f},"$cne/$f");
-#	}
-#
-#	my $redo;
-#	foreach my $f(@files) {
-#		$redo++ if $f =~/^[CM]\s/;
-#	}
-#	cvs("update","-d","-D",$cvsdate) if $redo;
-#
 	my @new=();
 	foreach my $n (grep { if(-l $_) { unlink $_; undef; } else { 1; } } bkfiles("x")) {
 		if($adt->{$n}{rev} eq "1.1" or $ENV{BKCVS_NORENAME}) {
