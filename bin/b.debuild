@@ -7,6 +7,9 @@ trap 'test -n "$superset" && kill $SUPERPID; usage; exit 1' 0
 RPM="-v --rcfile /usr/src/STATUS/rpmrc"
 BUILD=/usr/src/redhat/BUILD
 
+if test -f /usr/local/bin/gpg-agent-start.sh ; then
+	source /usr/local/bin/gpg-agent-start.sh
+fi
 if test -f /usr/local/bin/ssh-agent-start.sh ; then
 	source /usr/local/bin/ssh-agent-start.sh
 fi
