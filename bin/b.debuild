@@ -219,6 +219,14 @@ else
 fi
 E="$(bk prs -rEXTERN -h -d:SHORTKEY: ChangeSet)" || true
 A="$(dpkg-architecture -qDEB_BUILD_ARCH)"
+if echo "$V" | grep -qs -- - ; then
+	if test -z "$E" ; then
+		echo "non-native version, but no EXTERN tag set!" >&2
+		exit 1
+	fi
+else
+	E="" # must be local, despite the existence of an EXTERN tag
+fi
 
 b.uplog
 
