@@ -1,3 +1,9 @@
+sourcemgr (1.371) unstable; urgency=low
+
+  * b.cvs.pl: Restart when the CVS server is dying on us
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue,  5 Oct 2004 13:54:15 +0200
+
 sourcemgr (1.370) unstable; urgency=low
 
   * b.cvs.pl: 

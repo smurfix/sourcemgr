@@ -51,6 +51,8 @@ use Carp qw(confess);
 use Storable qw(nstore retrieve);
 use File::ShLock;
 
+$SIG{'PIPE'}="IGNORE";
+
 my $ENDFILE = "/var/run/b.cvs.stop";
 my $verbose = $ENV{"BK_VERBOSE"};
 
@@ -185,6 +187,18 @@ sub new {
 	bless($self,$what);
 
 	$repo =~ s#/+$##;
+	$self->{'fullrep'} = $repo;
+	$self->conn();
+
+	$self->{'subdir'} = $subdir;
+	$self->{'lines'} = undef;
+
+	return $self;
+}
+
+sub conn {
+	my $self = shift;
+	my $repo = $self->{'fullrep'};
 	if($repo =~ s/^:pserver:(?:(.*?)(?::(.*?))?@)?([^:\/]*)(?::(\d*))?//) {
 		my($user,$pass,$serv,$port) = ($1,$2,$3,$4);
 		$user="anonymous" unless defined $user;
@@ -260,13 +274,8 @@ sub new {
 	$rep=$self->readline();
 	die "validReply: $rep\n" if $rep ne "ok\n";
 
-	$self->{'ok'} = $rep;
 	$self->{'socketo'}->write("UseUnchanged\n") if $rep =~ /\bUseUnchanged\b/;
 	$self->{'repo'} = $repo;
-	$self->{'subdir'} = $subdir;
-	$self->{'lines'} = undef;
-
-	return $self;
 }
 
 sub readline {
@@ -298,38 +307,96 @@ sub rlog {
 	print STDERR "C: rlog\n";
 }
 
-sub file {
+sub _file {
 	my($self,$fn,$rev) = @_;
-	$self->{'socketo'}->write("Global_option -n\n");
-	$self->{'socketo'}->write("Argument -n\n");
-	$self->{'socketo'}->write("Argument -p\n");
-	$self->{'socketo'}->write("Argument -N\n");
-	$self->{'socketo'}->write("Argument -ko\n");
-	$self->{'socketo'}->write("Argument -r\n");
-	$self->{'socketo'}->write("Argument $rev\n");
-	$self->{'socketo'}->write("Argument --\n");
-	$self->{'socketo'}->write("Argument $self->{'subdir'}/$fn\n");
-	$self->{'socketo'}->write("Directory .\n");
-	$self->{'socketo'}->write("$self->{'repo'}\n");
-	$self->{'socketo'}->write("Sticky T1.1\n");
-	$self->{'socketo'}->write("co\n");
-	$self->{'socketo'}->flush();
+	$self->{'socketo'}->write("Global_option -n\n") or return undef;
+	$self->{'socketo'}->write("Argument -n\n") or return undef;
+	$self->{'socketo'}->write("Argument -p\n") or return undef;
+	$self->{'socketo'}->write("Argument -N\n") or return undef;
+	$self->{'socketo'}->write("Argument -ko\n") or return undef;
+	$self->{'socketo'}->write("Argument -r\n") or return undef;
+	$self->{'socketo'}->write("Argument $rev\n") or return undef;
+	$self->{'socketo'}->write("Argument --\n") or return undef;
+	$self->{'socketo'}->write("Argument $self->{'subdir'}/$fn\n") or
+	return undef;
+	$self->{'socketo'}->write("Directory .\n") or return undef;
+	$self->{'socketo'}->write("$self->{'repo'}\n") or return undef;
+	$self->{'socketo'}->write("Sticky T1.1\n") or return undef;
+	$self->{'socketo'}->write("co\n") or return undef;
+	$self->{'socketo'}->flush() or return undef;
 	$self->{'lines'} = 0;
+	return 1;
 }
-
-sub line {
+sub _line {
 	my($self) = @_;
 	die "Not in lines" unless defined $self->{'lines'};
 
 	my $line;
+	my $res="";
 	while(defined($line = $self->readline())) {
 		#chomp $line;
+		if($line =~ s/^M //) {
+			$res .= $line;
+		} elsif($line =~ /^Mbinary\b/) {
+			my $cnt;
+			die "EOF from server after 'Mbinary'" unless defined ($cnt = $self->readline());
+			chomp $cnt;
+			die "Duh: Mbinary $cnt" if $cnt !~ /^\d+$/ or $cnt<1;
+			$line="";
+			while($cnt) {
+				my $buf;
+				my $num = $self->{'socketi'}->read($buf,$cnt);
+				die "S: Mbinary $cnt: $num: $!\n" if not defined $num or $num<=0;
+				$res .= $buf;
+				$cnt -= $num;
+			}
+		} else {
+			chomp $line;
+			if($line eq "ok") {
+				print STDERR "S: ok (".length($res).")\n";
+				return $res;
+			} elsif($line =~ s/^E //) {
+				print STDERR "S: $line\n";
+			} else {
+				die "Unknown: $line\n";
+			}
+		}
+	}
+}
+sub file {
+	my($self,$fn,$rev) = @_;
+	my $res;
+
+	if ($self->_file($fn,$rev)) {
+		$res = $self->_line();
+		return $res if defined $res;
+	}
+
+	# retry
+	$self->conn();
+	$self->_file($fn,$rev) or die "No file command send\n";
+	$res = $self->_line();
+	die "No input: $fn $rev\n" unless defined $res;
+	return $res;
+}
+
+sub line {
+	my($self,$cmd) = @_;
+	die "Not in lines" unless defined $self->{'lines'};
+
+	my $line;
+	my $res;
+	while(1) {
+		$line = $self->readline();
+		return undef if not defined $line or $line eq "";
+		#chomp $line;
+
 		if($line =~ s/^M //) {
 			$self->{'lines'}++;
 			return $line;
 		} elsif($line =~ /^Mbinary\b/) {
 			my $cnt;
-			die "EOF from server" unless defined ($cnt = $self->readline());
+			die "EOF from server after 'Mbinary'" unless defined ($cnt = $self->readline());
 			chomp $cnt;
 			die "Duh: Mbinary $cnt" if $cnt !~ /^\d+$/ or $cnt<1;
 			$line="";
@@ -355,7 +422,6 @@ sub line {
 			}
 		}
 	}
-	die "EOF from server\n";
 }
 
 package main;
@@ -1004,11 +1070,8 @@ sub process($$$$) {
 				} else {
 					foreach my $f(@ff) {
 						my $line;
-						$cvs->file($f,$rev);
 						open(F,">$f") or die "No file: $f: $!\n";
-						while(defined($line=$cvs->line())) {
-							print F $line or die "Write: $f: $!\n";
-						}
+						print F $cvs->file($f,$rev) or die "Write: $f: $!\n";
 						close(F) or die "Write: $f: $!\n";
 						#cvs((($ENV{CVS_REPOSITORY} =~ m#:/#) ? "-q" : "-Q"),"update","-A","-r",$rev, @ff);
 					}
