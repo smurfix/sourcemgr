@@ -2,32 +2,32 @@
 compile:
 
 install:
-	install bin/* /usr/local/bin
-	echo EQUALCP /usr/src/STATUS
-	echo EQUALCP /usr/src/STATUS/after
-	echo EQUALCP /usr/src/STATUS/bin
-	echo EQUALCP /usr/src/STATUS/checkout
-	echo EQUALCP /usr/src/STATUS/cvsup
-	echo EQUALCP /usr/src/STATUS/dist
-	echo EQUALCP /usr/src/STATUS/done
-	echo EQUALCP /usr/src/STATUS/fail
-	echo EQUALCP /usr/src/STATUS/hosts
-	echo EQUALCP /usr/src/STATUS/keep
-	echo EQUALCP /usr/src/STATUS/legacy
-	echo EQUALCP /usr/src/STATUS/out
-	echo EQUALCP /usr/src/STATUS/packages
-	echo EQUALCP /usr/src/STATUS/removed
-	echo EQUALCP /usr/src/STATUS/rpm
-	echo EQUALCP /usr/src/STATUS/sent
-	echo EQUALCP /usr/src/STATUS/skip
-	echo EQUALCP /usr/src/STATUS/status
-	echo EQUALCP /usr/src/STATUS/subst
-	echo EQUALCP /usr/src/STATUS/to-install
-	echo EQUALCP /usr/src/STATUS/work
+	install $$(bk sfiles -g | grep ^bin/) /usr/local/bin
+	@echo EQUALCP /usr/src/STATUS
+	@echo EQUALCP /usr/src/STATUS/after
+	@echo EQUALCP /usr/src/STATUS/bin
+	@echo EQUALCP /usr/src/STATUS/checkout
+	@echo EQUALCP /usr/src/STATUS/cvsup
+	@echo EQUALCP /usr/src/STATUS/dist
+	@echo EQUALCP /usr/src/STATUS/done
+	@echo EQUALCP /usr/src/STATUS/fail
+	@echo EQUALCP /usr/src/STATUS/hosts
+	@echo EQUALCP /usr/src/STATUS/keep
+	@echo EQUALCP /usr/src/STATUS/legacy
+	@echo EQUALCP /usr/src/STATUS/out
+	@echo EQUALCP /usr/src/STATUS/packages
+	@echo EQUALCP /usr/src/STATUS/removed
+	@echo EQUALCP /usr/src/STATUS/rpm
+	@echo EQUALCP /usr/src/STATUS/sent
+	@echo EQUALCP /usr/src/STATUS/skip
+	@echo EQUALCP /usr/src/STATUS/status
+	@echo EQUALCP /usr/src/STATUS/subst
+	@echo EQUALCP /usr/src/STATUS/to-install
+	@echo EQUALCP /usr/src/STATUS/work
 
-	echo EQUALCP /usr/src/STATUS/rpmmacros
-	echo EQUALCP /usr/src/STATUS/rpmrc
+	@echo EQUALCP /usr/src/STATUS/rpmmacros
+	@echo EQUALCP /usr/src/STATUS/rpmrc
 
-	echo EQUALCP /usr/src/STATUS/RPM/BUILD
-	echo EQUALCP /usr/src/STATUS/RPM/RPMS
-	echo EQUALCP /usr/src/STATUS/RPM/RPMS/i686
+	@echo EQUALCP /usr/src/STATUS/RPM/BUILD
+	@echo EQUALCP /usr/src/STATUS/RPM/RPMS
+	@echo EQUALCP /usr/src/STATUS/RPM/RPMS/i686
