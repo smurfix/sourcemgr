@@ -75,7 +75,8 @@ if test -e "$dir" ; then
 	echo >&2 "Das Verzeichnis '$dir' gibt es schon... geht nicht"
 	exit 1
 fi
-bk clone $optp -q $BK_REPOSITORY/$what$dv $ddir
+### $optp -- geht momentan nicht
+bk clone -q $BK_REPOSITORY/$what$dv $ddir
 
 if test "$nvers" != "gibts/nicht" ; then
 	echo Kopiere Quelldaten...
