@@ -101,7 +101,7 @@ tmp="/var/cache/cvs/bk/tmp/$$"
 rm -rf "$tmp"
 
 if test -n "$nvers"; then
-	wset="-w $nvers"
+	wset="-N -w $nvers"
 	dv="-$nvers"
 elif test -n "$vers" ; then
 	dv="-$vers"

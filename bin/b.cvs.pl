@@ -779,7 +779,7 @@ END
 	open(P,"bk sfiles -pC |");
 	print FP $_ while(<P>);
 	close(P); close(FP);
-	my $tip=bk("prs","-ahn","-r+","-d:I:");
+	my $tip=bk("prs","-ahn","-r+","-d:I:","ChangeSet");
 	print STDERR "$pn: $cvsdate  $tip     |\n";
 
 

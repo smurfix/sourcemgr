@@ -11,6 +11,7 @@ Usage: $(basename $0)  -- holt Sourcecode aus dem Archiv
        [ -w neureleasename, legt eine Kopie an ]
        [ -d Paket ]
        [ -n (checkt Sourcen nicht aus) ]
+       [ -N (kopiert Kopie nicht zurueck) ]
        [ neuesVerzeichnis ]
 	Verzeichnisname ist der Paketname, wenn nicht angegeben.
 END
@@ -20,8 +21,9 @@ vers=noris
 nvers=gibts/nicht
 dir=
 optp=
+noback=
 
-   eval set -- "$(getopt "d:nv:w:h" "$@")"
+   eval set -- "$(getopt "d:nNv:w:h" "$@")"
    for i
    do
 	   case "$i"
@@ -32,6 +34,8 @@ optp=
 			   shift; dir="$1"; shift;;
 		   -n)
 		       shift; optp=-P ;;
+		   -N)
+		       shift; noback=1 ;;
 		   -v)
 			   shift; vers="$1"; shift;;
 		   -w)
@@ -72,7 +76,7 @@ else
 fi
 
 if test -e "$dir" ; then
-	echo >&2 "Das Verzeichnis '$dir' gibt es schon... geht nicht"
+	echo >&2 "$dir: Das Verzeichnis '$dir' gibt es schon... geht nicht"
 	exit 1
 fi
 
@@ -85,8 +89,8 @@ fi
 
 cd "$ddir"
 if test "$nvers" != "gibts/nicht" ; then
-	echo Kopiere Quelldaten...
-	bk clone -q . $BK_REPOSITORY/$what$ndv
+	echo -n -e "$dir: copy source back    |\r"
+	test -n "$noback" || bk clone -q . $BK_REPOSITORY/$what$ndv
 	bk parent $BK_REPOSITORY/$what$ndv
 	dv="$ndv"
 fi
