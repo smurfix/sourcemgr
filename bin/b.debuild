@@ -22,7 +22,7 @@ cat >&2 <<END
 Usage: $(basename $0)  -- Baue Debian-Source-Pakete.
 	   [ -d Paket ]  [ -v release ]
 	   [ -t HOST (upload there) ]
-	   [ -b (build a binary) ]
+	   [ -b (build a binary) ]  [ -B (with pbuilder) ]
 	   [ -s? (pass to dpkg-*) ]
 END
     trap "" 0
@@ -34,9 +34,10 @@ defvers=noris
 vers=
 dest=local
 bin=
+pbin=
 opt_s=
 
-   eval set -- "$(getopt "bd:s:t:v:h" "$@")"
+   eval set -- "$(getopt "bBd:s:t:v:h" "$@")"
    if test $? != 0
    then
 	   exit 1
@@ -49,6 +50,8 @@ opt_s=
 		       exit 1 ;;
 		   -b)
 		   		shift; bin=y ;;
+		   -B)
+		   		shift; pbin=y ;;
 		   -s)
 			   shift; opt_s="-s$1"; shift;;
 		   -d)
@@ -117,7 +120,7 @@ fi
 
 # Now build the source archives
 T="/tmp/ex.$$"
-trap 'rm -rf $T' 0 1 2 15
+trap 'echo rm -rf $T' 0 1 2 15
 E="$(bk prs -rEXTERN -h -d:SHORTKEY: ChangeSet)" || true
 A="$(dpkg-architecture -qDEB_BUILD_ARCH)"
 
@@ -128,22 +131,31 @@ V="$(echo $DV | sed -ne 's/\(..*\)-..*/\1/p' )"
 if test -z "$V" ; then E=""; V="$DV"; fi
 bk export -T -w -tplain -r+ . "$T/$N-$V"
 mv debian/changelog "$T/$N-$V"/debian
-( cd "$T/$N-$V" ; rm debian/users debian/version debian/changelog.old )
+
 if test -n "$E" ; then # non-original package
 	bk export -T -w -tplain -rEXTERN . "$T/$N-$V.orig"
 fi
-( cd $T; dpkg-source -b -sa "$N-$V" )
-( cd "$T/$N-$V" ; fakeroot dpkg-buildpackage -S $opt_s )
-( cd "$T/$N-$V" ; dpkg-genchanges -S $opt_s > "../${N}_${DV}_source.changes" )
-( cd "$T/$N-$V" ; test -z "$bin" || fakeroot dpkg-buildpackage -nc -b )
-( cd $T; echo y | debsign "${N}_${DV}_source.changes" )
-#( cd $T; test -z "$bin" || debsign "${N}_${DV}_$A.changes" )
-( cd $T ; for i in * ; do if test -d $i; then rm -rf $i; fi; done )
+
+cd "$T/$N-$V"
+rm -f debian/users debian/version debian/changelog.old || true
+cd $T
+dpkg-source -b -sa "$N-$V"
+cd "$T/$N-$V"
+fakeroot dpkg-buildpackage -S $opt_s
+dpkg-genchanges -S $opt_s > "../${N}_${DV}_source.changes"
+test -z "$bin" || fakeroot dpkg-buildpackage -nc -b
+test -z "$pbin" || pdebuild --buildresult "$T" -- --debbuildopts "-nc -b"
+
+cd $T
+echo y | debsign "${N}_${DV}_source.changes"
+test -z "$pbin$bin" || echo y | debsign "${N}_${DV}_$A.changes"
+cd $T
+for i in * ; do if test -d $i; then rm -rf $i; fi; done
 echo "Built:"
-ls $T
+ls 
 echo ""
 #mv $T/* ..
-( cd $T; for f in *.changes; do dput $dest "$f"; done )
+for f in *.changes; do dput $dest "$f"; done
 
 #dpkg-buildpackage -S -rfakeroot -IPENDING -Idebian/users -Idebian/version -IBitkeeper -ISCCS "$@"
 
