@@ -14,11 +14,16 @@ END
 }
 
 test -z "$2"
+bk root >/dev/null 2>&1
 
 trap '' 0
 
 fr() {
-	bk prs -ah '-d:I:	:UTC:\n:KEY:\n' -r$1 ChangeSet
+	nr=$(bk get -p -r$1 "$(bk root)"/rpm.Version 2>/dev/null || true | head -1)
+	if test -n "$nr" ; then
+		nr="	noris:$nr"
+	fi
+	bk prs -ah '-d:I:	:UTC:'"$nr"'\n:KEY:\n' -r$1 ChangeSet
 }
 
 if test -z "$1" ; then
