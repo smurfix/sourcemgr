@@ -94,7 +94,7 @@ fi
 
 if test -z "$dir" -a -z "$vset" ; then # from current directory
 	if test $(bk sfiles -xgc | fgrep -v '/SCCS/' | wc -l) -gt 0 ; then
-		tarp "" 0
+		trap "" 0
 		echo "Unsaved files." >&2
 		exit 1
 	fi
@@ -175,7 +175,7 @@ DV="$(echo "$DV" | sed -e 's/^[0-9][0-9]*://')"
 
 bk export -T -w -tplain -r+ . "$T/$N-$VV"
 if test -f "$T/$N-$VV"/debian/exporter ; then
-	"$T/$N-$VV"/debian/exporter "$T/$N-$VV"
+	"$T/$N-$VV"/debian/exporter "$T/$N-$VV" "+"
 fi
 test -f "$T/$N-$VV"/debian/changelog || mv debian/changelog "$T/$N-$VV"/debian
 
@@ -192,6 +192,9 @@ if test -n "$E" ; then # non-original package
 		echo + create new original source archive
 		rm -f "$T/${N}_$VV.orig.tar.gz"
 		bk export -T -w -tplain -rEXTERN . "$T/$N-$VV.orig"
+		if test -f "$T/$N-$VV"/debian/exporter ; then
+			"$T/$N-$VV"/debian/exporter "$T/$N-$VV.orig" "EXTERN"
+		fi
 	fi
 fi
 
