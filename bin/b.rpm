@@ -46,9 +46,9 @@ RPM Setup:
 	b.rpmget -d \$ARCHIVE\$ -v\$RELEASE\$
 
 Variablen in RPM-Dateien:
-	$ARCHIVE$   Archivname (pop_datenbank, ...)
-	$RELEASE$   Art (noris, test, ...)
-	$VERSION$   Versionsnummer, aus rpm.version oder ChangeSet
+	\$ARCHIVE\$   Archivname (pop_datenbank, ...)
+	\$RELEASE\$   Art (noris, test, ...)
+	\$VERSION\$   Versionsnummer, aus rpm.version oder ChangeSet
 
 END
     trap "" 0

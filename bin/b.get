@@ -53,11 +53,6 @@ test -n "$ddir"
 
 trap '' 0
 
-if test -d /var/cache/bk ; then : ; else
-	echo "/var/cache/bk: not found" >&2
-	exit 1
-fi
-
 mod=p
 if b.exists -v "$vers" $dir > /tmp/tf.$$ ; then : ; else
 	echo >&2 "Problem: '$dir' Version '$vers' nicht bekannt."
@@ -80,17 +75,22 @@ if test -e "$dir" ; then
 	echo >&2 "Das Verzeichnis '$dir' gibt es schon... geht nicht"
 	exit 1
 fi
+
 ### $optp -- geht momentan nicht
-c=/var/cache/bk/$what$dv
-if test -d "$c" ; then
-	pw="$(pwd)"
-	cd $c
-	bk pull -q $BK_REPOSITORY/$what$dv 
-	cd "$pw"
+if test -d /var/cache/bk ; then
+	c=/var/cache/bk/$what$dv
+	if test -d "$c" ; then
+		pw="$(pwd)"
+		cd $c
+		bk pull -q $BK_REPOSITORY/$what$dv 
+		cd "$pw"
+	else
+		bk clone -q $BK_REPOSITORY/$what$dv $c
+	fi
+	bk lclone -q $c $ddir
 else
-	bk clone -q $BK_REPOSITORY/$what$dv $c
+	bk clone -q $BK_REPOSITORY/$what$dv $ddir
 fi
-bk lclone -q $c $ddir
 
 if test "$nvers" != "gibts/nicht" ; then
 	echo Kopiere Quelldaten...
