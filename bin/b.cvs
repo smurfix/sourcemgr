@@ -62,7 +62,14 @@ web=
 		   -S)
 		   	   shift; rename=1 ;;
 		   -D)
-			   shift; run="perl -d $(type -p "$0.pl")" ;;
+			   shift;
+			   if test -f "$0.pl" ; then 
+			       run="perl -d $0.pl";
+			   elif test -f "bin/$0.pl" ; then 
+			       run="perl -d bin/$0.pl";
+			   else
+			       run="perl -d $(type -p "$0.pl")";
+			   fi ;;
 		   -L)
 		       shift; nolock=0 ;;
 		   -p)

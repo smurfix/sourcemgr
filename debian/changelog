@@ -1,3 +1,12 @@
+sourcemgr (1.363) unstable; urgency=low
+
+  * Major CVS import overhaul:
+  * - faster
+  * - fewer remote resources
+  * - more correct WRT branches
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 20 Jul 2004 12:52:25 +0200
+
 sourcemgr (1.362) unstable; urgency=low
 
   * bin/b.debuild: .sig += .sig.asc

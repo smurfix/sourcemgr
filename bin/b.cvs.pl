@@ -65,17 +65,6 @@ if($ENV{BKCVS_LOCK}) {
 	} continue { sleep 15; }
 }
 
-### Test Revision Matching
-#my %target=("x"=>"2.2.0.4");
-#my $trev="test";
-#sub rev_ok($$);
-#foreach my $i(qw(1.1 1.2 1.3 1.4  2.0 2.1 2.2 2.2.4.1 2.2.4.2 2.2.4.3)) {
-#	die "RevProb $i\n" unless rev_ok("x",$i);
-#}
-#foreach my $i(qw(1.2.3.4 2.3 2.3.4.5 2.2.3.1 2.2.5.1 2.2.4.1.4.4 3.1)) {
-#	die "RevProb $i\n" if rev_ok("x",$i);
-#}
-
 my $debug=$ENV{BK_VERBOSE}||0;
 my $diff=$ENV{BKCVS_DIFF}||60; # Zeitraum für "gleichzeitige" Änderungen im CVS
 my $shells=$ENV{BKCVS_SHELLS}||0;
@@ -111,16 +100,11 @@ my $cn = shift @ARGV;
 my $pn = shift @ARGV;
 my $trev = $ENV{BK_TARGET_REV};
 $trev="" unless defined $trev;
-my %target;
+my $target = {};
 my %tpre; # previous version name
 my %cutoff; # date where the vendor version branch ends
    # The vendor branch is an "interesting" idea. Basically, it must be
-   # handled like the real thing until a version 1.2 shows up. 1.1.1.x
-   # versions after that are supposed to be merged onto the trunk.
-   # This is incidentally the reason why I need to scan revisions 1.1,
-   # 1.1.1.1 _and_ 1.1.2.1.
-   # Oh yes, some trees also have 1.0 revisions. Don't ask me where
-   # _those_ come from. :-/
+   # handled like the real thing until a version 1.2 shows up.
 
 $pn =~ s#[/:]#_#g;
 my %excl;
@@ -134,6 +118,7 @@ if($cn eq ".") {
 }
 
 my @DT; my @AU; my $mdate;
+my $time = time();
 
 sub dateset($;$) {
 	my($dt,$au) = @_;
@@ -189,49 +174,201 @@ sub bk {
 	wantarray ? @res : join(" ",@res);
 }
 
-sub cvs {
-	my @comp = ();
-	if(defined $ENV{BKCVS_COMP}) {
-		push(@comp,$ENV{BKCVS_COMP}) if $ENV{BKCVS_COMP} ne "";
-	} else {
-		push(@comp,"-z3");
-	}
-	my $do_cd=1;
-	unless(defined $_[0]) {
-		shift(@_);
-		$do_cd=0;
-	}
-	unshift(@_,"cvs",@comp,"-d",$ENV{CVS_REPOSITORY});
-	print STDERR ">>> @_\n" if $debug;
-	my $rep=0;
-	while(1) {
-		open(FP,"-|") or do {
-			#chdir("..") if $do_cd;
-			exec @_;
-			#exec "strace","-v","-s3000","-o","/var/tmp/prcs","-F","-f",@_;
-			exit(99);
-		};
-		my @res;
-		while(<FP>) {
-			chomp;
-			push(@res,$_);
+package CVS;
+
+sub new {
+	my($what,$repo,$subdir) = @_;
+	$what=ref($what) if ref($what);
+
+	my $self = {};
+	$self->{'buffer'} = "";
+	bless($self,$what);
+
+	my $rr = $repo;
+	$repo =~ s#/+$##;
+	if($repo =~ s/^:pserver:(?:(.*?)(?::(.*?))?@)?(.*?)(?::\(\d+\))?://) {
+		my($user,$pass,$serv,$port) = ($1,$2,$3,$4);
+		$user="anonymous" unless defined $user;
+		$port=2401 unless $port;
+		unless($pass) {
+			open(H,$ENV{'HOME'}."/.cvspass") and do {
+				while(<H>) {
+					my ($w,$p) = split;
+					if($w eq $rr) {
+						$pass = $p;
+						last;
+					}
+				}
+			};
 		}
-		close(FP);
-		unless ($? and not $ENV{BKCVS_IGNORE_ERROR}) {
-			return wantarray ? @res : join(" ",@res);
+		$pass="A" unless $pass;
+
+		use IO::Socket;
+		my $s = IO::Socket::INET->new(PeerHost => $serv, PeerPort => $port);
+		die "Socket to $serv: $!\n" unless defined $s;
+		$s->write("BEGIN AUTH REQUEST\n$repo\n$user\n$pass\nEND AUTH REQUEST\n") or die "Write to $serv: $!\n";
+		$s->flush();
+
+		my $rep = <$s>;
+
+		if($rep ne "I LOVE YOU\n") {
+			$rep="<unknown>" unless $rep;
+			die "AuthReply: $rep\n";
 		}
-		if($rep++<1000) {
-			print STDERR "$CLR CVS $?\r";
-			if($rep < 15) {
-				sleep($rep)
-			} else {
-				sleep(15)
-			}
-		} else {
-			die " CVS error: $?\n";
+		$self->{'socketo'} = $s;
+		$self->{'socketi'} = $s;
+	} else { # local
+		use IO::Pipe;
+		my $pr = IO::Pipe->new();
+		my $pw = IO::Pipe->new();
+		my $pid = fork();
+		die "Fork: $!\n" unless defined $pid;
+		unless($pid) {
+			$pr->writer();
+			$pw->reader();
+			use POSIX qw(dup2);
+			dup2($pw->fileno(),0);
+			dup2($pr->fileno(),1);
+			$pr->close();
+			$pw->close();
+			exec("cvs","server");
 		}
+		$pw->writer();
+		$pr->reader();
+		$self->{'socketo'} = $pw;
+		$self->{'socketi'} = $pr;
 	}
+	$self->{'socketo'}->write("Root $repo\n");
+	#Valid-responses ok error Valid-requests Checked-in New-entry Checksum Copy-file Updated Created Update-existing Merged Patched Rcs-diff Mode Mod-time Removed Remove-entry Set-static-directory Clear-static-directory Set-sticky Clear-sticky Template Clear-template Notified Module-expansion Wrapper-rcsOption M Mbinary E F MT\nvalid-requests
+	$self->{'socketo'}->write("Valid-responses ok error Valid-requests Mode Mod-time M Mbinary E F Checked-in Updated Merged Removed\n");
+
+	$self->{'socketo'}->write("valid-requests\n");
+	$self->{'socketo'}->flush();
+
+	my $rep=$self->readline();
+	if($rep !~ s/^Valid-requests\s*//) {
+		$rep="<unknown>" unless $rep;
+		die "validReply: $rep\n";
+	}
+	$rep=$self->readline();
+	die "validReply: $rep\n" if $rep ne "ok\n";
+
+	$self->{'ok'} = $rep;
+	$self->{'socketo'}->write("UseUnchanged\n") if $rep =~ /\bUseUnchanged\b/;
+	$self->{'repo'} = $repo;
+	$self->{'subdir'} = $subdir;
+	$self->{'lines'} = undef;
+
+	return $self;
 }
+
+sub readline {
+	my($self) = @_;
+	return $self->{'socketi'}->getline();
+#	return undef unless defined $self->{'buffer'};
+#	while(1) {
+#		if($self->{'buffer'} =~ s/^(.*?\n)//) {
+#			return $1;
+#		}
+#		my $buf;
+#		my $len = $self->{'socketi'}->read($buf);
+#		die "Server: $!" if not defined $len or $len<0;
+#		if($len == 0) {
+#			$self->{'buffer'}=undef;
+#			return undef; # EOF
+#		}
+#		$self->{'buffer'} .= $buf;
+#	}
+}
+
+sub rlog {
+	my($self) = @_;
+	$self->{'socketo'}->write("Argument --\n");
+	$self->{'socketo'}->write("Argument $self->{'subdir'}\n");
+	$self->{'socketo'}->write("rlog\n");
+	$self->{'socketo'}->flush();
+	$self->{'lines'} = 0;
+	print STDERR "C: rlog\n";
+}
+
+sub file {
+	my($self,$fn,$rev) = @_;
+	$self->{'socketo'}->write("Global_option -n\n");
+	$self->{'socketo'}->write("Argument -n\n");
+	$self->{'socketo'}->write("Argument -p\n");
+	$self->{'socketo'}->write("Argument -N\n");
+	$self->{'socketo'}->write("Argument -ko\n");
+	$self->{'socketo'}->write("Argument -r\n");
+	$self->{'socketo'}->write("Argument $rev\n");
+	$self->{'socketo'}->write("Argument --\n");
+	$self->{'socketo'}->write("Argument $self->{'subdir'}/$fn\n");
+	$self->{'socketo'}->write("Directory .\n");
+	$self->{'socketo'}->write("$self->{'repo'}\n");
+	$self->{'socketo'}->write("Sticky T1.1\n");
+	$self->{'socketo'}->write("co\n");
+	$self->{'socketo'}->flush();
+	$self->{'lines'} = 0;
+}
+
+sub line {
+	my($self) = @_;
+	die "Not in lines" unless defined $self->{'lines'};
+
+	my $line;
+	while(defined($line = $self->readline())) {
+		#chomp $line;
+		if($line =~ s/^M //) {
+			$self->{'lines'}++;
+			return $line;
+		} elsif($line =~ /^Mbinary\b/) {
+			my $cnt;
+			die "EOF from server" unless defined ($cnt = $self->readline());
+			chomp $cnt;
+			die "Duh: Mbinary $cnt" if $cnt !~ /^\d+$/ or $cnt<1;
+			$line="";
+			while($cnt) {
+				my $buf;
+				my $num = $self->{'socketi'}->read($buf,$cnt);
+				die "S: Mbinary $cnt: $num: $!\n" if not defined $num or $num<=0;
+				$line .= $buf;
+				$cnt -= $num;
+			}
+			$self->{'lines'}++;
+			return $line;
+		} else {
+			chomp $line;
+			if($line eq "ok") {
+				print STDERR "S: ok ($self->{'lines'})\n";
+				$self->{'lines'} = undef;
+				return undef;
+			} elsif($line =~ s/^E //) {
+				print STDERR "S: $line\n";
+			} else {
+				die "Unknown: $line\n";
+			}
+		}
+	}
+	die "EOF from server\n";
+}
+
+package main;
+
+my $cvs = CVS->new($ENV{CVS_REPOSITORY},$cne);
+
+## my $cvs=CVS->new(":pserver:anonymous\@cvs.sourceforge.net:/cvsroot/ivtv","ivtv");
+## my $line;
+##
+## $cvs->file("ivtv/README","1.1");
+## open(F,">/tmp/itr.1.1");
+## while(defined($line=$cvs->line())) { print F $line; }
+## close(F);
+##
+## $cvs->file("ivtv/README","1.2");
+## open(F,">/tmp/itr.1.2");
+## while(defined($line=$cvs->line())) { print F $line; }
+## close(F);
+## exit(0);
+##__END__
 
 sub bkfiles($) {
 	my($f) = @_;
@@ -263,6 +400,7 @@ sub pdate($) {
 }
 
 my %symdate; # actual date - latest
+my %dead_sym; # symbols found on non-included branches
 my $cset;
 my $dt_done;
 
@@ -322,19 +460,150 @@ sub add_date($;$$$$$) {
 	return $cs;
 }
 
+sub date_sym($$$$) {
+	my($fn,$sym,$dt,$edt) = @_;
+	return if $dt >= $edt;
+	$symdate{$sym}=[] unless exists $symdate{$sym};
+	my $s = $symdate{$sym};
+
+	my($min,$max,$i,$cs);
+
+	cend: {
+		$min=0;$max=@$s;$i=0;
+
+		# vor dem Anfang?
+		while($min<$max) {
+			$i=int(($min+$max)/2);
+			$cs = $s->[$i];
+
+			if($cs->[0] > $edt) {
+				$max=$i;
+				next;
+			} elsif($cs->[0] < $edt) {
+				$min=$i+1;
+				next;
+			}
+			# ansonsten: Treffer.
+			last cend;
+		}
+		# nix gefunden
+		if($max>0) {
+			my $sm=$s->[$max-1][1];
+#			my $sa=[ @{$s->[$max-1][2]} ];
+			$cs=[$edt,$sm];
+		} else {
+			$cs=[$edt,0];
+		}
+		splice(@$s,$max,0,$cs);
+	}
+
+	cstart: {
+		$min=0;$max=@$s;$i=0;
+
+		# vor dem Anfang?
+		while($min<$max) {
+			$i=int(($min+$max)/2);
+			$cs = $s->[$i];
+			
+			if($cs->[0] > $dt) {
+				$max=$i;
+				next;
+			} elsif($cs->[0] < $dt) {
+				$min=$i+1;
+				next;
+			}
+			# ansonsten: Treffer.
+			$max=$i;
+			last cstart;
+		}
+		# nix gefunden
+		if($max>0) {
+			my $sm=$s->[$max-1][1];
+#			my $sa=[ @{$s->[$max-1][2]} ];
+			$cs=[$dt,$sm];
+		} else {
+			$cs=[$dt,0];
+		}
+		splice(@$s,$max,0,$cs);
+	}
+
+	while($s->[$max][0] < $edt) {
+		$s->[$max][1] ++;
+#		push(@{$s->[$max][2]},$fn);
+		$max ++;
+	}
+}
+
+sub reduce_sym() {
+	foreach my $sym(keys %symdate) {
+		next if $dead_sym{$sym};
+		my $acnt=-1;
+		my $adate;
+		my %fl;
+		my %fa;
+		my $fa;
+		my $fs;
+		foreach my $s(@{$symdate{$sym}}) {
+#			my($ss,$mm,$hh,$d,$m,$y)=localtime($s->[0]);
+#			$m++; $y+=1900; ## zweistellig wenn <2000
+#			my $dat = sprintf "%04d-%02d-%02d %02d:%02d:%02d",$y,$m,$d,$hh,$mm,$ss;
+#			$fa=""; $fs=""; %fa=();
+#			foreach my $f(@{$s->[2]}) {
+#				$fa{$f}=1;
+#				next if exists $fl{$f};
+#				$fa.=" $f";
+#				$fl{$f}=1;
+#			}
+#			foreach my $f(keys %fl) {
+#				next if exists $fa{$f};
+#				$fs.=" $f";
+#				delete $fl{$f};
+#			}
+#			print "$sym: $dat: $s->[1]";
+#			print " +$fa" if $fa; print " -$fs" if $fs;
+#			print "\n";
+
+			if($acnt <= $s->[1]) { # use the latest
+				$adate = $s->[0];
+				$acnt = $s->[1];
+			}
+		}
+#		foreach my $s(@{$symdate{$sym}}) {
+#			next if $acnt != $s->[1];
+#			my($ss,$mm,$hh,$d,$m,$y)=localtime($s->[0]);
+#			$m++; $y+=1900; ## zweistellig wenn <2000
+#			my $dat = sprintf "%04d-%02d-%02d %02d:%02d:%02d",$y,$m,$d,$hh,$mm,$ss;
+#			print "$sym: $dat: @{$s->[2]}\n";
+#		}
+
+		push(@{add_date($adate)->{sym}},$sym);
+
+#		my($ss,$mm,$hh,$d,$m,$y)=localtime($adate);
+#		$m++; $y+=1900; ## zweistellig wenn <2000
+#		my $dat = sprintf "%04d-%02d-%02d %02d:%02d:%02d",$y,$m,$d,$hh,$mm,$ss;
+#		print "$sym: $dat\n";
+	}
+	%symdate=();
+}
+
 sub rev_ok($$) {
 	my($fn,$rev)=@_;
 # Target: 2.2.0.4
-# OK: 1.1 1.1.1.1 1.1.1.2 1.2 1.3 1.4  2.0 2.1 2.2 2.2.4.1 2.2.4.2 2.2.4.3
-# !OK: 1.2.3.4 2.3 2.3.4.5 2.2.3.1 2.2.5.1 2.2.4.1.4.4 3.1 
+# OK: 1.1 1.1.1.1 1.1.1.2 1.2 1.3 1.4  2.0 2.1 2.2 2.2.4.1 2.2.0.4 2.2.4.2 2.2.4.3
+# !OK: 1.2.3.4 2.3 2.3.4.5 2.2.3.1 2.2.5.1 2.2.4.1.4.4 2.3 3.1 
 
-# Danger -- we need to filter 1.1.1.* separately if it occurs before 1.2.
+# ASSUMPTION: mainline+vendor is checked in completely before we even think
+#             about importing "normal" branches.
+# Vendor branch cut-off dates (1.1.1.2, 1.2, 1.1.1.3 => ignore the latter)
+# are checked via %cutoff.
 
+	my $tr = $target->{$fn};
+	return 1 if defined $tr and $rev eq $tr;
 	my @f = split(/\./,$rev);
-	return (0+@f == 2 or (0+@f==4 and $f[0]==1 and $f[1]==1 and $f[2]==1))
-		if $trev eq ""; # baseline / vendor branch
 
-	my $tr = $target{$fn};
+	return (0+@f == 2 or (0+@f==4 and $f[0]==1 and $f[1]==1 and $f[2]==1))
+		if $trev eq "" or not $tr; # baseline + vendor branch
+
 	return 0 unless defined $tr;
 	die "Target: $tr  File: $fn\n" unless $tr =~ s/\.0\.(\d+)$/.$1/;
 
@@ -357,6 +626,17 @@ sub rev_ok($$) {
 	return 0+@f == 1;
 }
 
+### Test Revision Matching
+#$target->{"/hurzli"}="2.2.0.4";
+#foreach my $r(qw(1.1 1.2 1.3 1.4  2.0 2.1 2.2 2.2.0.4 2.2.4.1 2.2.4.2 2.2.4.3)) {
+#	die "RevP1: $r\n" unless rev_ok("/hurzli",$r);
+#}
+#foreach my $r(qw(1.2.3.4 2.3 2.3.4.5 2.2.3.1 2.2.5.1 2.2.0.2 2.2.4.1.4.4 2.3 3.1)) {
+#	die "RevP2: $r\n" if rev_ok("/hurzli",$r);
+#}
+#exit(0);
+
+
 # Process one CVS log entry
 sub proc1($$$$$$) {
 	my($fn,$dt,$rev,$cmt,$autor,$gone) = @_;
@@ -367,7 +647,6 @@ sub proc1($$$$$$) {
 		 $fn =~ m#^CVSROOT/# or
 		 $fn =~ m#/CVSROOT/# or
 		 0;
-	return undef unless rev_ok($fn,$rev);
 	return add_date($dt,$fn,$rev,$autor,$cmt,$gone)
 		if $rev ne "1.1" or not $gone;
 }
@@ -384,11 +663,22 @@ sub proc(@) {
 
 	my %entry;
 	my %syms;
+	my $re = "$cvs->{'repo'}/$cvs->{'subdir'}";
+
 	# It is helpful to have the output of "cvs log FILE" handy if you
 	# want to understand the next bits.
 	foreach my $x(@_) {
 		if($state == 0 and $x =~ s/^Working file:\s+(\S+)\s*$/$1/) {
 			$fn = $x;
+			$state=1;
+			# print STDERR "$CLR  $fn\r" if $verbose;
+			next;
+		}
+		if($state == 0 and $x =~ s/^RCS file:\s+(\S+),v\s*$/$1/) {
+			$fn = $x;
+			die "Unknown name: $fn\n" unless $fn =~ s/^\Q$re\E\///;
+			$fn =~ s#/Attic/#/#;
+			$fn =~ s#^Attic/##;
 			$state=1;
 			# print STDERR "$CLR  $fn\r" if $verbose;
 			next;
@@ -404,7 +694,7 @@ sub proc(@) {
 				my $dsym=$1;
 				my $drev=$2;
 
-				$target{$fn}=$drev if defined $trev and $dsym eq $trev;
+				$target->{$fn}=$drev if defined $trev and $dsym eq $trev;
 				$syms{$drev}=[] unless defined $syms{$drev};
 				push(@{$syms{$drev}},$dsym);
 
@@ -445,7 +735,7 @@ sub proc(@) {
 			$dt=timelocal($ss,$mm,$hh,$d,$m,$y);
 			die "Datum: $x" unless $dt;
 			$cutoff{$fn}=$dt if $rev eq "1.2";
-			$state = 6;
+			$state=6;
 			next;
 		} elsif($state == 5 and $x =~ /^date:\s+(\d+)-(\d+)-(\d+)\s+(\d+)\:(\d+)\:(\d+)\s*[+-]\d{4}\s*\;\s+author\:\s+(\S+)\;\s+state\:\s+(\S+)\;/) {
 			$gone=1 if lc($8) eq "dead";
@@ -455,10 +745,10 @@ sub proc(@) {
 			$dt=timelocal($ss,$mm,$hh,$d,$m,$y);
 			die "Datum: $x" unless $dt;
 			$cutoff{$fn}=$dt if $rev eq "1.2";
-			$state = 6;
+			$state=6;
 			next;
 		}
-		if($state==6) {
+		if($state == 6) {
 			next if $x =~ /^branches\:\s+/;
 			$cmt .= "$x\n";
 			next;
@@ -467,33 +757,40 @@ sub proc(@) {
 	$entry{$rev} = proc1($fn,$dt,$rev,$cmt,$autor,$gone) if $dt;
 
 	while(my($rev,$syms)=each %syms) {
-		my $nxdate;
-		if($entry{$rev.".1.1"}) {
-			$nxdate = $entry{$rev.".1.1"}{wann}
-				if not $nxdate or $nxdate > $entry{$rev.".1.1"}{wann};
-		}
-		if($entry{$rev.".2.1"}) {
-			$nxdate = $entry{$rev.".2.1"}{wann}
-				if not $nxdate or $nxdate > $entry{$rev.".2.1"}{wann};
-		}
-		my $drev = $rev; $drev =~ s/(\d+)$/1+$1/e;
-		if($entry{$drev}) {
-			$nxdate = $entry{$drev}{wann}
-				if not $nxdate or $nxdate > $entry{$drev}{wann};
-		}
 		foreach my $sym(@$syms) {
-			if ($sym =~ /^Branch:/) {
-				next unless $nxdate;
-				$symdate{$sym}=$nxdate-1
-					if not $symdate{$sym} or $symdate{$sym} >= $nxdate;
-			} else {
-				my $dt = $entry{$rev};
-				next unless $dt;
-				$dt = $dt->{wann};
-				next unless $dt;
-				$symdate{$sym}=$dt
-					if not $symdate{$sym} or $symdate{$sym} < $dt;
+			unless(rev_ok($fn,$rev)) {
+#				print STDERR "Ouch $sym|$rev|$target->{$fn}|$fn\n";
+				$dead_sym{$sym}++;
+				next;
 			}
+			my $nxdate = $time;
+			if($entry{$rev.".1.1"}) {
+				$nxdate = $entry{$rev.".1.1"}{wann}
+					if $nxdate > $entry{$rev.".1.1"}{wann};
+			}
+			my $enum=2;
+			my $skip=0;
+			my $drev;
+			while($skip<5) {
+				$drev=$rev.".$enum.1";
+				if($entry{$drev}) {
+					$nxdate = $entry{$drev}{wann}
+						if $nxdate > $entry{$drev}{wann} and ($sym =~ /^Branch:/ or rev_ok($fn,$drev));
+				} else {
+					$skip += 1;
+				}
+				$enum++;
+			}
+			$drev = $rev; $drev =~ s/(\d+)$/1+$1/e;
+			if($entry{$drev}) {
+				$nxdate = $entry{$drev}{wann}
+					if $nxdate > $entry{$drev}{wann} and rev_ok($fn,$drev);
+			}
+			my $dt = $entry{$rev};
+			next unless $dt;
+			$dt = $dt->{wann};
+			next unless $dt;
+			date_sym($fn,$sym,$dt,$nxdate);
 		}
 	}
 }
@@ -501,79 +798,40 @@ sub proc(@) {
 my $tmpcv = "/var/cache/cvs";
 my $tmppn="/var/cache/cvs/bk/$pn";
 
-if(-f "$tmppn.data") {
-	print STDERR "$pn: Reading stored CVS log\n";
-	$cset = retrieve("$tmppn.data");
-
-	foreach my $x (@$cset) {
-		my $ff=$x->{files};
-		foreach my $f (keys %$ff) {
-			$cutoff{$f}=$x->{wann}
-				if $ff->{$f}{rev} eq "1.2";
-		}
-	}
-} else {
+#if(-f "$tmppn.data") {
+#	print STDERR "$pn: Reading stored CVS log\n";
+#	$cset = retrieve("$tmppn.data");
+#	($cset,$target) = @$cset;
+#
+#	foreach my $x (@$cset) {
+#		my $ff=$x->{files};
+#		foreach my $f (keys %$ff) {
+#			$cutoff{$f}=$x->{wann}
+#				if $ff->{$f}{rev} eq "1.2";
+#		}
+#	}
+#} else {
 	$cset=[];
 	print STDERR "$CLR $pn: Processing CVS log\r" if $verbose;
 	my $mr=1;
-	while(1) {
-		my $done=0;
-		foreach my $x (qw(0 1 1.1.1 1.2.1)) {
-			mkpath("$tmpcv/$mr.$x",1,0755);
-			
-			print STDERR "$CLR $pn: Fetch CVS files $mr.$x\r";
-			chdir("$tmpcv/$mr.$x") or die "no dir $tmpcv/$mr.$x";
-			if(-d $cn) {
-				chdir($cn) or die "no chdir $cn: $!";
-				cvs(undef,"update","-d","-r$mr.$x");
-			} else {
-				if($cne eq ".") {
-					mkdir($cn);
-					chdir($cn);
-				}
-				cvs(undef,"get","-r$mr.$x",$cne);
+	my @buf = ();
+	my $line;
 
-				chdir($cne) or next;  # no-op when $cne eq "."
-			}
-
-			print STDERR "$CLR $pn: processing $mr.$x\r";
-			my $lines=`find . -name CVS -prune -o -type f -print | wc -l`;
-			last if not (0+$lines) and $x eq "1";
-
-			my @buf = ();
-			open(LOG,"cvs log |");
-			while(<LOG>) {
-				chomp;
-				if($_ =~ /^=+\s*$/) {
-					proc(@buf);
-					@buf=();
-				} else {
-					push(@buf,$_) if @buf or /^RCS file:/;
-				}
-			}
-			proc(@buf) if @buf;
-			close(LOG);
-
-			opendir(D,".");
-			my $dn;
-			while(defined($dn=readdir(D))) {
-				next if $dn eq "." or $dn eq "..";
-				next if $dn eq "CVS" or $dn eq "CVSROOT";
-				$done++;
-				last;
-			}
-			closedir(D);
+	$cvs->rlog();
+	while(defined($line = $cvs->line())) {
+		chomp $line;
+		if($line =~ /^=+\s*$/) {
+			proc(@buf);
+			@buf=();
+		} else {
+			push(@buf,$line) if @buf or $line =~ /^RCS file:/;
 		}
-		last unless $done;
-	} continue {
-		$mr++;
 	}
+	proc(@buf) if @buf;
 
-	foreach my $sym(keys %symdate) {
-		push(@{add_date($symdate{$sym})->{sym}},$sym);
-	}
-	nstore($cset,"$tmppn.data");
-}
+	reduce_sym();
+	nstore([$cset,$target],"$tmppn.data");
+#}
 chdir("/");
 
 dateset($cset->[0]{wann});
@@ -734,7 +992,16 @@ sub process($$$$) {
 						wget ($ENV{BKCVS_WEB}.$f."?rev=".$rev."&content-type=text/plain", $f);
 					}
 				} else {
-					cvs((($ENV{CVS_REPOSITORY} =~ m#:/#) ? "-q" : "-Q"),"update","-A","-r",$rev, @ff);
+					foreach my $f(@ff) {
+						my $line;
+						$cvs->file($f,$rev);
+						open(F,">$f") or die "No file: $f: $!\n";
+						while(defined($line=$cvs->line())) {
+							print F $line or die "Write: $f: $!\n";
+						}
+						close(F) or die "Write: $f: $!\n";
+						#cvs((($ENV{CVS_REPOSITORY} =~ m#:/#) ? "-q" : "-Q"),"update","-A","-r",$rev, @ff);
+					}
 				}
 				utime($wann,$wann,@ff);
 			}
@@ -934,13 +1201,21 @@ while(@$cset) {
 			my $y=$cset->[$i];
 			my $f=$y->{autor}{$autor};
 
-			# Different author -> different changeset
-			last sk_add unless $f;
-
-			# A file was changed already -> belongs in new changeset
+			# A file was changed already -> this belongs in a new changeset
+			my $nf = 0;
 			foreach my $fn(keys %$f) {
+				next unless rev_ok($fn,$f->{$fn}{rev});
+				$nf++;
 				last sk_add if $adf{$fn}++;
 			}
+
+			# skip if there are no files to be done here.
+			# If there are tags here, however ...
+			last sk_add if $y->{sym} and not $nf;
+			next sk_add unless $nf;
+
+			# Different author -> different changeset
+			last sk_add unless $f;
 
 			# comments are the same? If so, increase grace time
 			$scmt = scmt($f,$scmt);
@@ -952,6 +1227,7 @@ while(@$cset) {
 
 			# NOW, finally, collect changes.
 			foreach my $fn(keys %$f) {
+				next unless rev_ok($fn,$f->{$fn}{rev});
 				$adt{$fn}=$f->{$fn}
 					if $f->{$fn}{rev} !~ /^1\.1\.1\.\d+$/
 						or not defined $cutoff{$fn}
@@ -959,11 +1235,10 @@ while(@$cset) {
 			}
 			$last{$autor}=$ldiff=$y->{wann};
 			
-
-			# Abbruch, wenn Symbol
+			# If there are tags here, we need a changeset
 			last sk_add if $y->{sym};
 
-			# Abbruch, wenn Änderung anderer Autoren reinkommt.
+			# We also need one if there are other authors
 			foreach my $a(keys %{$y->{autor}}) {
 				last sk_add if $a ne $autor and (not defined $last{$a} or $last{$a} < $y->{wann});
 	}
