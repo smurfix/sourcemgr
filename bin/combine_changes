@@ -21,7 +21,7 @@ GPG will be asked to re-sign the result.
 
 from GnuPGInterface import GnuPG
 from sys import argv
-import os
+import os, re
 
 FORMAT="1.7"
 
@@ -188,7 +188,13 @@ for fn in argv[1:]:
 		else:
 			raise RuntimeError,("bad state",state)
 
-out=open(os.path.join(os.path.dirname(fn),keys["Source:"]+"_"+keys["Version:"]+".changes"),"w")
+# remove the epoch from the output file name
+epoch=re.compile("\\d+:")
+v=keys["Version:"]
+vm=epoch.search(v)
+if vm: v=v[:epoch.start(0)] + v[epoch.end(0):]
+
+out=open(os.path.join(os.path.dirname(fn), keys["Source:"]+"_"+v+".changes"), "w")
 
 temp.seek(0)
 
