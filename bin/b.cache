@@ -50,6 +50,17 @@ test -z "$dv" || dv="-$dv"
 
 dir="$what$dv"
 
+case "$BK_REPOSITORY" in
+	/*) if test -d "$BK_REPOSITORY/$dir";  then
+			echo "$BK_REPOSITORY/$dir"
+			exit 0
+		else
+			echo "Archiv '$what$dv' gibt es nicht in $BK_REPOSITORY"
+			exit 1
+		fi
+		;;
+esac
+
 cbase="/var/cache/bk"
 
 if test -d "$cbase" ; then : ; else
