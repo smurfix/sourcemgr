@@ -20,6 +20,7 @@ usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Hole aus Archiv, baue, installiere, wirf weg.
        [ -i (install) ]  [ -I (build-und-install) ]
+	   [ -d Paket ]
        [ -v release ] [ -w norisrelease ]
        [ -s Subtarget, d.h. compile_XX ] 
        [ -n (Sourcen nach Installation nicht löschen) ]
