@@ -48,10 +48,10 @@ if test -z "$dir" ; then
 fi
 
 tmp=/var/tmp/bki.$$
-trap 'rm -rf $tmp' 0
+trap 'rm -rf $tmp; usage; exit 1' 0
 
-dir="$1"
-test -d "$dir"
+ddir="$1"
+test -d "$ddir"
 shift
 cmt="$*"
 test -n "$cmt"
@@ -61,9 +61,11 @@ test -d "$tmp"
 
 set -e
 
-cd "$dir"
-test ! -d SCCS
-dir="$(pwd)"
+cd "$ddir"
+ddir="$(pwd)"
+# entferne alte Bitkeeper- und/oder CVS-Dateien
+( find . -type d \( -name SCCS -o -name CVS \) -prune -print | grep -v "^\./BitKeeper/";
+  echo BitKeeper; echo CVSROOT ) | xargs rm -rf
 
 done=/tmp/f.done.$$
 trap 'rm -rf $done $tmp' 0
@@ -72,18 +74,18 @@ trap 'rm -rf $done $tmp' 0
   echo BitKeeper ) |
 ( set -e
   while read a ; do
-	echo $a
-	mv "$a" "$dir/$a" || cp -a "$a" "$dir/$a"
+	mv "$tmp/$a" "$a" || cp -a "$tmp/$a" "$a"
   done
   touch $done
 )
 test -f $done
-rm -f $tmp $done
+rm -rf $tmp $done
 
 b.import.pl "$cmt"
 
 bk push -q
 echo "Import OK:" $(bk prs -ah -r+ -d:I: ChangeSet)
-rm -rf BitKeeper ChangeSet
+trap "" 0
+rm -rf $tmp ChangeSet BitKeeper
 find . -name SCCS -type d -prune -print0 | xargs -0r rm -rf
 exit 0

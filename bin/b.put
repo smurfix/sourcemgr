@@ -39,6 +39,7 @@ trap '' 0
 b.name "$dir" >/tmp/bn.$$
 read dir overs </tmp/bn.$$
 rm -f /tmp/bn.$$
+test -n "$vset" || vers="$overs"
 
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 
@@ -64,8 +65,8 @@ END
 	fi
 
 else
-	test -n "$vset" || vers=""
 	test -z "$vers" || dv="-$vers"
+	echo Version $vers  gibt es noch nicht -- wird neu angelegt:
 	echo + bk clone . $BK_REPOSITORY/$what$dv
 	bk clone -q . $BK_REPOSITORY/$what$dv
 	exit 1

@@ -87,5 +87,5 @@ if(@new and @gone) {
 }
 
 bk('-r', ci => '-qG', "-y\"$cmt\"");
-bk(undef,"bk sfiles -pC | bk cset -y\"$cmt\"");
+bk(undef,"bk sfiles -pC | bk cset -q -y\"$cmt\"");
 

@@ -9,12 +9,14 @@ cat >&2 <<END
 Usage: $(basename $0)  -- generiert ein neues BK-Archiv
          -d Paket
 	   [ -v Version ]
+	   [ -s (Single-User) ]
 	     Beschreibung
 END
 }
 
 dir=
 vers=
+single=
 
    eval set -- "$(getopt "d:v:h" "$@")"
    for i
@@ -23,6 +25,8 @@ vers=
 	   in
 		   -h)
 		       exit 1 ;;
+		   -s)
+		   	   shift; single=y ;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
@@ -52,7 +56,17 @@ fi
 cat <<END >$tmpcf
 description: $*
 
+END
+
+if test -n "$single" ; then
+	echo single_user:$USER >>$tmpcf
+	echo single_host:$(hostname) >>$tmpcf
+else
+	cat <<END >>$tmpcf
 logging:    changesets@openlogging.org
+END
+fi
+cat <<END >>$tmpcf
 security:   none
 contact:    $USER
 email:		$USER@noris.de

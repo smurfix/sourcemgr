@@ -157,20 +157,20 @@ fi
 set -e
 
 cd /usr/src
-if test -n "$skipdone" -a -s "STATUS/done/$desc$submode" ; then
-	echo "$desc$submode: Done."
+if test -n "$skipdone" -a -s "STATUS/done/$desc$dv$submode" ; then
+	echo "$desc$dv$submode: Done."
 	exit 0
 fi
-if test -n "$doinstall" -a -s "STATUS/done/$desc$submode" ; then
-	echo "$desc$submode: Bereits installiert, wiederhole..."
-	mv "STATUS/done/$desc$submode" "STATUS/to-install/$desc$submode"
+if test -n "$doinstall" -a -s "STATUS/done/$desc$dv$submode" ; then
+	echo "$desc$dv$submode: Bereits installiert, wiederhole..."
+	mv "STATUS/done/$desc$dv$submode" "STATUS/to-install/$desc$dv$submode"
 fi
-if test -n "$doinstall" -a -s "STATUS/fail/$desc$submode" -a -n "$freinst"; then
-	echo "$desc$submode: Installationsfehler? wiederhole..."
-	mv "STATUS/fail/$desc$submode" "STATUS/to-install/$desc$submode"
+if test -n "$doinstall" -a -s "STATUS/fail/$desc$dv$submode" -a -n "$freinst"; then
+	echo "$desc$dv$submode: Installationsfehler? wiederhole..."
+	mv "STATUS/fail/$desc$dv$submode" "STATUS/to-install/$desc$dv$submode"
 fi
-if test "$doinstall" = "y" -a ! -f "STATUS/to-install/$desc$submode" ; then
-	echo "$desc$submode: Noch nicht gebaut!"
+if test "$doinstall" = "y" -a ! -f "STATUS/to-install/$desc$dv$submode" ; then
+	echo "$desc$dv$submode: Noch nicht gebaut!"
 	exit 1
 fi
 if test -f "/usr/src/STATUS/checkout/$desc" ; then
@@ -195,55 +195,55 @@ if test -z "$bkrel" ; then bkrel="noris" ; else dv="-$bkrel"; fi
 archive="$what$dv"
 bkvers="$( bk tip "$BK_REPOSITORY/$archive" )"
 
-if test -f "STATUS/work/$desc$submode" ; then
-	read host pid < STATUS/work/$desc$submode
+if test -f "STATUS/work/$desc$dv$submode" ; then
+	read host pid < STATUS/work/$desc$dv$submode
 	if ! test "$host" = "$(hostname)" || kill -0 $pid >/dev/null 2>&1 ; then
-		echo -n "$desc$submode: In Arbeit: "
-		head -1 STATUS/work/$desc$submode 
-		echo "$desc$submode: 'redo $dir', wenn Abbruch."
+		echo -n "$desc$dv$submode: In Arbeit: "
+		head -1 STATUS/work/$desc$dv$submode 
+		echo "$desc$dv$submode: 'redo $dir', wenn Abbruch."
 		exit 1
 	fi
 fi
 if test -f "STATUS/legacy/$desc" ; then
-	echo "$desc$submode: Altes Programm, wird nicht angefaßt."
+	echo "$desc$dv$submode: Altes Programm, wird nicht angefaßt."
 	exit 1
 fi
-#	if test -f "STATUS/to-install/$desc$submode" -a -z "$doinstall" ; then
-#		echo "$desc$submode: Muß installiert werden."
+#	if test -f "STATUS/to-install/$desc$dv$submode" -a -z "$doinstall" ; then
+#		echo "$desc$dv$submode: Muß installiert werden."
 #		exit 0
 #	fi
-if test -f STATUS/work/$desc$submode ; then
-	mv -f STATUS/work/$desc$submode STATUS/work/$desc$submode.new
+if test -f STATUS/work/$desc$dv$submode ; then
+	mv -f STATUS/work/$desc$dv$submode STATUS/work/$desc$dv$submode.new
 fi
-echo $(hostname) $$ > STATUS/work/$desc$submode
+echo $(hostname) $$ > STATUS/work/$desc$dv$submode
 
-if test -s "STATUS/fail/$desc$submode" ; then
+if test -s "STATUS/fail/$desc$dv$submode" ; then
 	echo '# RESTART (fail)'
-	echo '# RESTART (fail)' >> STATUS/work/$desc$submode
-	sed -e '/^#-#/d' -e 's/^/#-/' < STATUS/fail/$desc$submode >> STATUS/work/$desc$submode 
-	echo '# RESTART (fail)' $(hostname) $$ >> STATUS/work/$desc$submode
-	rm -f STATUS/fail/$desc$submode
+	echo '# RESTART (fail)' >> STATUS/work/$desc$dv$submode
+	sed -e '/^#-#/d' -e 's/^/#-/' < STATUS/fail/$desc$dv$submode >> STATUS/work/$desc$dv$submode 
+	echo '# RESTART (fail)' $(hostname) $$ >> STATUS/work/$desc$dv$submode
+	rm -f STATUS/fail/$desc$dv$submode
 fi
-if test -s "STATUS/to-install/$desc$submode" ; then
+if test -s "STATUS/to-install/$desc$dv$submode" ; then
 	echo '# RESTART (to-install)'
-	echo '# RESTART (to-install)' >> STATUS/work/$desc$submode
-	sed -e '/^#-#/d' -e 's/^/#-/' < STATUS/to-install/$desc$submode >> STATUS/work/$desc$submode 
-	echo '# RESTART (to-install)' $(hostname) $$ >> STATUS/work/$desc$submode
-	rm -f STATUS/to-install/$desc$submode
+	echo '# RESTART (to-install)' >> STATUS/work/$desc$dv$submode
+	sed -e '/^#-#/d' -e 's/^/#-/' < STATUS/to-install/$desc$dv$submode >> STATUS/work/$desc$dv$submode 
+	echo '# RESTART (to-install)' $(hostname) $$ >> STATUS/work/$desc$dv$submode
+	rm -f STATUS/to-install/$desc$dv$submode
 fi
-if test -s "STATUS/done/$desc$submode" ; then
+if test -s "STATUS/done/$desc$dv$submode" ; then
 	echo '# RESTART (done)'
-	echo '# RESTART (done)' >> STATUS/work/$desc$submode
-	sed -e '/^#-#/d' -e 's/^/#-/' < STATUS/done/$desc$submode >> STATUS/work/$desc$submode 
-	echo '# RESTART (done)' $(hostname) $$ >> STATUS/work/$desc$submode
-	rm -f STATUS/done/$desc$submode
+	echo '# RESTART (done)' >> STATUS/work/$desc$dv$submode
+	sed -e '/^#-#/d' -e 's/^/#-/' < STATUS/done/$desc$dv$submode >> STATUS/work/$desc$dv$submode 
+	echo '# RESTART (done)' $(hostname) $$ >> STATUS/work/$desc$dv$submode
+	rm -f STATUS/done/$desc$dv$submode
 fi
-if test -s STATUS/work/$desc$submode.new ; then
+if test -s STATUS/work/$desc$dv$submode.new ; then
 	echo '# RESTART (Abbruch)'
-	echo '# RESTART (Abbruch)' >> STATUS/work/$desc$submode
-	sed -e '/^#-#/d' -e 's/^/#-/' < STATUS/work/$desc$submode.new >> STATUS/work/$desc$submode 
-	echo '# RESTART (Abbruch)' $(hostname) $$ >> STATUS/work/$desc$submode
-	rm -f STATUS/work/$desc$submode.new
+	echo '# RESTART (Abbruch)' >> STATUS/work/$desc$dv$submode
+	sed -e '/^#-#/d' -e 's/^/#-/' < STATUS/work/$desc$dv$submode.new >> STATUS/work/$desc$dv$submode 
+	echo '# RESTART (Abbruch)' $(hostname) $$ >> STATUS/work/$desc$dv$submode
+	rm -f STATUS/work/$desc$dv$submode.new
 fi
 
 if test -z "$again" -a -z "$qpack" ; then
@@ -269,7 +269,7 @@ if test -z "$again" -a -z "$qpack" ; then
 		test -s $FR/$i || rm -f $FR/$i
 	done
 
-	if test -f $FR/rpm.spec ; then cp $FR/rpm.spec STATUS/rpm/$desc$subtarget.spec; noflist=y; else
+	if test -f $FR/rpm.spec ; then cp $FR/rpm.spec STATUS/rpm/$desc$dv$subtarget.spec; noflist=y; else
 		(
 			echo "## autogenerated by 'p.rpm -I $what'. Do not edit."
 			echo ""
@@ -343,9 +343,9 @@ fi
 if test -z "$again" -o -n "$doinstall" ; then
 	mkfifo /tmp/ff.$$
 	mkfifo /tmp/fg.$$
-	( set +x; while read a ; do echo "# $a" ; done < /tmp/ff.$$ | tee -a STATUS/work/$desc$submode ) &
+	( set +x; while read a ; do echo "# $a" ; done < /tmp/ff.$$ | tee -a STATUS/work/$desc$dv$submode ) &
 	reader=$!
-	( set +x; while read a ; do echo "# $a" ; done < /tmp/fg.$$ | tee -a STATUS/work/$desc$submode.e ) &
+	( set +x; while read a ; do echo "# $a" ; done < /tmp/fg.$$ | tee -a STATUS/work/$desc$dv$submode.e ) &
 	readere=$!
 	sleep 1
 	exec  5>&1 6>&2  >/tmp/ff.$$ 2>/tmp/fg.$$
@@ -354,15 +354,15 @@ if test -z "$again" -o -n "$doinstall" ; then
 	if test -z "$doinstall" -o "$doinstall" = "b" -a -z "$noflist" ; then # compile
 		NRPM="$RPM"
 		if test -n "$again" ; then NRPM="$NRPM --short-circuit"; fi
-		echo rpm -bc $NRPM STATUS/rpm/$desc$subtarget.spec
-		sudo rpm -bc $NRPM STATUS/rpm/$desc$subtarget.spec || bad=$!
+		echo rpm -bc $NRPM STATUS/rpm/$desc$dv$subtarget.spec
+		sudo rpm -bc $NRPM STATUS/rpm/$desc$dv$subtarget.spec || bad=$!
 	fi
 	
 	if test -n "$doinstall" -a -z "$bad" -a -z "$noflist" ; then
-		echo "+*+" rpm -bi --short-circuit $RPM STATUS/rpm/$desc$subtarget.spec
-		echo "+*+" LD_PRELOAD=/usr/lib/log-install.so LOGFILE=/usr/src/STATUS/work/$desc$submode.p
-		sudo env LD_PRELOAD=/usr/lib/log-install.so LOGFILE=/usr/src/STATUS/work/$desc$submode.p \
-		rpm -bi --short-circuit $RPM STATUS/rpm/$desc$subtarget.spec || bad=$!
+		echo "+*+" rpm -bi --short-circuit $RPM STATUS/rpm/$desc$dv$subtarget.spec
+		echo "+*+" LD_PRELOAD=/usr/lib/log-install.so LOGFILE=/usr/src/STATUS/work/$desc$dv$submode.p
+		sudo env LD_PRELOAD=/usr/lib/log-install.so LOGFILE=/usr/src/STATUS/work/$desc$dv$submode.p \
+		rpm -bi --short-circuit $RPM STATUS/rpm/$desc$dv$subtarget.spec || bad=$!
 	fi
 	
 	cd /usr/src
@@ -370,18 +370,18 @@ if test -z "$again" -o -n "$doinstall" ; then
 	sleep 1
 	kill $reader 2>/dev/null || true
 	kill $readere 2>/dev/null || true
-	test ! -f /usr/src/STATUS/work/$desc$submode.p || cat /usr/src/STATUS/work/$desc$submode.p >> /usr/src/STATUS/work/$desc$submode && rm -f /usr/src/STATUS/work/$desc$submode.p
-	test ! -f /usr/src/STATUS/work/$desc$submode.e || cat /usr/src/STATUS/work/$desc$submode.e >> /usr/src/STATUS/work/$desc$submode && rm -f /usr/src/STATUS/work/$desc$submode.e
+	test ! -f /usr/src/STATUS/work/$desc$dv$submode.p || cat /usr/src/STATUS/work/$desc$dv$submode.p >> /usr/src/STATUS/work/$desc$dv$submode && rm -f /usr/src/STATUS/work/$desc$dv$submode.p
+	test ! -f /usr/src/STATUS/work/$desc$dv$submode.e || cat /usr/src/STATUS/work/$desc$dv$submode.e >> /usr/src/STATUS/work/$desc$dv$submode && rm -f /usr/src/STATUS/work/$desc$dv$submode.e
 	if test -n "$bad" ; then
-		mv "STATUS/work/$desc$submode" "STATUS/fail/$desc$submode"
-		if test -n "$doinstall" ; then touch "STATUS/done/$desc$submode"; fi
-		echo "$desc$submode: ### FEHLER ###"
+		mv "STATUS/work/$desc$dv$submode" "STATUS/fail/$desc$dv$submode"
+		if test -n "$doinstall" ; then touch "STATUS/done/$desc$dv$submode"; fi
+		echo "$desc$dv$submode: ### FEHLER ###"
 		exit $bad
 	fi
 fi
 
 if test -z "$doinstall" -a -z "$again"; then # nocompile
-	mv "STATUS/work/$desc$submode" "STATUS/to-install/$desc$submode"
+	mv "STATUS/work/$desc$dv$submode" "STATUS/to-install/$desc$dv$submode"
 elif test -n "$again" -o -n "$doinstall" -a -n "$noflist" ; then ## install checked-out
     if test -n "$qpack" -a -z "$noflist" ; then
 		sudo rpm -q --queryformat '[%{fileflags} %{filenames}\n]' $qpack | while read a b ; do 
@@ -390,30 +390,30 @@ elif test -n "$again" -o -n "$doinstall" -a -n "$noflist" ; then ## install chec
 		  elif test $a = 2 ; then echo "%doc $b"
 		  else echo "$b"
 		  fi
-		done >> STATUS/rpm/$desc$subtarget.spec
+		done >> STATUS/rpm/$desc$dv$subtarget.spec
 	fi
-	sudo rpm -bb --clean $RPM STATUS/rpm/$desc$subtarget.spec
+	sudo rpm -bb --clean $RPM STATUS/rpm/$desc$dv$subtarget.spec
 else # install
-	mv -f "STATUS/work/$desc$submode" "STATUS/done/$desc$submode"
-	echo "$desc$submode: Generiere STATUS/dist/$desc$submode"
-	rm -f "STATUS/fail/$desc$submode"
+	mv -f "STATUS/work/$desc$dv$submode" "STATUS/done/$desc$dv$submode"
+	echo "$desc$dv$submode: Generiere STATUS/dist/$desc$dv$submode"
+	rm -f "STATUS/fail/$desc$dv$submode"
 	if test -z "$noflist" ; then
 		(
-			sudo gen.flist.rpm < STATUS/done/$desc$submode
+			sudo gen.flist.rpm < STATUS/done/$desc$dv$submode
 			echo ""; echo "# EOF"
- 		) >> STATUS/rpm/$desc$subtarget.spec
+ 		) >> STATUS/rpm/$desc$dv$subtarget.spec
 	fi
-	sudo gen.flist < STATUS/done/$desc$submode > STATUS/out/new.$desc$submode 
+	sudo gen.flist < STATUS/done/$desc$dv$submode > STATUS/out/new.$desc$dv$submode 
 
-	( test ! -f STATUS/removed/$desc$submode || cat STATUS/removed/$desc$submode ; test ! -f STATUS/out/$desc$submode || cat STATUS/out/$desc$submode ) | sort -u > /tmp/d1.$$
-	sort -u STATUS/out/new.$desc$submode > /tmp/d2.$$
-	comm -23 /tmp/d1.$$ /tmp/d2.$$ > STATUS/removed/new.$desc$submode
+	( test ! -f STATUS/removed/$desc$dv$submode || cat STATUS/removed/$desc$dv$submode ; test ! -f STATUS/out/$desc$dv$submode || cat STATUS/out/$desc$dv$submode ) | sort -u > /tmp/d1.$$
+	sort -u STATUS/out/new.$desc$dv$submode > /tmp/d2.$$
+	comm -23 /tmp/d1.$$ /tmp/d2.$$ > STATUS/removed/new.$desc$dv$submode
 	rm -f /tmp/d1.$$ /tmp/d2.$$
 
-	mv -f STATUS/out/new.$desc$submode STATUS/out/$desc$submode
-	mv STATUS/removed/new.$desc$submode STATUS/removed/$desc$submode 
+	mv -f STATUS/out/new.$desc$dv$submode STATUS/out/$desc$dv$submode
+	mv STATUS/removed/new.$desc$dv$submode STATUS/removed/$desc$dv$submode 
 
-	sudo rpm -bb --short-circuit --clean $RPM STATUS/rpm/$desc$subtarget.spec
+	sudo rpm -bb --short-circuit --clean $RPM STATUS/rpm/$desc$dv$subtarget.spec
 fi
 
 exit 0
