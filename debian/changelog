@@ -1,3 +1,9 @@
+sourcemgr (1.322) unstable; urgency=low
+
+  * Also use BK_REMOTE_REPOSITORY (read-only, in b.cache)
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 17 Feb 2004 21:01:50 +0100
+
 sourcemgr (1.321) unstable; urgency=low
 
   * small cleanup

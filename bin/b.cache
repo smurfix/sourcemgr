@@ -1,5 +1,6 @@
 #!/bin/sh
 . /usr/share/sourcemgr/repository
+. /usr/share/sourcemgr/remoterepository
 
 set -e
 trap 'usage; exit 1' 0
@@ -104,8 +105,15 @@ if test -d "$c" ; then
 else
 	echo "$what$dv: Importing to cache" >&2
 	rm -rf "$c" "$c.x"
-	bk clone -q $BK_REPOSITORY/$what$dv "$c.x"
+	if bk clone -q $BK_REPOSITORY/$what$dv "$c.x" ; then
+		: # OK
+	elif test -z "$BK_REMOTE_REPOSITORY" then
+		exit 1
+	else
+		bk clone -q $BK_REMOTE_REPOSITORY/$what$dv "$c.x"
+	fi
 fi
+
 cd "$c.x" 
 bk -Ur get -Sq
 cd ..

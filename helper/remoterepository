@@ -1,0 +1,9 @@
+#
+# shell snippet to set BK_REMOTE_REPOSITORY
+
+if test -z "$BK_REMOTE_REPOSITORY" -a -f $HOME/.sourcemgr.cf ; then
+	BK_REMOTE_REPOSITORY=$(/usr/share/sourcemgr/getvar $HOME/.sourcemgr.cf BK_REMOTE_REPOSITORY)
+fi
+if test -z "$BK_REMOTE_REPOSITORY" ; then
+	BK_REMOTE_REPOSITORY=$(/usr/share/sourcemgr/getvar /etc/sourcemgr.cf BK_REMOTE_REPOSITORY)
+fi

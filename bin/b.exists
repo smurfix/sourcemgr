@@ -1,5 +1,6 @@
 #!/bin/bash
 . /usr/share/sourcemgr/repository
+. /usr/share/sourcemgr/remoterepository
 
 set -e
 trap 'usage; exit 1' 0
@@ -60,6 +61,10 @@ elif bk changes -r+ "$BK_REPOSITORY/public/$what$dv" >/dev/null 2>&1 ; then
 	what="public/$what"
 elif bk changes -r+ "$BK_REPOSITORY/public/$what2$dv" >/dev/null 2>&1 ; then
 	what="public/$what2"
+elif test -n "$BK_REMOTE_REPOSITORY" && bk changes -r+ "$BK_REMOTE_REPOSITORY/$what$dv" >/dev/null 2>&1 ; then
+	: # OK
+elif test -n "$BK_REMOTE_REPOSITORY" && bk changes -r+ "$BK_REMOTE_REPOSITORY/$what2$dv" >/dev/null 2>&1 ; then
+	what="$what2"
 else
 	exit 1
 fi
