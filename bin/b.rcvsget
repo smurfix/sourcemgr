@@ -9,6 +9,7 @@ Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -d Paket ]
        [ -l (kein PSERVER) ]
        [ -n (kein push) ]
+       [ -p parent-Repository ]
        [ -r Fork (im CVS) ]
        [ -v releasename (cvs / extern) ]
        [ -w releasename (cvs) ]
@@ -30,13 +31,14 @@ nvers=
 nopush=
 rvers=
 rdir=
+parent=
 datum=$(date '+%Y-%m-%d')
 sdatum=now
 quiet=-q
 comp=-z3
 loc=
 
-   eval set -- "$(getopt "Vd:v:w:r:hD:Zln" "$@")"
+   eval set -- "$(getopt "Vd:v:w:r:hD:Zlnp:" "$@")"
    for i
    do
 	   case "$i"
@@ -49,6 +51,8 @@ loc=
 		   	   shift; quiet="" ;;
 		   -D)
 			   shift; D=$(echo $1|sed -e 's/_/ /g'); datum="$D"; sdatum="$D"; shift;;
+		   -p)
+			   shift; parent="$1"; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
@@ -93,13 +97,25 @@ tmp="/var/cache/cvs/bk/tmp/$$"
 rm -rf "$tmp"
 dest=/var/cache/cvs/bk/"$dir-$vers"
 
-if $(b.exists -d "$dir" -v "$vers" >/tmp/bn.$$)  ; then
+if test -d "$dest" ; then :
+	cd "$dest"
+	bk pull -q
+	test -n "$nopush" || bk push
+	cd /var/cache/cvs
+elif test -n "$parent" ; then
+	bk clone bk://bitkeeper.noris.de/$parent "$dest"
+elif $(b.exists -d "$dir" -v "$vers" >/tmp/bn.$$)  ; then
 	if test -n "$nvers" -a "$vers" != "$nvers"; then
 		rm -rf "bk/$dir-$nvers"
 		b.get -d "$dir" -v "$vers" -w "$nvers" -n "bk/$dir-$nvers"
 		vers="$nvers"
 	elif ! test -d "$dest" ; then
 		b.get -d "$dir" -v "$vers" -n "$dest"
+	else
+		cd "$dest"
+		bk pull -q
+		test -n "$nopush" || bk push -q
+		cd /var/cache/cvs
 	fi
 else
 	test -z "$nvers" -o "$vers" = "$nvers"
@@ -121,14 +137,11 @@ if test -d $gdir$rdir; then
 	rm -rf ChangeSet BitKeeper
 	find . -name SCCS -type d -prune -print0 | xargs -0r rm -rf
 	test -n "$quiet" || echo CVS $quiet $comp -d $woher update -Pd -ko -D "$sdatum" $rvers
-	if cvs $quiet $comp -d $woher update -Pd -ko -D "$sdatum" $rvers | tee /tmp/fl.$$
-	then 
-		rm -f /tmp/fl.$$
-	else
-		perl -ne 'chomp; unlink $_ if s/^C //;' < /tmp/fl.$$
-		rm -f /tmp/fl.$$
+	cvs $quiet $comp -d $woher update -Pd -ko -D "$sdatum" $rvers | tee /tmp/fl.$$
+	if perl -ne 'chomp; if(s/^[CM] //) { $res++; unlink $_; } END { exit ($res==0) } ' < /tmp/fl.$$ ; then
 		cvs $quiet $comp -d $woher update -Pd -ko -D "$sdatum" $rvers
 	fi
+	rm -f /tmp/fl.$$
 else
 	if test "$was" = "." ; then mkdir -p $gdir$rdir; cd $gdir$rdir; ddir=.
 	else ddir="$gdir$rdir"; fi
@@ -165,7 +178,7 @@ trap "rm -rf $tmp; undoit; exit 1" 0
 echo Importing into Bitkeeper
 b.import.pl $datum "CVS:$datum"
 
-test -n "$nopush" || bk push
+test -n "$nopush" || bk push -q
 
 trap "" 0
 set +e

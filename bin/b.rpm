@@ -195,7 +195,13 @@ b.exists -d "$what" -v "$vers" >/tmp/b.rpm.$$
 read what bkrel </tmp/b.rpm.$$
 rm -f /tmp/b.rpm.$$
 
-if test -z "$bkrel" ; then bkrel="noris" ; else dv="-$bkrel"; fi
+if test -z "$bkrel" ; then
+	vget=""
+	bkrel="noris"
+else
+	vget="-v $bkrel"
+	dv="-$bkrel"
+fi
 archive="$what$dv"
 
 if test -f "STATUS/work/$desc$dv$submode" ; then
@@ -258,7 +264,7 @@ if test -z "$again" -a -z "$qpack" ; then
 		( cd "$RFR"; echo "Update Sourcen ..."; sudo bk pull )
 	else
 		echo "Hole Sourcen aus dem Archiv ..."
-		sudo b.get -d $what -v "$vers" $RFR
+		sudo b.get -d $what $vget $RFR
 	fi
 	bkvers="$( cd $RFR; bk get -q -p rpm.version 2>/dev/null | head -1 )"
 	if test -z "$bkvers" ; then
