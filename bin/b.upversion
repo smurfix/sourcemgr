@@ -31,6 +31,7 @@ if test -f $F ; then # simple version file
 	OV="$(bk get -qp "$BF" | head -1)"
 else # Debian changelog
 	BF=debian/changelog; F=debian/SCCS/s.changelog
+	test -f $F || exit 0
 	test -f $BF || bk get -q $BF
 	test -f $BF || exit 0
 	OV="$(dpkg-parsechangelog | sed -ne 's/^Version: *//p')"

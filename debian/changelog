@@ -1,3 +1,9 @@
+sourcemgr (1.325) unstable; urgency=low
+
+  * b.upversion: don't complain if no debian/changelog doesn't exist
+
+ -- Matthias Urlichs <smurf@debian.org>  Thu, 19 Feb 2004 07:09:15 +0100
+
 sourcemgr (1.324) unstable; urgency=low
 
   * b.get: Make "-w -" work
