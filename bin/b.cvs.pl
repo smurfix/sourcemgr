@@ -340,31 +340,36 @@ if(-f "$tmpcv/$cn.data") {
 	print STDERR "Processing CVS log\n";
 	my $mr=1;
 	while(1) {
-		mkpath("$tmpcv/$mr",1,0755);
-		
-		print STDERR "Fetch CVS files $mr...\n";
-		chdir("$tmpcv/$mr") or die "no dir $tmpcv/$mr";
-		if(-d $cn) {
-			chdir($cn) or die "no chdir $cn: $!";
-			cvs(undef,"update","-d","-r$mr.1");
-		} else {
-			cvs(undef,"get","-r$mr.1",$cn);
-			chdir($cn) or last;
-		}
-		print STDERR "processing $mr...\n";
-		my @buf = ();
-		open(LOG,"cvs log |");
-		while(<LOG>) {
-			chomp;
-			if($_ =~ /^=+\s*$/) {
-				proc(@buf);
-				@buf=();
+		my $done=0;
+		foreach my $x (1,2) {
+			mkpath("$tmpcv/$mr.$x",1,0755);
+			
+			print STDERR "Fetch CVS files $mr.$x...\n";
+			chdir("$tmpcv/$mr.$x") or die "no dir $tmpcv/$mr.$x";
+			if(-d $cn) {
+				chdir($cn) or die "no chdir $cn: $!";
+				cvs(undef,"update","-d","-r$mr.$x");
 			} else {
-				push(@buf,$_) if @buf or /^RCS file:/;
+				cvs(undef,"get","-r$mr.$x",$cn);
+				chdir($cn) or last;
 			}
+			print STDERR "processing $mr.$x ...\n";
+			my @buf = ();
+			open(LOG,"cvs log |");
+			while(<LOG>) {
+				chomp;
+				if($_ =~ /^=+\s*$/) {
+					proc(@buf);
+					@buf=();
+				} else {
+					push(@buf,$_) if @buf or /^RCS file:/;
+				}
+			}
+			proc(@buf) if @buf;
+			close(LOG);
+			$done++;
 		}
-		proc(@buf) if @buf;
-		close(LOG);
+		last unless $done;
 	} continue {
 		$mr++;
 	}
