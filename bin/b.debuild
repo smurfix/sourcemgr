@@ -258,6 +258,31 @@ if test -n "$E" ; then # non-original package
 	   false
 	then
 		echo + get original source from .. or via HTTP
+	   if test $(tar tfvz "$T/${N}_$VV.orig.tar.gz" | wc -l) -lt 4 ; then
+		 # Oh no, an embedded tar file. I hate embedded tar files.
+		 SEPARATE=-su
+		 cd "$T"
+		 mkdir SEP
+		 cd SEP
+		 tar xfz "../${N}_$VV.orig.tar.gz"
+		 if test $(ls | wc -l) -lt 2 ; then
+			mv $(ls) XyZ
+			mv XyZ/* .
+			rm -rf XyZ
+		 fi
+		 rm -f *.sig || true
+		 for f in *.tar.gz ; do tar xfz "$f"; done
+		 rm -f *.tar.gz
+		 if test $(ls | wc -l) -lt 2 ; then
+			mv $(ls) XyZ
+			mv XyZ/* .
+			rm -rf XyZ
+		 fi
+		 cd ..
+
+		 mv SEP "$T/$N-$VV.orig"
+		 rm "$T/${N}_$VV.orig.tar.gz"
+	   fi
 	else
 		echo + create new original source archive
 		rm -f "$T/${N}_$VV.orig.tar.gz"
@@ -271,10 +296,20 @@ fi
 
 cd "$T/$N-$VV"
 rm -f debian/users debian/version debian/changelog.old || true
-# cd "$T"
-# dpkg-source -b -sa "$N-$VV"
 cd "$T/$N-$VV"
-fakeroot dpkg-buildpackage -S $opt_s -uc -us
+
+if test -n "$SEPARATE" ; then
+  mkdir debian/patches
+  fakeroot debian/rules clean
+  echo build.patch >>debian/patches/00list
+  ( cd ..; diff -ruN -x debian "$N-$VV.orig" "$N-$VV" ) > debian/patches/build.patch
+  cat debian/patches/build.patch | ( cd ../"$N-$VV.orig"; patch -p1 -f -E )
+  cd ..; dpkg-source $opt_s -b "$N-$VV" "$N-$VV.orig"
+  cd "$N-$VV"
+else
+  fakeroot dpkg-buildpackage -S $opt_s -uc -us $SEPARATE
+fi
+
 if test -n "$bin"; then
 	dpkg-checkbuilddeps || sudo apt-get build-dep $N || exit 1
 	fakeroot dpkg-buildpackage -nc -b -uc -us

@@ -1,3 +1,9 @@
+sourcemgr (1.358) unstable; urgency=low
+
+  * Oh no, some of Debian's .orig files include a tarfile in a tarfile!
+
+ -- Matthias Urlichs <smurf@debian.org>  Sat, 10 Jul 2004 17:39:28 +0200
+
 sourcemgr (1.357) unstable; urgency=low
 
   * b.cvs.pl: parse local CVS changelog
