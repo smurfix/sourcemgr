@@ -48,12 +48,13 @@ if b.exists -v "$vers" -d $dir > /tmp/tf.$$ ; then
 	if test -z "$what" ; then echo >&2 "'$dir' nicht gefunden" ; exit 1 ; fi
 
 	test -z "$dv" || dv="-$overs"
-	if bk superset $BK_REPOSITORY/$what$dv ; then
-		echo + bk push $BK_REPOSITORY/$what$dv
-		bk push $BK_REPOSITORY/$what$dv
-	else
+
+	echo + bk push $BK_REPOSITORY/$what$dv
+	if bk push $BK_REPOSITORY/$what$dv ; then : ; else
 		cat >&2 <<END
-Problem: Das Archiv $what$dv hat Änderungen, die du noch nicht hast.
+
+Wahrscheinliches Problem:
+Das Archiv "$what$dv" hat Änderungen, die du noch nicht hast.
 
 Mögliche Abhilfen:
 - Erst b.merge aufrufen
@@ -68,6 +69,4 @@ else
 	bk clone -q . $BK_REPOSITORY/$what$dv
 	exit 1
 fi
-
-
 
