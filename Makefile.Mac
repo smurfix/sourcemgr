@@ -24,3 +24,7 @@ install:
 	@install -d /usr/src/STATUS/subst
 	@install -d /usr/src/STATUS/to-install
 	@install -d /usr/src/STATUS/work
+
+	@install -m 1777 -d /var/cache/bk
+	@install -m 1777 -d /var/cache/cvs
+	@install -m 1777 -d /var/cache/cvs/bk

@@ -31,3 +31,7 @@ install:
 	@install -d /usr/src/STATUS/RPM/BUILD/tmp
 	@install -d /usr/src/STATUS/RPM/RPMS
 	@install -d /usr/src/STATUS/RPM/RPMS/i686
+
+	@install -m 1777 -d /var/cache/bk
+	@install -m 1777 -d /var/cache/cvs
+	@install -m 1777 -d /var/cache/cvs/bk
