@@ -1,4 +1,4 @@
 #!/bin/sh
 
 set -ex
-dpkg-buildpackage -rfakeroot -Idebian/users -IBitkeeper -ISCCS "$@"
+dpkg-buildpackage -rfakeroot -Idebian/users -Idebian/version -IBitkeeper -ISCCS "$@"
