@@ -15,17 +15,13 @@ test -s "$BK_PENDING" || exit 0
 test -s "SCCS/s.rpm.version" || exit 0
 if grep -q '^SCCS/s\.rpm\.version|' "$BK_PENDING" ; then exit 0; fi
 
-set -- $(bk get -qp rpm.version | head -1 | sed -e 's/\./ /g' )
-V=
-if test -z "$2" ; then V="1.0.0" ; else
-    while test -n "$2" ; do
-		V="$V$1."
-		shift
-	done
-fi
-V="$V$(expr $1 + 1)" ## 1.2.3 => 1.2.4
+set -- $(bk get -qp rpm.version | head -1 | sed -e 's/\.\([0-9][0-9]*\)$/ \1/' )
+V="$1"
+W="$2"
+if test -z "$W" ; then V="1.0"; W="0" ; fi
+W="$(expr $W + 1)" ## 1.2.3 => 1.2.4
 bk edit -qg rpm.version
-( echo "$V"; bk get -qp rpm.version | tail +2 ) > rpm.version
+( echo "$V.$W"; bk get -qp rpm.version | tail +2 ) > rpm.version
 
 bk ci -q -y"Version $V" rpm.version
 bk sfiles -pC rpm.version >> "$BK_PENDING"

@@ -11,7 +11,7 @@ test -n "$pn" || pn="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
 test -n "$pn" || pn="$(basename "$(pwd)")"
 
 rm -f debian/changelog
-bk changes -d"$pn"' (:I:) unstable; urgency=low\n\n$each(:C:){  * (:C:)\n}\n -- BK_Importer <:USER:@:HOST:>  :Dd: :DM: :Dy: :T: +0000\n\n' |
+bk changes -d"$pn"' (_>:I:<_) unstable; urgency=low\n\n$each(:C:){  * (:C:)\n}\n -- BK_Importer <:USER:@:HOST:>  :Dd: :DM: :Dy: :T: +0000\n\n' |
 
 perl >debian/changelog -e'
 unless(-f "debian/users") {
@@ -26,8 +26,21 @@ while(<F>) {
 	$tz{$mail}=$tz;
 }
 close(F);
+
+sub vgrab($) {
+	my($vers)=@_;
+	return "($vers)" unless -f "rpm.version";
+	$rev=`bk c2r -r$vers rpm.version`;
+	return "($vers)" unless $rev;
+	chop $rev;
+	$rev=`bk get -q -p -r$rev rpm.version`;
+	return "(0.0)" unless $rev;
+	$rev =~ s/\n.*//s;
+	return "($rev)";
+}
 while(<>) {
 	s/BK_Importer\s+\<([\S+]+)\>(.+)\+0000/$mail{$1}$2$tz{$1}/g;
+	s/\(_\>([.0-9]+)\<_\)/vgrab($1)/eg;
 	print;
 }
 '
