@@ -14,6 +14,7 @@ use File::ShLock;
 my $ENDFILE = "/var/run/b.cvs.stop";
 my $verbose = $ENV{"BK_VERBOSE"};
 
+my $CLR="\r".(" "x79)."\r";
 my $lock;
 if($ENV{BKCVS_LOCK}) {
 	nl: while(1) {
@@ -170,12 +171,6 @@ sub bk {
 		return undef;
 	};
 	unlink("ChangeSet");
-	if(-f "kunde/domain/SCCS/s.record" and -d "kunde/domain/record") {
-		rename("kunde/domain/record","kunde/domain/recordd");
-		system("env @AU @DT bk edit kunde/domain/record");
-		system("env @AU @DT bk rm kunde/domain/record");
-		rename("kunde/domain/recordd","kunde/domain/record");
-	}
 	#die "*** CHGF in".`pwd`."    @cmd\n" if -f "ChangeSet";
 	if($undo and system("bk -r check -ag")) {
 		system("bk -r check -ag | env @AU @DT bk gone -");
@@ -199,20 +194,34 @@ sub cvs {
 	}
 	unshift(@_,"cvs",@comp,"-d",$ENV{CVS_REPOSITORY});
 	print STDERR ">>> @_\n" if $debug;
-	open(FP,"-|") or do {
-		#chdir("..") if $do_cd;
-		exec @_;
-		#exec "strace","-v","-s3000","-o","/var/tmp/prcs","-F","-f",@_;
-		exit(99);
-	};
-	my @res;
-	while(<FP>) {
-		chomp;
-		push(@res,$_);
+	my $rep=0;
+	while(1) {
+		open(FP,"-|") or do {
+			#chdir("..") if $do_cd;
+			exec @_;
+			#exec "strace","-v","-s3000","-o","/var/tmp/prcs","-F","-f",@_;
+			exit(99);
+		};
+		my @res;
+		while(<FP>) {
+			chomp;
+			push(@res,$_);
+		}
+		close(FP);
+		unless ($? and not $ENV{BKCVS_IGNORE_ERROR}) {
+			return wantarray ? @res : join(" ",@res);
+		}
+		if($rep++<1000) {
+			print STDERR "$CLR CVS $?\r";
+			if($rep < 15) {
+				sleep($rep)
+			} else {
+				sleep(15)
+			}
+		} else {
+			die " CVS error: $?\n";
+		}
 	}
-	close(FP);
-	die "CVS error: $?\n" if $? and not $ENV{BKCVS_IGNORE_ERROR};
-	wantarray ? @res : join(" ",@res);
 }
 
 sub bkfiles($) {
@@ -369,7 +378,7 @@ sub proc(@) {
 		if($state == 0 and $x =~ s/^Working file:\s+(\S+)\s*$/$1/) {
 			$fn = $x;
 			$state=1;
-			# print STDERR " "x70,"\r  $fn\r" if $verbose;
+			# print STDERR "$CLR  $fn\r" if $verbose;
 			next;
 		}
 		if($state == 1 and $x =~ /^symbolic names:/) {
@@ -455,14 +464,14 @@ if(-f "$tmppn.data") {
 	}
 } else {
 	$cset=[];
-	print STDERR " $pn: Processing CVS log     |\r" if $verbose;
+	print STDERR "$CLR $pn: Processing CVS log\r" if $verbose;
 	my $mr=1;
 	while(1) {
 		my $done=0;
 		foreach my $x (qw(1 1.1.1 1.2.1)) {
 			mkpath("$tmpcv/$mr.$x",1,0755);
 			
-			print STDERR " $pn: Fetch CVS files $mr.$x     |\r";
+			print STDERR "$CLR $pn: Fetch CVS files $mr.$x\r";
 			chdir("$tmpcv/$mr.$x") or die "no dir $tmpcv/$mr.$x";
 			if(-d $cn) {
 				chdir($cn) or die "no chdir $cn: $!";
@@ -475,7 +484,7 @@ if(-f "$tmppn.data") {
 				cvs(undef,"get","-r$mr.$x",$cne);
 				chdir($cne) or last;  # no-op when $cne eq "."
 			}
-			print STDERR " $pn: processing $mr.$x       |\r";
+			print STDERR "$CLR $pn: processing $mr.$x\r";
 			my @buf = ();
 			open(LOG,"cvs log |");
 			while(<LOG>) {
@@ -605,7 +614,7 @@ sub process($$$$) {
 	my($ss,$mm,$hh,$d,$m,$y)=localtime($wann);
 	$m++; $y+=1900; ## zweistellig wenn <2000
 	my $cvsdate = sprintf "%04d-%02d-%02d %02d:%02d:%02d",$y,$m,$d,$hh,$mm,$ss;
-	print STDERR " $pn: Processing $len: $cvsdate      |\r";
+	print STDERR "$CLR $pn: Proc $len: $cvsdate\r";
 	dateset($wann,$autor);
 
 	# system("(bk sfiles -gU; bk sfiles -x) | p.bk.filter | xargs -0r p.bk.mangler");
@@ -645,7 +654,7 @@ sub process($$$$) {
 				}
 			}
 			while(@f) {
-				print STDERR " $pn: Processing $len: $cvsdate $cnt ".(0+@f)." $rcnt  |\r" if $verbose;
+				print STDERR "$CLR $pn: Proc $len: $cvsdate $cnt ".(0+@f)." $rcnt\r" if $verbose;
 				my @ff;
 				if(@f > 30) {
 					@ff = splice(@f,0,25);
@@ -716,7 +725,7 @@ END
 			system($ENV{SHELL} || "/bin/sh","-i");
 			$shells--;
 		} else {
-			print STDERR " $pn: *** rename ***\r" if $verbose;
+			print STDERR "$CLR $pn: *** rename ***\r" if $verbose;
 			open(RN,"|env @AU @DT bk renametool -p > $tmf");
 			foreach my $f(sort { $a cmp $b } @gone) { print RN "$f\n"; }
 			print RN "\n";
@@ -931,7 +940,7 @@ while(@$cset) {
 	last if -f $ENDFILE;
 	if($ENV{BKCVS_PUSH} and $done >= $ENV{BKCVS_PUSH}) {
 		$ddone += $done;
-		print STDERR " $pn: Push $ddone     |\r" if $verbose;
+		print STDERR "$CLR $pn: Push $ddone\r" if $verbose;
 		bk("push","-q");
 		$done=0;
 	}
@@ -949,7 +958,7 @@ if ($ENV{BKCVS_TAG}) {
 	}
 }
 if($ENV{BKCVS_PUSH}) {
-	print STDERR " $pn: Push LAST        |\r" if $verbose;
+	print STDERR "$CLR $pn: Push LAST\r" if $verbose;
 	bk("push","-q");
 }
 exit 0 if -f $ENDFILE;

@@ -1,3 +1,9 @@
+sourcemgr (1.295) unstable; urgency=low
+
+  * b.cvs.pl: CVS repeater
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue,  9 Dec 2003 12:09:41 +0100
+
 sourcemgr (1.294) unstable; urgency=low
 
   * b.rcs.pl: existierende Tags KORREKT analysieren
