@@ -1,5 +1,8 @@
 #!/bin/sh
 
+set -e
+trap 'usage; exit 1' 0
+
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Importieren eines CVS-Archivs
@@ -11,29 +14,24 @@ Usage: $(basename $0)  -- Importieren eines CVS-Archivs
        [ -g (goto Source and do internal version too) ]
        [ Beschreibungstext ]
 END
-exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
+dir=
 overs=
 vers=noris
-txt="$dir"
+txt=
 url=
 cfile=
 LV=/tmp/lv.$$
 goto=
 
    set -- $(getopt "gd:t:V:v:hu:" $*)
-   if test $? != 0
-   then
-	   usage
-   fi
    for i
    do
 	   case "$i"
 	   in
 		   -h)
-		       usage ;;
+		       exit 1 ;;
 		   -g)
 			   goto="y"; shift;;
 		   -t)
@@ -51,8 +49,11 @@ goto=
 	   esac
    done
 
-if test -z "$dir"; then usage; fi
+dir="$(p.name "$dir")"
+if test -z "$txt" ; then txt="$dir"; fi
 if test -n "$*" ; then txt="$*"; fi
+trap '' 0
+
 if test -n "$goto" ; then
 	cd /usr/src
 	if test ! -d "$dir" ; then
@@ -66,8 +67,9 @@ if test -n "$goto" ; then
 		cfile="$(pwd)/$cfile"
 	fi
 fi
+set +e
 
-export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 
 cd /tmp/; mkdir x.$$; cd x.$$
@@ -194,6 +196,7 @@ perl -p -e '
 
 vi $what.prj </dev/tty
 prcs checkin -r$vers $what </dev/tty
+prcs admin compress $what
 redo $dir
 
 fi

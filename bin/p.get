@@ -1,5 +1,8 @@
 #!/bin/sh
 
+set -e
+trap 'usage; exit 1' 0
+
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- holt noris-Sourcecode aus dem Archiv
@@ -8,25 +11,20 @@ Usage: $(basename $0)  -- holt noris-Sourcecode aus dem Archiv
        [ -i (Import, holt nur .prj) ]
        [ -n (holt nach /usr/src) ]
 END
-exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 vers=noris
 imp=
 mkdir=
+dir=
 
    set -- $(getopt "d:v:ihn" $*)
-   if test $? != 0
-   then
-	   usage
-   fi
    for i
    do
 	   case "$i"
 	   in
 		   -h)
-		       usage ;;
+		       exit 1 ;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -i)
@@ -40,8 +38,7 @@ mkdir=
 	   esac
    done
 
-if test -z "$dir"; then usage; fi
-
+dir="$(p.name "$dir")"
 desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 
 if test -f "/usr/src/STATUS/checkout/$desc" ; then
@@ -51,7 +48,9 @@ else
     what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 fi
 
-export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
+
+trap '' 0
 
 if test -n "$imp" ; then imp="$what.prj"; fi
 if test -n "$mkdir" ; then
@@ -64,7 +63,7 @@ if test -n "$mkdir" ; then
 	cd "$dir"
 fi
 
-set -xe
+set -x
 
 prcs checkout -r$vers $what.prj $imp "$@"
 # prcs execute -r$vers --match :tag=project -- p.sub -v$vers $what '{}'

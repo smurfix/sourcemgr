@@ -1,5 +1,8 @@
 #!/bin/sh
 
+set -e
+trap 'usage; exit 1' 0
+
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- überschüssige Dateien löschen
@@ -7,23 +10,18 @@ Usage: $(basename $0)  -- überschüssige Dateien löschen
        [ -n (NICHT wirklich löschen) ]
        Datei...
 END
-exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 rm=rm
+dir=
 
    set -- $(getopt "d:nh" $*)
-   if test $? != 0
-   then
-	   usage
-   fi
    for i
    do
 	   case "$i"
 	   in
 		   -h)
-		   	   usage ;;
+		   	   exit 1 ;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -n)
@@ -33,7 +31,8 @@ rm=rm
 	   esac
    done
 
-if test -z "$dir"; then usage; fi
+set -e
+dir="$(p.name "$dir")"
 
 desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 
@@ -44,9 +43,10 @@ else
     what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 fi
 
-export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 
-set -xe
+set -x
+trap '' 0
 
 prcs depopulate $what $*
 $rm $*

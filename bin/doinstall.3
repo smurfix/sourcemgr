@@ -12,9 +12,10 @@ set -ex
 
 mkdir -p /mnt/usr ## just in case
 mkdir -p /mnt/var/lib/packages
+mkdir -p /mnt/usr/X11R6/bin
 
 cd /mnt/usr
-mkdir -p share share/man share/info share/doc
+mkdir -p share/man share/info share/doc
 rm -f man doc info
 ln -s share/man man
 ln -s share/doc doc
@@ -23,7 +24,7 @@ ln -s share/info info
 set -e
 
 cd /cd/usr/src
-copyover /mnt /cd < STATUS/hosts/$name
+copyover /mnt /cd < STATUS/hosts/$name 2>&1 | tee -a /mnt/var/log/install
 
 fi
 

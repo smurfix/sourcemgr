@@ -1,5 +1,8 @@
 #!/bin/sh
 
+set -e
+trap 'usage; exit 1' 0
+
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Diffs zur letzten Version
@@ -8,25 +11,20 @@ Usage: $(basename $0)  -- Diffs zur letzten Version
        [ -v fromreleasename ]
        [ -w toreleasename ]
 END
-exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
-overs="-rnoris.@"
+overs="-r."
 vers=
 b=
+dir=
 
    set -- $(getopt "d:bv:w:h" $*)
-   if test $? != 0
-   then
-	   usage
-   fi
    for i
    do
 	   case "$i"
 	   in
 		   -h)
-		       usage ;;
+		       exit 1 ;;
 		   -b)
 			   b="-b"; shift;;
 		   -d)
@@ -40,8 +38,8 @@ b=
 	   esac
    done
 
-if test -z "$dir"; then usage; fi
-
+set -e
+dir="$(p.name "$dir")"
 desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 
 if test -f "/usr/src/STATUS/checkout/$desc" ; then
@@ -51,9 +49,10 @@ else
     what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 fi
 
-export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 
-set -xe
+set -x
+trap '' 0
 
 prcs diff -f $overs $vers $what "$@" -- -u -b 2>&1 |less -p "^Index"
 

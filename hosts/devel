@@ -1,5 +1,5 @@
-base
 misc:install-log
+bin:cvsup
 gnu:gawk
 gnu:gettext
 gnu:autoconf
@@ -9,13 +9,16 @@ lib:tcl:tcl
 lib:tcl:tk
 gnu:patch
 gnu:bison
-gnu:gcc
+gnu:egcs
 gnu:cvs
-gnu:cygnus
 gnu:rcs
+misc:prcs
 gnu:flex
 gnu:make
-lib:bin86
+misc:bin86
 gnu:indent
 gnu:diffutils
 gnu:texinfo
+gnu:binutils
+misc:strace
+gnu:binutils:gdb

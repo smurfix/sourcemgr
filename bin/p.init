@@ -1,4 +1,7 @@
 #!/bin/sh
+ 
+set -e
+trap 'usage; exit 1' 0
 
 usage() {
 cat >&2 <<END
@@ -9,41 +12,52 @@ Usage: $(basename $0)  -- Initiales Installieren von externem Source im Archiv
        [ -e (nur extern) ]
        [ -i (nur intern) ]
        [ -u URL ]
-       [ Kurzbeschreibung ]
-       Wenn die Kurzbeschreibung angegeben ist, wird eine Zeile in
-          STATUS/build generiert.
+       [ -a SUBDIST (append to distrib file ('perl', 'router', 'user'...),
+                     see \$(src)/STATUS/hosts/*. ]
+       [ -p Perl-Makefile anlegen ]
+       [ -k Kurzbeschreibung ]
+	   [ -E (editiere Projectfiles) ]
+	   Version
+
+Wenn die Kurzbeschreibung angegeben ist, wird ein Eintrag in
+         STATUS/build generiert.
 END
-exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
+dir=
 vers=noris
-vstr=
+info=
 overs=base
-ovstr="*"
 exto=
 into=
 url="-"
+perl=
+edit=
+dfile=
 
-   set -- $(getopt "d:v:V:eihu:" $*)
-   if test $? != 0
-   then
-	   usage
-   fi
+   set -- $(getopt "d:v:V:eihu:pk:Ea:" $*)
    for i
    do
 	   case "$i"
 	   in
 		   -h)
-		       usage ;;
+		       exit 1 ;;
+		   -E)
+		       edit=y; shift ;;
+		   -p)
+		       perl=y; shift ;;
+		   -a)
+		       shift; dfile=$1; shift ;;
 		   -u)
 			   shift; url="$1"; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
+		   -k)
+		       shift; info="$1"; shift;;
 		   -v)
-			   shift; vers="$1"; vstr="$1"; shift;;
+			   shift; vers="$1"; shift;;
 		   -V)
-			   shift; overs="$1"; ovstr="$1"; shift;;
+			   shift; overs="$1"; shift;;
 		   -e)
 		       shift; into=x ;;
 		   -i)
@@ -53,12 +67,13 @@ url="-"
 	   esac
    done
 
-if test -z "$dir"; then usage; fi
-
-export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
-what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
-
 set -e
+dir="$(p.name "$dir")"
+export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
+what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
+dist=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
+
+trap '' 0
 
 if test -z "$exto" ; then
 
@@ -66,8 +81,10 @@ prcs checkout -r $overs.@ $what
 prcs populate $what
 
 perl -p -i -e '
+   s#\(Populate-Ignore\s+\(\)#(Populate-Ignore ("/CVS/" "^CVS/" "\\\\.rej\$" "\\\\.orig\$") #;
     s/^  \((.*)\(\)\)/  ($1() :no-keywords)/;
-	s/^\(Project-Description\s+""\)/(Project-Description "'"$*"'")/;
+	s/^\(Project-Description\s+""\)/(Project-Description "'"$info"'")/;
+	s/\(New-Version-Log \"\"\)/(New-Version-Log "'"$*"'")/;
 ' $what.prj
 
 cat <<END >>$what.prj
@@ -76,8 +93,9 @@ cat <<END >>$what.prj
 ;;* Hier keine internen Modifiaktionen ablegen!
 ;;*
 END
-vi $what.prj
+test -z "$edit" || vi $what.prj
 prcs checkin -r$overs.@ $what </dev/tty
+prcs admin compress $what
 
 else
 prcs checkout -r $overs $what $what.prj
@@ -86,7 +104,7 @@ fi
 if test -z "$into" ; then
 
 perl -i -n -e '
-   s#\(Populate-Ignore\s+\(#(Populate-Ignore ("/CVS/" "^CVS/" "\\\\.rej\$" "\\\\.orig\$" #;
+   s#\(Populate-Ignore\s+\(\)#(Populate-Ignore ("/CVS/" "^CVS/" "\\\\.rej\$" "\\\\.orig\$") #;
    s/\(New-Version-Log \"\"\)/(New-Version-Log "'Import\ $sv'")/ if "'"$sv"'" ne "";
    # s/^  \((.*)\(\)\)/  ($1() :no-keywords)/;
    print unless /^;;\*/;
@@ -99,6 +117,20 @@ cat <<END >>$what.prj
 END
 
 if test ! -f Makefile.Linux ; then
+
+if test -n "$perl" ; then
+cat <<'END' >Makefile.Linux
+
+Makefile:
+	perl Makefile.PL
+	# patch -p1 < Makefile.dif
+compile: Makefile
+	$(MAKE)
+install: Makefile
+	$(MAKE) install
+END
+
+else
 
 cat <<'END' >Makefile.Linux
 #!/usr/bin/make -f
@@ -119,17 +151,22 @@ clean: Makefile
 
 END
 fi
+fi
 
 prcs populate $what 
 
-vi $what.prj
+test -z "$edit" || vi $what.prj
 
 prcs checkin -r$vers.@ $what </dev/tty
+prcs admin compress $what
 
 fi
 
-if test -n "$*" ; then
-	echo "*$vstr	$dir	$ovstr	$*	$url" >> /usr/src/STATUS/build
+if test -n "$info" ; then
+	echo "*	$dir	$*	$info	$url" >> /usr/src/STATUS/build
+fi
+if test -n "$dfile" ; then
+	echo "$dist" >> /usr/src/STATUS/hosts/$dfile
 fi
 ## * kernel/base * Code zum Bauen der Standarddistribution -
 

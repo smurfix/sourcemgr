@@ -1,3 +1,5 @@
-/bin/ipmask
-/bin/zsh
-/bin/ksh
+gnu:libc: /usr/include/VIELE fehlen, wenn sie schonmal installiert waren.
+Dito /usr/lib/crt*.o und /lib/libpthread*.
+
+Libtool ruft ldconfig auf => irgendwie unterdrücken?
+

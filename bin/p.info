@@ -1,5 +1,8 @@
 #!/bin/sh
 
+set -e
+trap 'usage; exit 1' 0
+
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Statusinfo eines Archivs
@@ -7,24 +10,23 @@ Usage: $(basename $0)  -- Statusinfo eines Archivs
        [ -v releasename ]
        [ -q (quick status: release+date header) ]
 END
-exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 vers=
 longopt="-l"
+dir=
 
    set -- $(getopt "d:v:hq" $*)
    if test $? != 0
    then
-	   usage
+	   usage; exit 1
    fi
    for i
    do
 	   case "$i"
 	   in
 		   -h)
-		       usage ;;
+		       exit 1 ;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
@@ -36,8 +38,8 @@ longopt="-l"
 	   esac
    done
 
-if test -z "$dir"; then usage; fi
-
+set -e
+dir="$(p.name "$dir")"
 desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 
 if test -f "/usr/src/STATUS/checkout/$desc" ; then
@@ -47,9 +49,10 @@ else
     what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 fi
 
-export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 
-set -xe
+trap '' 0
+set -x
 
-prcs info $longopt $vers $what
+prcs info -f $longopt $vers $what
 

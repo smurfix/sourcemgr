@@ -58,7 +58,6 @@ v-2-3-10 gnu/man-db
 #-1-6 gnu/oleo
 #-0-27 gnu/para
 v-400-201 misc/perl/tk
-v-5-05 misc/perl/libwww
 #-2-0 gnu/plot
 #-2-7 gnu/pseudo	Pseudoscheme (Scheme unter Common Lisp
 #-0-3 gnu/ptx
@@ -94,7 +93,6 @@ v-12 kernel/psmisc
 v-1-10 kernel/rocket-pci
 v-1-10 kernel/rocket-adaptec
 v-1-10 kernel/rocket-test
-v-1-3 kernel/sysklogd
 v-2-69 kernel/sysvinit
 v-1-85 lib/db
 v-2-0-5 lib/efence
@@ -119,7 +117,6 @@ v-2-5 misc/util-linux
 v-3-0 net/debug/tcpdump	-- Cleanup notwendig!
 v-4-4 net/debug/traceroute
 #v-4-9-5-6b net/dns/bind => bind8
-v-2-3-0 net/ftp/ncftp
 v-2-4-25 net/mail/elm
 v-8-7-6 net/mail/sendmail
 v-1-5-1 net/news/inn
@@ -133,7 +130,6 @@ v-2-6-3 security/pgp
 # security/tamu/drawbridge
 # security/tamu/tiger
 v-3-4-13 server/plp
-v-3-5-f server/xntp
 # x11/gimp	Bildbearbeitung hoch zehn
 v-0-75-a x11/lesstif	Ich hasse Motif.
 v-212	x11/xmt	ftp.ora.com/pub/examples/xbook/Xmt
@@ -246,8 +242,6 @@ v-491 misc/aps
 v-1-8 kernel/isapnptools
 v-3-5-a-20 net/mud/tinyfugue
 v-1	misc/syslog Kleines Programm zum Absetzen von Syslognachrichten
-v-2-9-roof net/irc/ircii
-v-1-04	misc/perl/libnet	CPAN
 v-1-2   lib/gd				ftp://www.mkstats.com/
 v-1-00	misc/perl/gd		ftp://www.mkstats.com/
 v-2-2	misc/perl/mkstats	ftp://www.mkstats.com/
@@ -261,14 +255,13 @@ v-0-2	net/mail/qmapop	bert-send-apop@mc.bio.uva.nl
 v-4-11	lib/gc	http://reality.sgi.com/employees/boehm_mti/gc_source
 v-1-9-1	lib/ld.so
 v-0		net/meta/midentd	???
-v-1997-04-09	kernel/automount	ftp://ftp.kernel.org/pub/linux/daemons/autofs/
+#v-1997-04-09	kernel/automount	ftp://ftp.kernel.org/pub/linux/daemons/autofs/
 v-0-4-8	misc/tex/tetex/lib
 v-0-4-7	misc/tex/tetex/src
 r-0-11-23	x11/lyx	http://la1ad.uio.no/~larsbj/lyx.shtml
 v-2-11	net/www/analog	http://www.statslab.cam.ac.uk/~sret1/analog/
 v-2-3-a-1	net/multicast/sdr
 v-2-4-0 net/ftp/wu-ftpd	ftp://ftp.academ.com/pub/wu-ftpd/private/
-v-3-20-19-g	database/mysql
 v-2-0-b-7	database/msql
 v-1-1701	misc/perl/msql	CPAN
 v-2-3-0 kernel/pppd ftp://cs.anu.edu.au/pub/software/ppp/
@@ -363,9 +356,8 @@ v-1 misc/colm
 *	net/rpc/rpc	*	Portmapper und Konsorten	0-9	x
 *noris.exp	net/route/gated	*	GateD-Routingdaemon	3.5.8/3.6.a2 ftp://ftp.merit.edu/net-research/gated
 *	misc/perl/dns	*	DNS-Zugriff von Perl aus	0-10	CPAN:/net/dns
-*	misc/perl/snmp	*	SNMP-Zugriff von Perl aus	1-6	CPAN:/net/snmp
 *	net/meta/ucspi	*	TCP-Listener	0-72	-
-*	misc/perl/tk	*	TkPerl	402-000	CPAN:/net/snmp
+*	misc/perl/tk	*	TkPerl	402-000	CPAN
 *	kernel/netkit-a	*	Diverse Netzwerkprogramme A	0-10	-
 *	kernel/netkit-b	*	Diverse Netzwerkprogramme B	0-09	-
 *	kernel/isdn	noris	U-ISDN-Krempel	45	-
@@ -377,7 +369,6 @@ v-1 misc/colm
 *	gnu/fileutils	*	GNU Fileutils	3-16	ftp://ftp.gnu.org/pub/gnu/
 *	gnu/tar	*	GNU tar	1.12	ftp://ftp.gnu.org/pub/gnu/
 *	gnu/texinfo	*	GNU TeXInfo	3.9	ftp://ftp.gnu.org/pub/gnu/
-*	net/windows/samba	*	SMB-Client+Server	1-9-16-11	ftp://samba.anu.edu.au/pub/samba/
 *	x11/qt	*	QT Toolkit	ftp://ftp.troll.no/qt/source/
 *	x11/kde/support	*	KDE Supportlibraries	ftp://ftp.kde.org/
 *	x11/kde/libs	*	KDE Libraries	ftp://ftp.kde.org/
@@ -398,7 +389,6 @@ v-1 misc/colm
 *	kernel/net-tools	*	Basis-Netzwerktools	1-3-50-b-6-f	xxx
 *	kernel/e2fs	*	Ext2 Utilities	1-10	-
 *	pop/config	*	Unser Standardkonfigurationsunsinn	-	-
-*	server/xntp	*	NTP-Server, Client, etc.	3-5-b	-
 *	net/yp/tools	*	YP-Tools	-
 *	net/yp/server	*	YP-Server	-/ypserv
 *	net/yp/bind	*	YP-Client-Setup	-/ypbind
@@ -406,12 +396,11 @@ v-1 misc/colm
 *	kernel/sfdisk	*	Diskpartitionierer	3.05	ftp://ftp.win.tue.nl/.../sfdisk*
 *	kernel/sysvinit	*	/sbin/init und Konsorten	2-69	ftp://sunsite.unc.edu/pub/Linux/system/Daemons/init/
 *	gnu/sed	*	stream editor	2-0-5	ftp://ftp.gnu.org/
-*	misc/sudo	*	mach-als-Superuser	-
+*	misc/sudo	*	mach-als-Superuser	http://www.courtesan.com/sudo/
 *	gnu/flex	*	flex	2-5-2	-
 *	misc/install-log	*	Installationen etc. mitprotokollieren	-	-
-*	lib/gif	*	GIF-Library	-
 -	gnu/binutils/gdb	*	Gnu DeBugger	4-16	ftp://ftp.gnu.org/pub/gnu/
-*	misc/perl/libnet	*	misc/perl/libnet	1-04	?
+*	misc/perl/libnet	*	Network Library	1-04	?
 *	x11/gimp	*	The GIMP	0-54-1	http://www.gimp.org/
 *	x11/gnome	*	Noch ein Desktopsystem	0-9	ftp://ftp.nuclecu.unam.mx/GNOME/
 *	gnu/guile/slib	*	Scheme Library	ftp://infoserv.cc.uni-augsburg.de//pub/pc/.gnu/scm/
@@ -419,9 +408,8 @@ v-1 misc/colm
 *	x11/mnemonic	*	WWW-Browser 1997-12-16	ftp://oloon.student.utwente.nl/pub/Mnemonic/
 *	lib/ssleay	*	lib/ssleay	0-6-6	?
 *	x11/scwm	*	Scheme-Configurable Window Manager	http://web.mit.edu/mstachow/www/scwm.html
+*	lib/snmp	*	SNMP-Library	3-3-1	ftp://ftp.ece.ucdavis.edu/pub/snmp/
 *	misc/perl/snmp	*	SNMP-Library für Perl	1-6	CPAN
-*	lib/snmp	*	SNMP-Library	3-1-3	-
-*	misc/perl/snmp	*	misc/perl/snmp	1-6	?
 *	kernel/lilo	*	LInux LOader	18-d-3	-
 *	misc/tex/tetex/src	*	TeTeX-Sourcen	0-4-7	-
 *	misc/tex/tetex/lib	*	TeTeX-Library	0-4-8	-
@@ -453,5 +441,60 @@ x	kernel/linux 	*	Master-Kernelsource	2.0.33/2.1.77	ftp.kernel.org
 *	x11/xsnow	*	x11/xsnow	1-40	?
 *	x11/xlockmore	*	x11/xlockmore	4.0.a.9	?
 *	misc/fillup	*	misc/fillup	1-0	?
-*	kernel/sysklogd	*	kernel/sysklogd	1-3	?
+*	kernel/sysklogd	*	kernel/sysklogd	1-3	ftp://ftp.infodrom.north.de/pub/people/joey/sysklogd/
 *	gnu/sh-utils	*	gnu/sh-utils	1-15	?
+*	lib/tcl/tcl	*	lib/tcl/tcl	8-0-a-2	?
+*	lib/tcl/tk	*	lib/tcl/tk	8-0-a-2	?
+*	x11/kde/admin	*	KDE Admin	-
+*	lib/shadow	*	lib/shadow	3-3-1	?
+*	database/mysql	*	database/mysql	3-20-24-a	?
+*	net/www/apache	*	net/www/apache	1-2-0	?
+*	net/www/squid	*	net/www/squid	1-1-11	?
+*	kernel/modules	*	kernel/modules	2-1-34	?
+*	kernel/knfs		*	Kernel-NFS-Utilities etc.	0.4.21	?
+*	gnu/cperf	*	gnu/cperf	2-1a	?
+*	emulators/dosemu	*	emulators/dosemu	0-64-0-4	?
+*	kernel/romfs	*	ROMFS-Generator	ftp://sunsite.unc.edu/pub/Linux/system/recovery/
+*	net/www/lynx	*	net/www/lynx	2-6	?
+*	misc/tcsh	*	misc/tcsh	6-06	?
+*	net/mail/mutt	*	Mailtool	-	?
+*	net/irc/ircii	*	net/irc/ircii	2-9-roof	?
+*	net/ftp/ncftp	*	net/ftp/ncftp	2-3-0	?
+*	kernel/bdflush	*	kernel/bdflush	1-5	?
+*	misc/mingetty	*	misc/mingetty	0-9-3	?
+*	net/time/ntp	*	NTP Server und Client	ftp://ftp.udel.edu/pub/ntp
+*	gnu/findutils	*	gnu/findutils	4-1	?
+*	lib/zlib	*	lib/zlib	1-0-4	?
+*	x11/xfractint	*	Fraktalgenerator	ftp.leo.org:/pub/comp/X11/contrib/clients/xfractint/
+*	misc/util-linux	*	misc/util-linux	2-5	?
+*	net/debug/ping	*	net/debug/ping	1996-12-30	?
+*	net/debug/tcpdump	*	net/debug/tcpdump	3-0-2	?
+*	net/debug/trace	*	net/debug/trace	1996-12-30	?
+*	net/debug/vrfy	*	net/debug/vrfy	1996-11-13	?
+*	net/debug/host	*	net/debug/host	1997-02-03	?
+*	misc/perl/dbi	*	Datenbankzugriff, generisch	CPAN
+*	security/pgp	*	PGP	LEO
+*	x11/xless	*	x11/xless	1-7	?
+*	kernel/smbmount	*	SMB-Mountprogramm	sunsite:systems/filesystems/smb
+*	kernel/smbmount	*	SMB-Mountprogramm	sunsite:systems/filesystems/smb
+*	kernel/coda	*	CODA Netzfilesystem	-
+*	misc/netpbm	*	PBM-Utilities	x
+*	kernel/pcmcia	*	kernel/pcmcia	2-9-6	?
+*	lib/tiff	*	lib/tiff	3-4-035	?
+*	net/mail/qmapop	*	net/mail/qmapop	0-2	?
+*	lib/perl/gtk	*	GTK-Interface	CPAN
+*	net/news/trn	*	Newsreader	3-6	xxx
+*	net/debug/tu	*	Paralleler Traceroute	ftp://ftp.q.net/tu.tar.bz2
+*	net/dns/bind8	*	net/dns/bind8	8-1-t-2	?
+*	kernel/autofs	*	kernel/autofs	?	ftp.kernel.org:/pub/linux/daemons/autofs/
+*	gnu/cpio	*	gnu/cpio	2-4-1	?
+*	pop/monitor	*	externes Monitorinterface	-	-
+*	misc/perl/mime-base64	Version 2.05	Base64-(De)Coder	CPAN
+*	misc/perl/data-dumper	als Text ausgeben Version 2.07	Datenstrukturen	CPAN
+*	misc/perl/libwww	*	WWW-Library	5-05	?
+*	misc/perl/md5	Version 1.5.3	MD5-Generator	CPAN
+*	gnu/gzip	*	gnu/gzip	1-2-4	?
+*	misc/perl/mime-lite	MIME-Library Version 1.121	Abgespeckte	CPAN
+*	misc/perl/mime-tools	MIME-Library Version 1.111	'Dicke'	CPAN
+*	misc/perl/mail-tools	Version 1.09	Mail-Library	CPAN
+*	misc/perl/io-string	in Strings Version 1.1.05	I-O	CPAN

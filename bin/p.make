@@ -1,4 +1,7 @@
 #!/bin/sh
+ 
+set -e
+trap 'usage; exit 1' 0
 
 usage() {
 cat >&2 <<END
@@ -21,7 +24,6 @@ eindeutig vorzuziehen!
 Beim Installieren wird automagisch "sudo" aufgerufen.
 Das Paßwort ist folglich das eigene.
 END
-exit 1
 }
 
 dir=
@@ -35,14 +37,14 @@ install=install
    set -- $(getopt "v:hignd:" $*)
    if test $? != 0
    then
-	   usage
+	   usage; exit 1
    fi
    for i
    do
 	   case "$i"
 	   in
 		   -h)
-		       usage ;;
+		       usage; exit 1 ;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
@@ -58,22 +60,14 @@ install=install
 	   esac
    done
 
-if test -n "$2"; then usage; fi
-if test -z "$*" -a -z "$dir" ; then
-	dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
-	if test -z "$dir"; then usage; fi
-fi
-if test -n "$*" -a -n "$dir"; then usage; fi
-if test -n "$*" ; then dir="$*"; fi
-if test -z "$dir"; then
-	if test -z "$islocal"; then usage; fi
-	dir=NIX
-fi
+if test -z "$dir" ; then dir="$(p.name "$*")" ; else test -z "$*" ;  fi
 
-export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 dir=$(echo $desc | sed -e 's/:/\//g')
+
+trap '' 0
 
 if test -z "$doinstall" -a "$(whoami)" = "root" ; then
     echo "Bitte NICHT als Root!"
@@ -86,6 +80,10 @@ if test -z "$islocal" ; then
 	cd /usr/src
 	if test -n "$doinstall" -a ! -d "$dir" ; then
 		echo "$desc: erst auschecken und bauen!"
+		exit 1
+	fi
+	if test -n "$doinstall" -a ! -f "STATUS/to-install/$desc" ; then
+		echo "$desc: Noch nicht gebaut!"
 		exit 1
 	fi
 	if test -f "/usr/src/STATUS/checkout/$desc" ; then
@@ -174,6 +172,8 @@ if test -z "$islocal" ; then
 	if test -n "$bad" ; then
 		mv "STATUS/work/$desc" "STATUS/fail/$desc"
 		echo "$desc: ### FEHLER ###"
+		rm -f /usr/src/$dir/AUTOREMOVE
+			## falls Fixes aus Versehen nicht eingecheckt werden
 		exit 1
 	fi
     if test -z "$doinstall" ; then # compile
@@ -183,9 +183,7 @@ if test -z "$islocal" ; then
 		echo "$desc: Generiere STATUS/dist/$desc"
 		rm -f "STATUS/fail/$desc"
 		(
-			(	gen.flist <STATUS/done/$desc
-#				if test -f STATUS/out/$desc ; then cat STATUS/out/$desc ; fi
-			)	| sort -u > STATUS/out/new.$desc 
+			gen.flist < STATUS/done/$desc > STATUS/out/new.$desc 
 			mv -f STATUS/out/new.$desc STATUS/out/$desc
 			gen.distfile $dir
 		) &

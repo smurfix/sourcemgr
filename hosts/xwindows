@@ -11,3 +11,9 @@ x11:xvidtune
 x11:xarchie
 x11:xbanner
 x11:xvtdl
+x11:qt
+lib:tiff
+lib:jpeg
+misc:perl:qt
+kde
+netscape

@@ -1,28 +1,27 @@
 #!/bin/sh
 
+set -e
+trap 'usage; exit 1' 0
+
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Löscht CVS-Unterverzeichnisse
 END
-exit 1
 }
 
    set -- $(getopt "h" $*)
-   if test $? != 0
-   then
-	   usage
-   fi
    for i
    do
 	   case "$i"
 	   in
 		   -h)
-		   	   usage ;;
+		   	   exit 1 ;;
 		   --)
 			   shift; break ;;
 	   esac
    done
 
+trap '' 0
 set -ex
 
 find . -type d -name CVS -print0 | xargs -0 rm -rf

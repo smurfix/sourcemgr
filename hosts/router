@@ -1,7 +1,5 @@
 base
 net:route:gated
-kernel:ipfwadm
 kernel:mgetty
 kernel:mrouted
 kernel:pppd
-server:xntp

@@ -1,11 +1,12 @@
 base
+gnu:uudecode
 misc:colm
 gnu:bc
 gnu:recode
 net:debug:trace
 net:debug:vrfy
 net:debug:tcpdump
-net:mail:elm
+net:mail:mutt
 gnu:man-db
 gnu:groff
 gnu:screen
@@ -16,6 +17,11 @@ net:www:lynx
 net:mud:tinyfugue
 security:pgp
 gnu:ispell
-misc:perl:dns
 misc:tcsh
 misc:at
+misc:perl:tk
+misc:perl:qt
+misc:perl:nntp
+misc:perl:newsrc
+misc:metamail
+misc:bindtools

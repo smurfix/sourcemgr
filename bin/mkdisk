@@ -1,17 +1,19 @@
 #!/bin/sh
 
 PATH=/usr/src/STATUS/bin:/usr/sbin:/sbin:$PATH
-LIBC=2.0.91
+LIBC=2.0.92
 
 usage() {
 cat >&2 <<END
 Usage: $0
        [ -f | -F /dev/fd0 | -I(mage) ] [ -m MEMSIZE ]
-       [ -s ramdisksize ]  [ -S imagesize ]
+       [ -s ramdisksize ]  [ -S imagesize ] [ -g(enerate ROMFS) ]
        [ -l(ilo) ] [ -v Kernelversion ] [ -p(rerun the disk's shell) ]
        [ -n(et) -d(ebug) -w X (serial wire X, usually 1) ]
        [ -r(un without stop in linuxrc) ] [ -R RootDevNum(hex-ohne-0x) ]
-    kernel (smurf, test, ...)
+#      [ -N(ew floppy, superformat, sect=21 cyl=83 ]
+       [ -k fqname-der-kiste ] [ -P (pcmcia-Kram mit drauf) ]
+    kernel (pci, adaptec, 2.1, ...)
 END
 exit 1
 }
@@ -24,6 +26,7 @@ size=3500
 imgsize=
 fifo=/tmp/pipe.$$
 fd=
+format=
 run=
 net=
 ver=
@@ -31,6 +34,8 @@ debug=
 serial=
 prerun=
 rootdev=
+romfs=
+kiste=
 MEM=
 if test -f STATUS/done/kernel:lilo ; then
 wherelilo=done
@@ -38,7 +43,7 @@ else
 wherelilo=legacy
 fi
 
-   set -- $(getopt dfF:Ilnps:S:rR:v:w:m: $*)
+   set -- $(getopt dfF:P:Ilnps:S:rR:v:w:m:Ngk: $*)
    if test $? != 0
    then
 	   usage
@@ -47,12 +52,18 @@ fi
    do
 	   case "$i"
 	   in
+		   -g)
+		       romfs=y; shift;;
 	       -p)
 		   	   prerun=y; shift;;
 	       -w)
 		       serial=$2; shift; shift;;
+		   -P)
+		       pcmcia=y; shift ;;
 		   -d)
 			   debug=y; shift;;
+		   -k)
+			   kiste=$2; shift; shift;;
 		   -I)
 			   fd=IMAGE; shift;;
 		   -F)
@@ -61,6 +72,8 @@ fi
 			   ver=$2; shift; shift;;
 		   -f)
 			   fd=/dev/fd0; shift;;
+	   	   -N)
+	   		   fd=/dev/fd0; format=y; shift;;
 		   -r)
 			   run=y; shift;;
 		   -S)
@@ -89,7 +102,7 @@ set -e
 
 if test -z "$ver" ; then
 	rm -f $fifo; mkfifo $fifo
-	( cd /lib/modules-$sys; /bin/ls -r1 | while read a ; do if test -d $a; then echo $a; fi; done > $fifo ) &
+	( cd /lib/modules-$sys; /bin/ls -r1 | grep '^[0-9]' | while read a ; do if test -d $a; then echo $a; fi; done > $fifo ) &
 	read ver <$fifo ; rm $fifo
 fi
 
@@ -99,6 +112,12 @@ fi
 
 echo 'Unmounting..?'
 umount $disk || true
+
+if test -n "$romfs" ; then
+rm -rf $disk
+mkdir $disk
+
+else
 rm -rf $disk $diskfile
 
 dd bs=1024 count=$size if=/dev/zero of=$diskfile
@@ -108,27 +127,34 @@ set -e
 mkdir $disk
 echo Mounting disk file
 mount -t ext2 -o loop $diskfile $disk
+fi
 
+while read a ; do echo /$a; mkdir $disk/$a; done <<END
+cd
+mnt
+END
+while read a ; do echo /$a "=>" /cd/$a; mkdir $disk/cd/$a; ln -s cd/$a $disk/$a; done <<END
+var
+usr
+sbin
+lib
+END
 while read a ; do echo /$a; mkdir $disk/$a; done <<END
 bin
 dev
 etc
 etc/terminfo
-lib
-mnt
 mnt1
 mnt2
 mnt3
 proc
-sbin
-usr
 usr/lib
 usr/sbin
-cd
 fd
-var
 var/run
+var/tmp
 END
+ln -s cd/var/tmp $disk/tmp
 
 if test -n "$net" ; then ## Netz
 cpio -pvd $disk <<END
@@ -138,7 +164,7 @@ cpio -pvd $disk <<END
 /usr/sbin/portmap
 /usr/sbin/rpc.mountd
 /usr/sbin/rpc.nfsd
-/lib/libnss_files-2.0.91.so
+/lib/libnss_files-$LIBC.so
 /lib/libnss_files.so.1
 END
 sed -e 's/files.*/files/' </etc/nsswitch.conf >$disk/etc/nsswitch.conf
@@ -162,19 +188,52 @@ cpio -pvd $disk <<END
 /bin/mount
 /bin/umount
 /sbin/insmod
-/sbin/ldconfig
 /sbin/update
 END
 
-find $disk/bin $disk/sbin -type f -print|xargs strip 
+find $disk/bin/ $disk/sbin/ -type f -print|xargs strip 
 
 cpio -pvd $disk <<END
 /dev/zero
 /dev/null
 /dev/tty
 /dev/tty1
+/dev/console
 /dev/ttyS0
 /dev/ttyS1
+/dev/hda
+/dev/hda1
+/dev/hda2
+/dev/hda3
+/dev/hda4
+/dev/hda5
+/dev/hda6
+/dev/hda7
+/dev/hda8
+/dev/hdb
+/dev/hdb1
+/dev/hdb2
+/dev/hdb3
+/dev/hdb4
+/dev/hdb5
+/dev/hdb6
+/dev/hdb7
+/dev/hda
+/dev/hdc1
+/dev/hdc2
+/dev/hdc3
+/dev/hdc4
+/dev/hdc5
+/dev/hdc6
+/dev/hdc7
+/dev/hdd
+/dev/hdd1
+/dev/hdd2
+/dev/hdd3
+/dev/hdd4
+/dev/hdd5
+/dev/hdd6
+/dev/hdd7
 /dev/sda
 /dev/sda1
 /dev/sda2
@@ -233,12 +292,12 @@ cp -v /usr/lib/terminfo/l/linux  $disk/etc/terminfo/l
 /lib/ld-linux.so.2
 /lib/libshadow.so.3
 /lib/libshadow.so.3.3.1
-/lib/libncurses.so.1.9.9e
-/lib/libncurses.so.3.0
-/lib/libreadline.so.2
 /lib/libdl-$LIBC.so
 /lib/libdl.so.2
 END
+#/lib/libreadline.so.2
+#/lib/libncurses.so.1.9.9e
+#/lib/libncurses.so.3.0
 #    fi
 #    cat STATUS/out/gnu:readline
 #    cat STATUS/out/lib:ncurses
@@ -278,10 +337,38 @@ cat <<END > $disk/etc/ld.so.conf
 /mnt/usr/lib
 END
 
-echo ldconfig ...
-LD_PRELOAD="" chroot $disk /sbin/ldconfig -v
+# echo ldconfig ...
+# LD_PRELOAD="" chroot $disk /sbin/ldconfig -v
 
 mkdir $disk/modules
+
+if test -n "$pcmcia" ; then ## pcmcia
+	echo "*.*				/dev/tty1" >$disk/etc/syslog.conf
+	mkdir -p $disk/var/log $disk/var/run
+	ln -s modules-pcmcia $disk/lib/modules
+	( echo /usr/sbin/syslogd
+	  fgrep -v usr/man /usr/src/STATUS/out/kernel:pcmcia
+	) | while read a ; do
+	if test -L $a ; then
+		mkdir -p $(dirname $disk/$a)
+		cp -a $a $disk/$a
+	elif test -f $a ; then
+		b=/tmp/$$.$(basename $a)
+		cp -a $a $b
+		ls -l $b
+		strip --strip-debug $b || true
+		ls -l $b
+		mkdir -p $(dirname $disk/$a)
+		cp -a $b $disk/$a
+		rm $b
+	elif test -d $a ; then
+		mkdir -p $disk/$a
+	else
+		mkdir -p $(dirname $disk/$a)
+		cp -a $b $disk/$a
+	fi
+	done
+fi
 
 if test -n "$net" ; then ## Netz
 while read a ; do
@@ -301,18 +388,22 @@ net/3c509.o
 net/3c59x.o
 net/8390.o
 net/eepro.o
-net/eexpress.o
-net/ewrk3.o
-net/ne.o
 net/wd.o
-net/depca.o
 net/smc-ultra.o
 net/smc9194.o
 net/tulip.o
-net/de4x5.o
+net/tlan.o
+misc/sunrpc.o
+fs/lockd.o
 fs/nfs.o
+fs/ext2.o
 block/floppy.o
 END
+#net/de4x5.o
+#net/depca.o
+#net/eexpress.o
+#net/ewrk3.o
+#net/ne.o
 
 else ## kein Netz
 
@@ -324,12 +415,19 @@ scsi/aha152x.o
 scsi/aic7xxx.o
 scsi/sd_mod.o
 scsi/sr_mod.o
+fs/ext2.o
 fs/isofs.o
-block/floppy.o
 fs/binfmt_aout.o
+block/floppy.o
+block/ide-disk.o
+block/ide-mod.o
+block/ide-probe.o
+block/ide-proc.o
 END
 fi
+#scsi/53c7,8xx.o
 
+touch $disk/proc/mounts
 ln -s /proc/mounts $disk/var/run/mtab
 
 echo ">> $disk/linuxrc"
@@ -340,15 +438,16 @@ set -xv
 PATH=/bin:/sbin
 END
 
-if test -z "$serial" ; then
-   echo "exec </dev/tty1 >/dev/tty1 2>&1" >>$disk/linuxrc
-else
+echo 'echo "linuxrc startet"' >>$disk/linuxrc
+
+if test -n "$serial" ; then
    echo "exec </dev/ttyS$serial >/dev/ttyS$serial 2>&1" >>$disk/linuxrc
+#else
+#   echo "exec </dev/tty1 >/dev/tty1 2>&1" >>$disk/linuxrc
 fi
 
 cat <<END >>$disk/linuxrc
 echo "Dies ist die Bootdiskette für $sys..."
-> /etc/mtab
 
 END
 
@@ -358,20 +457,28 @@ cat <<END >>$disk/linuxrc
 insmod /modules/8390.o
 insmod /modules/ne.o io=0x300
 insmod /modules/wd.o io=0x240
+insmod /modules/sunrpc.o
+insmod /modules/lockd.o
 insmod /modules/nfs.o
+insmod /modules/ext2.o
 END
 
 else ## kein Netz
 
 cat <<END >>$disk/linuxrc
+insmod /modules/binfmt_aout.o
+insmod /modules/ext2.o
 insmod /modules/scsi_mod.o
 insmod /modules/aha1542.o
 insmod /modules/aha152x.o
 insmod /modules/aic7xxx.o
 insmod /modules/ncr53c8xx.o
+insmod /modules/53c7,8xx.o
 insmod /modules/sd_mod.o
 insmod /modules/floppy.o
-insmod /modules/binfmt_aout.o
+insmod /modules/ide-mod.o
+insmod /modules/ide-disk.o
+insmod /modules/ide-probe.o
 END
 fi
 
@@ -379,6 +486,7 @@ cat <<END >>$disk/linuxrc
 
 mount -n /proc
 END
+
 if test -n "$rootdev" ; then
 echo "echo 0x$rootdev >/proc/sys/kernel/real-root-dev" >>$disk/linuxrc
 else
@@ -396,9 +504,10 @@ umount -n /proc
 END
 
 chmod +x $disk/linuxrc
+ls -l $disk/linuxrc
 
 
-du -s $disk/.
+du $disk/.
 if test -n "$debug" ; then
 	echo "disk ready for compressing."
 	( cd $disk; /bin/sh -i )
@@ -412,13 +521,19 @@ else
 	LD_PRELOAD="" chroot $disk /bin/sh -c "echo Running a small test..."
 fi
 
-echo Unmounting disk file
-umount $disk
-sync
 if test -n "$fd" ; then
   dest=/tmp/cdisk.$$
 else
   dest=/boot-$sys/disk-$net$ver 
+fi
+
+if test -n "$romfs" ; then
+echo Generating ROM FS
+/sbin/genromfs -d $disk -f $diskfile -V "Test 1"
+else
+echo Unmounting disk file
+umount $disk
+sync
 fi
 
 echo "Compressing $diskfile ($disk) to $dest"
@@ -428,6 +543,15 @@ if test -n "$fd" ; then
 
   sleep 1
   if test -b "$fd" ; then
+	if test -n "$format" ; then
+#		superformat $fd sect=21 cyl=83
+		superformat $fd sect=18 cyl=82
+#		superformat $fd sect=18 cyl=80
+	else
+#		mformat -k -t 83 -s 21 a: # /dev/fd0
+		mformat -k -t 82 -s 18 a: # /dev/fd0
+#		mformat -k -t 80 -s 18 a: # /dev/fd0
+	fi
     echo /sbin/fs/mkfs.ext2 -i 50000 $fd $imgsize
     set +e
     /sbin/fs/mkfs.ext2 -i 50000 $fd $imgsize
@@ -441,7 +565,39 @@ if test -n "$fd" ; then
 	set -e
     mount -t ext2 -o loop $fd $disk
   fi
+  if test -n "$kiste" ; then
+  	if test ! -f STATUS/status/$kiste ; then
 
+	  echo "Keine Statusdatei für $kiste gefunden."
+	  echo -n "System (pci): "; read who; if test -z "$who"; then who="pci"; fi
+	  echo -n "Ziel (193.141.54.134): "; read slave; if test -z "$slave"; then slave="193.141.54.134"; fi
+	  echo -n "Netzbits (26): "; read netbits; if test -z "$netbits"; then netbits=26; fi
+	  set -- $(/sbin/ipwhat $slave $netbits)
+	  mask=$1
+	  netz=$2
+	  broad=$3
+	  defdef=$4
+
+	  echo -n "Defaultrouter ($defdef): "; read def; if test -z "$def"; then def="$defdef"; fi
+	  echo -n "Quelle ($defdef): "; read master; if test -z "$master"; then master="$defdef"; fi
+	  echo -n "Hostname (install.noris.de): "; read name; if test -z "$name"; then name="install.noris.de"; fi
+
+	  (
+	    echo "### KONFIGDATEN '$kiste'"
+	    echo "export who=$who"
+	    echo "export master=$master"
+	    echo "export slave=$slave"
+	    echo "export mask=$mask"
+	    echo "export imask=$netbits"
+	    echo "export broad=$broad"
+	    echo "export netz=$netz"
+	    echo "export def=$def"
+	    echo "export name=$name"
+	  ) > STATUS/status/$kiste
+
+	fi
+	cp STATUS/status/$kiste $disk/STATUS
+  fi
 
   while read a ; do echo /$a; mkdir $disk/$a; done <<END
 boot
@@ -472,11 +628,11 @@ END
 
   echo $disk/etc/lilo.conf
   cat <<END >$disk/etc/lilo.conf
-#disk=/dev/fd0
-#	bios=0x01
-#	sectors=21
-#	heads=2
-#	cylinders=80
+disk=/dev/fd0
+	bios=0x00
+	sectors=18
+	heads=2
+	cylinders=82
 boot = /dev/fd0
 install = /boot/boot.b
 compact
@@ -546,4 +702,4 @@ if test -n "$fd" ; then
   rm $dest
 fi
 rm $diskfile
-rmdir $disk
+rm -r $disk

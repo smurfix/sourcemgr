@@ -2,24 +2,66 @@
 
 dest=$1
 src=$2
+stat=$3
+
+### bash extension
+umask +rx,u=rwx || umask 022
+
+shift; shift; shift
+set -e
 pack=$dest/var/lib/packages
-set -ex
-test -d $pack
 sk=/tmp/skipped.$$
 rm -f $sk
+if test -z "$stat" -o "x$stat" = "x-"; then stat="$src/usr/src/STATUS" ; fi
 
-while read a ; do
-	if test -f $pack/$a ; then
+if test -z "$src" ; then
+	echo "Usage: $0 destroot srcroot [ STATUSdir [Paket..]]" >&2
+	echo "Ohne Pakete: lies von stdin. STATUSdir ist normalerweise /usr/src." >&2
+	exit 1
+fi
+
+if test ! -d "$pack" ; then
+	echo "Verzeichnis '$pack' nicht gefunden!" >&2
+	exit 1
+fi
+
+if test ! -d "$stat" ; then
+	echo "Verzeichnis '$stat' nicht gefunden!" >&2
+	exit 1
+fi
+
+inst() {
+	a="$1"
+	if test -f $pack/$a && test $pack/$a -nt $stat/out/$a ; then
 		: echo "$a: bereits installiert"
-	elif test -f STATUS/out/$a ; then
-		sed -e "s|^/*||" < STATUS/out/$a | (cd $src; cpio -pamdv $dest 2>&1 ) | sed -e "s|^$dest|/|" > $pack/$a
-	elif test -f STATUS/hosts/$a ; then
-		STATUS/bin/copyover $dest $src < STATUS/hosts/$a
+	elif test -f $stat/out/$a ; then
+		sed -e "s|^/*||" < $stat/out/$a > /tmp/ff.$$
+		( perl -e '
+                       while(<>) { chop; s#/+$##;
+                                   while($_ =~ s#/+([^/]+)$##) { $k{$_}++; } }
+		       foreach $i (sort { length $a <=> length $b || $a cmp $b } keys %k) {
+                                   print "$i\n";
+                       }
+		    ' < /tmp/ff.$$
+		  tee $pack/$a < /tmp/ff.$$ ) | (cd $src; cpio -pamdv $dest 2>&1 ) 
+		rm -f /tmp/ff.$$
+	elif test -f $stat/hosts/$a ; then
+		$stat/bin/copyover $dest $src $stat < $stat/hosts/$a
 	else
 		echo $a: nicht gefunden
 		echo $a >> $sk
 	fi
-done
+}
+
+if test -n "$*" ; then
+	for x ; do
+		inst "$x"
+	done
+else
+	while read x ; do
+		inst "$x"
+	done
+fi
 
 if test -f $sk ; then
 	cat $sk

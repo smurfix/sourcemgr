@@ -1,2 +1,4 @@
-lib:jpeg
-server:hylafax
+pop:fax
+kernel:mgetty
+server:bintec
+pictconv

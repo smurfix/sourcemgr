@@ -1,5 +1,8 @@
 #!/bin/sh
 
+set -e
+trap 'usage; exit 1' 0
+
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- update externer Sourcen
@@ -9,26 +12,21 @@ Usage: $(basename $0)  -- update externer Sourcen
        [ -e (editiere Projektdatei) ]
        [ Kurzbeschreibung ]
 END
-exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
+dir=
 overs=
 nvers=base
 vers=
 edit=
 
    set -- $(getopt "d:V:W:hv:e" $*)
-   if test $? != 0
-   then
-	   usage
-   fi
    for i
    do
 	   case "$i"
 	   in
 		   -h)
-		       usage ;;
+		       exit 1 ;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -W)
@@ -44,8 +42,9 @@ edit=
 	   esac
    done
 
+set -e
+dir="$(p.name "$dir")"
 if test -z "$overs" ; then overs=base; fi
-if test -z "$dir"; then usage; fi
 if test -z "$vers" ; then
 vers=$(echo $nvers | \
 	perl -pe '
@@ -58,8 +57,10 @@ vers=$(echo $nvers | \
 ' )
 fi
 
-export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
+
+trap '' 0
 
 test -f $what.prj || prcs checkout -r $overs $what $what.prj
 cp $what.prj $what.backup
@@ -82,7 +83,7 @@ elif grep -q 'New-Version-Log ""' $what.prj ; then
   fi
 fi
 
-set -xe
+set -x
 
 prcs checkin -r $vers.@ $what </dev/tty
 

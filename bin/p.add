@@ -1,5 +1,8 @@
 #!/bin/sh
 
+trap 'usage; exit 1' 0
+set -e
+
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- neue Dateien hinzufügen
@@ -8,24 +11,19 @@ Usage: $(basename $0)  -- neue Dateien hinzufügen
        [ -k (no keywords) ]
        Datei...
 END
-exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 update=
 keys=
+dir=
 
    set -- $(getopt "d:huk" $*)
-   if test $? != 0
-   then
-	   usage
-   fi
    for i
    do
 	   case "$i"
 	   in
 		   -h)
-		   	   usage ;;
+		   	   exit 1 ;;
 		   -k)
 			   keys="y"; shift;;
 		   -u)
@@ -37,8 +35,8 @@ keys=
 	   esac
    done
 
-if test -z "$dir"; then usage; fi
-
+set -e
+dir="$(p.name "$dir")"
 desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 
 if test -f "/usr/src/STATUS/checkout/$desc" ; then
@@ -48,15 +46,20 @@ else
     what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 fi
 
-export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 
-cp -f $what.prj $what.backup
+#cp -f $what.prj $what.backup
 prcs populate -f $update $what.prj $*
-prcs depopulate -f $what.prj $what.backup
+#prcs depopulate -f $what.prj $what.backup
+
+trap '' 0
 
 if test -n "$keys" ; then
     perl -p -i -e '
         s/^  \((.*)\(\)\)/  ($1() :no-keywords)/;
     ' $what.prj
 fi
+perl -n -i -e '
+    print unless /\\\(/;
+' $what.prj
 

@@ -58,11 +58,15 @@ while read ver dir rest ; do
 		desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 		if test -f "done/$desc" ; then 
 			echo "$desc: Fertig."
+		elif test -f "to-install/$desc" -a -z "$doinstall" ; then 
+			echo "$desc: Muﬂ installiert werden."
 		elif test -f "fail/$desc" ; then 
 			echo "$desc: Hatte einen Fehler!"
 		elif test -z "$doinstall" ; then
+			echo "$desc: p.make -g ..."
 			p.make -g "$dir"
 		else
+			echo "$desc: p.make -gi ..."
 			p.make -gi "$dir"
 		fi
 	fi

@@ -1,5 +1,8 @@
 #!/bin/sh
 
+set -e
+trap 'usage; exit 1' 0
+
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Initiales Installieren von eigenen Sourcen im Archiv
@@ -8,24 +11,19 @@ Usage: $(basename $0)  -- Initiales Installieren von eigenen Sourcen im Archiv
        [ -r Versionsbezeichnung ]
        einzeilige Beschreibung
 END
-exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
+dir=
 vers=noris
 desc="Neu angelegt."
 
    set -- $(getopt "d:v:hr:" $*)
-   if test $? != 0
-   then
-	   usage
-   fi
    for i
    do
 	   case "$i"
 	   in
 		   -h)
-		       usage ;;
+		       exit 1 ;;
 		   -r)
 			   shift; desc="$1"; shift;;
 		   -d)
@@ -37,8 +35,10 @@ desc="Neu angelegt."
 	   esac
    done
 
-if test -z "$dir"; then usage; fi
-if test -z "$*ir"; then usage; fi
+set -e
+
+dir="$(p.name "$dir")"
+test -n "$*"
 
 desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 
@@ -49,14 +49,14 @@ else
     what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 fi
 
-export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
-
-set -e
+export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
+trap '' 0
 
 echo + prcs checkout -r$vers $what
 prcs checkout -r$vers $what
 echo + prcs populate $what
 prcs populate $what
+prcs admin compress $what
 
 cat <<END >>$what.prj
 ;;*

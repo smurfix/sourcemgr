@@ -1,5 +1,8 @@
 #!/bin/sh
 
+set -e
+trap 'usage; exit 1' 0
+
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Verteile an alle betroffenen Rechner
@@ -11,7 +14,6 @@ Usage: $(basename $0)  -- Verteile an alle betroffenen Rechner
 Ohne -f/-F wird an die als Distributionskisten bekannten Rechner verteilt
 (welche das sind, steht in "/usr/src/STATUS/bin/gen.distfile").
 END
-exit 1
 }
 
 dir=
@@ -19,14 +21,12 @@ wer=dist
 kiste=
 
    set -- $(getopt "d:hfFk:" $*)
-   if test $? != 0
-   then
-	   usage
-   fi
    for i
    do
 	   case "$i"
 	   in
+		   -h)
+		       exit 1 ;;
 		   -k)
 		       kiste="-m $2"; shift; shift; wer="" ;;
 		   -F)
@@ -35,26 +35,20 @@ kiste=
 		       wer="all"; shift ;;
 		   -d)
 		       dir="$2"; shift ;;
-		   -h)
-		       usage ;;
 		   --)
 			   shift; break ;;
 	   esac
    done
 
-if test -n "$2"; then usage; fi
-if test -z "$*" -a -z "$dir" ; then
-	dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
-	if test -z "$dir"; then usage; fi
-fi
-if test -n "$*" -a -n "$dir"; then usage; fi
-if test -n "$*" ; then dir="$*"; fi
+test -z "$2"
+if test -z "$dir" ; then dir="$(p.name "$1")" ; else test -z "$1"; fi
 
-export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 dir=$(echo $desc | sed -e 's/:/\//g')
 
+trap '' 0
 if test -n "$doinstall" -a "$(whoami)" != "root" ; then
     echo "Programme werden als Root verteilt."
     exit 1

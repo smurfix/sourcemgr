@@ -1,31 +1,37 @@
 #!/bin/sh
 
+set -e
+trap 'usage; exit 1' 0
+
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Speichern von Änderungen im Archiv
        [ -d dest-directory ]
        [ -v releasename ]
+       [ -n(o remake) ]
+       [ -N(o put if changed) ]
        [ -e (editiere Projektdatei) ]
        [ Kommentar ]
 END
-exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
+dir=
 vers=
 edit=
+remake=y
+noput=
 
-   set -- $(getopt "d:v:he" $*)
-   if test $? != 0
-   then
-	   usage
-   fi
+   set -- $(getopt "d:v:henN" $*)
    for i
    do
 	   case "$i"
 	   in
 		   -h)
-		       usage ;;
+		       exit 1 ;;
+		   -N)
+		       noput=-f; shift;;
+		   -n)
+		       remake=; shift;;
 		   -e)
 		       edit=y; shift;;
 		   -d)
@@ -37,8 +43,8 @@ edit=
 	   esac
    done
 
-if test -z "$dir"; then usage; fi
-
+set -e
+dir="$(p.name "$dir")"
 desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 
 if test -f "/usr/src/STATUS/checkout/$desc" ; then
@@ -48,7 +54,8 @@ else
 	what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 fi
 
-export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
+trap '' 0
 
 if test -n "$edit" ; then
   vi $what.prj
@@ -59,8 +66,7 @@ elif grep -q 'New-Version-Log ""' $what.prj ; then
   ' $what.prj
 fi
 
-set -xe
-
-prcs checkin $vers $what </dev/tty
-redo $dir
+echo + prcs checkin $vers $what
+prcs checkin $noput $vers $what </dev/tty
+test -z "$remake" || redo $dir
 

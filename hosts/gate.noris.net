@@ -1,4 +1,4 @@
 kernel:linux-adaptec
-kernel:isdn-adaptec
-misc:fillup
-kernel:mrouted
+base
+qmail
+users

@@ -1,5 +1,8 @@
 kernel:base
+perl
 gnu:make
+gnu:gawk
+gnu:patch
 gnu:bash
 gnu:cpio
 gnu:diffutils
@@ -12,7 +15,6 @@ gnu:grep
 gnu:gzip
 gnu:less
 gnu:libc
-gnu:perl
 gnu:readline
 gnu:sed
 gnu:sh-utils
@@ -50,7 +52,7 @@ net:misc:ipwhat
 security:ssh
 server:plp
 server:rdist
-server:xntp
+net:time:ntp
 net:rpc:rpc
 net:rpc:nfsd
 net:meta:ucspi
@@ -62,3 +64,9 @@ misc:bzip2
 misc:sudo
 gnu:bash.small
 lib:ld.so
+kernel:ipfwadm
+kernel:mount
+misc:rc5
+gnu:uuencode
+pop:monitor
+kernel:autofs

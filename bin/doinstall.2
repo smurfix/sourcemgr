@@ -9,7 +9,7 @@ if test -d /mnt/etc ; then
 else
 	echo -n "kein /mnt/etc => konfiguriere deutsche Tastatur "
 
-loadkeys /cd/usr/lib/kbd/keytables/de-latin1-nodeadkeys.map 
+loadkeys /cd/usr/share/kbd/keytables/de-latin1-nodeadkeys.map 
 	echo "und scsi-Module..."
 insmod /cd/lib/modules-$who/$(uname -r)/scsi/scsi_mod.o
 insmod /cd/lib/modules-$who/$(uname -r)/scsi/sd_mod.o
@@ -19,10 +19,14 @@ insmod /cd/lib/modules-$who/$(uname -r)/scsi/aic7xxx.o
 insmod /cd/lib/modules-$who/$(uname -r)/scsi/aha1542.o
 	echo -n "...done. "
 swapoff -a
-	echo "fdisk startet -- Root wird /dev/sda1."
-fdisk
+echo -n "Alles OK? "
+read ans
+if test "$ans" = "n" ; then exit 1 ; fi
 
-echo -n "Swap <sda2>: "; read swap; swap=${swap:-sda2}
+echo "fdisk startet -- Root wird /dev/${disk}1."
+fdisk /dev/$disk
+
+echo -n "Swap <${disk}2>: "; read swap; swap=${swap:-${disk}2}
 echo "Swap nach /dev/$swap"
 
 /sbin/update
@@ -30,40 +34,36 @@ echo "Swapspace."
 mkswap /dev/$swap
 swapon /dev/$swap
 
-test -d /sbin/fs/ || ln -s /cd/sbin/fs /sbin/
-mkfs -t ext2 /dev/sda1
-mount -t ext2 /dev/sda1 /mnt
+# test -d /sbin/fs/ || ln -s /cd/sbin/fs /sbin/
+/cd/sbin/fs/mkfs.ext2 /dev/${disk}1
+mount -t ext2 /dev/${disk}1 /mnt
 
 mkdir -p /mnt/proc /mnt/var /mnt/var/tmp /mnt/var/run /mnt/cd
 ln -s /proc/mounts /mnt/var/run/mtab
+touch /mnt/proc/mounts
 ln -s var/tmp /mnt/tmp
-mkdir -p /var/tmp /usr/bin; ln -sf /cd/usr/bin/perl /usr/bin; ln -sf var/tmp /tmp
+# mkdir -p /var/tmp /usr/bin; ln -sf /cd/usr/bin/perl /usr/bin; ln -sf var/tmp /tmp
 
-echo -n "Mountpoints nach (ab sda3; '-' überspringt)...: "
+echo -n "Mountpoints nach (ab ${disk}3; '-' überspringt)...: "
 read a
 
 set -xe
 
 mkdir /mnt/etc
 cat >/mnt/etc/fstab <<EOF
-/dev/sda1       /                         ext2            defaults   1   1
+/dev/${disk}1       /                         ext2            defaults   1   1
 /dev/$swap       swap                      swap            defaults   0   0
 none            /proc                     proc            defaults   0   0
 EOF
 pp=3; for i in $a ; do
 	if test "x$i" != "x-" ; then
 		mkdir -p /mnt/$i
-		mkfs -t ext2 /dev/sda$pp
-		mount -t ext2 /dev/sda$pp /mnt/$i
-		echo "/dev/sda$pp       /$i                         ext2            defaults   2   2" >>/tmp/fstab.$$
+		/cd/sbin/fs/mkfs.ext2 /dev/${disk}$pp
+		mount -t ext2 /dev/${disk}$pp /mnt/$i
+		echo "/dev/${disk}$pp       $i                         ext2            defaults   2   2" >>/mnt/etc/fstab
 	fi
 	pp=$(expr $pp + 1)
 done
-mkdir -p /mnt/var/run /mnt/var/adm/packages /mnt/var/tmp /mnt/var/log/root
-ln -sf /proc/mounts /mnt/var/run/mtab
-mkdir -p /mnt/lib/modules-$who; ln -s modules-$who /mnt/lib/modules
-mkdir -p /mnt/boot-$who; ln -s boot-$who /mnt/boot
-
 fi
 
-exec /cd/usr/src/STATUS/bin/doinstall.3
+exec /cd/usr/src/STATUS/bin/doinstall.2a

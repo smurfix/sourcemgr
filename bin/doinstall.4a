@@ -1,7 +1,7 @@
 #!/bin/sh
 . /fd/STATUS
 
-PATH=/cd/usr/src/STATUS/bin:/bin:/sbin:/usr/sbin:/cd/bin:/cd/sbin:/cd/usr/bin:/cd/usr/sbin
+PATH=/cd/usr/src/STATUS/bin:/usr/bin:/bin:/sbin:/usr/sbin:/cd/bin:/cd/sbin:/cd/usr/bin:/cd/usr/sbin
 
 # Dieses Skript läuft (evtl. unter chroot) in der neuen Umgebung,
 # aber das macht nix. ;-)
@@ -12,15 +12,18 @@ set -ex
 ldconfig -X
 if test -b /dev/sdd ; then : ; else
     cd /dev
-    ./MAKEDEV -v generic
-    cd /
+	if test -f DEVICES ; then
+		cd /
+		cpio -iv <dev/DEVICES
+	else
+    	./MAKEDEV -v generic
+    	cd /
+	fi
 fi
 cd /
 test -d boot -o -L boot || ln -s boot-$who boot
 cd /lib; test -d modules -o -L modules || ln -s modules-$who modules
 cd /
-
-/sbin/mklilo
 
 #    who=$who master=$master slave=$slave mask=$mask imask=$netbits
 #    broad=$broad netz=$netz def=$def name=$name
@@ -41,13 +44,11 @@ HOSTNAME=$(echo $name | sed -e 's#\..*##')
 ##
 ## Ethernetinterface(s) und dazugehörende IP-Adressen
 ##
-NETWORK="eth0,$slave,$imask,$def"
+NETWORK="$eth,$slave,$imask,$def"
 ##
 END
 fillup /etc/rc.config /tmp/cf.$$ || true
 rm /tmp/cf.$$
-
-/sbin/sysconfig
 
 cd /dev
 ln -sf tty1 syscons
@@ -58,14 +59,30 @@ if test ! -f /etc/ssh/ssh_host_key ; then
 	ssh-keygen -b 1024 -f /etc/ssh/ssh_host_key -N ''
 fi
 
-. /etc/rc.config
+cd /etc
+. ./rc.config
 
-hostname $HOSTNAME
+mkdir -p $LOCAL
+echo alias $eth blafasel.o > $LOCAL/modules.conf
+vi lilo.conf $LOCAL/modules.conf
+cp -av fstab $LOCAL
+/sbin/sysconfig -f
+/sbin/mklilo
 
+# hostname $HOSTNAME
+# 
 if killproc -TEST /usr/sbin/inetd ; then : ; else
 	/usr/sbin/inetd
 fi
 if killproc -TEST /usr/sbin/sshd ; then : ; else
-	/usr/sbin/sshd
+ 	/usr/sbin/sshd
 fi
+
+cd /
+rm mnt && mkdir mnt
+rm pop && mkdir pop
+chmod 755 /
+umount -a
+umount /proc
+sync
 

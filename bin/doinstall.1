@@ -1,6 +1,7 @@
 #!/bin/sh
 
-insmod /modules/floppy.o; mount -t ext2 /dev/fd0 /fd
+insmod /modules/floppy.o; insmod /modules/ext2.o; mount -t ext2 /dev/fd0 /fd
+insmod /modules/sunrpc.o; insmod /modules/lockd.o; insmod /modules/nfs.o
 
 if test ! -s /fd/STATUS ; then
 	echo "keine Statusdatei gefunden, lege sie an."
@@ -18,6 +19,8 @@ if test ! -s /fd/STATUS ; then
 	echo -n "Defaultrouter ($defdef): "; read def; if test -z "$def"; then def="$defdef"; fi
 	echo -n "Quelle ($defdef): "; read master; if test -z "$master"; then master="$defdef"; fi
 	echo -n "Hostname (install.noris.de): "; read name; if test -z "$name"; then name="install.noris.de"; fi
+	echo -n "Disk (sda): "; read disk; if test -z "$disk"; then disk="sda"; fi
+	echo -n "Ethernet (eth0): "; read eth; if test -z "$eth"; then eth="eth0"; fi
 
 	echo "### KONFIGDATEN" >/fd/STATUS 
 
@@ -30,13 +33,15 @@ if test ! -s /fd/STATUS ; then
 	echo "export netz=$netz" >>/fd/STATUS
 	echo "export def=$def" >>/fd/STATUS
 	echo "export name=$name" >>/fd/STATUS
+	echo "export disk=$disk" >>/fd/STATUS
+	echo "export eth=$eth" >>/fd/STATUS
 fi
 
 . /fd/STATUS
 
 found=
 while read a b ; do 
-	if test "$a" = "eth0:" ; then found=ja; fi
+	if test "$a" = "${eth}:" ; then found=ja; fi
 done < /proc/net/dev
 
 if test -n "$found" ; then
@@ -52,21 +57,22 @@ else
    insmod /modules/${foo:-wd.o}
 fi
 	echo -n "ifconfig "
-ifconfig eth0 $slave netmask $mask
+ifconfig ${eth} $slave netmask $mask
 	echo -n "netroute "
+set +e
 route add -net $netz netmask $mask
 	echo -n "defaultroute "
 route add default gw $def
 	echo done.
+set -e
 
 if test -d /cd/bin ; then
 	echo "/cd/bin gefunden."
 else
 	echo -n "/cd/bin nicht gefunden => mount "
-   mount ${master}:/ /cd
-   echo -n "ldconfig "
-   ldconfig -X >/dev/null 2>&1
+   mount -o timeo=20,hard,intr ${master}:/ /cd
 	echo done.
 fi
 
+export LD_LIBRARY_PATH=/mnt/lib:/cd/lib
 exec /cd/usr/src/STATUS/bin/doinstall.2

@@ -1,26 +1,24 @@
 #!/bin/sh
 
+set -e
+trap 'usage; exit 1' 0
+
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- editiere die .prj-Datei
        [ -d dest-directory ]
 END
-exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
+dir=
 
    set -- $(getopt "d:h" $*)
-   if test $? != 0
-   then
-	   usage
-   fi
    for i
    do
 	   case "$i"
 	   in
 		   -h)
-		   	   usage ;;
+		   	   exit 1 ;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   --)
@@ -28,8 +26,7 @@ dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 	   esac
    done
 
-if test -z "$dir"; then usage; fi
-
+dir="$(p.name "$dir")"
 desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 
 if test -f "/usr/src/STATUS/checkout/$desc" ; then
@@ -39,9 +36,10 @@ else
     what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 fi
 
-export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
+export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 
-set -ex
+set -x
+trap '' 0
 
 vi $what.prj
 

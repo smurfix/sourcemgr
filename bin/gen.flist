@@ -1,6 +1,9 @@
 #!/usr/bin/perl
 
-my($dir) = '?';
+use File::Basename;
+
+my $dir = '?';
+my @prefs;
 
 sub dodir(\$) {
 	my($f) = @_;
@@ -10,11 +13,12 @@ sub dodir(\$) {
 }
 
 %files=();
-while(<>) {
+nf: while(<>) {
 	chop;
 	last if /\*CUTOFF\*/;
 	s/^# CHECKDIR /DIR /;
 	s/^# EQUALCP /LNK /;
+	s/^# STATIN /STI /;
 	next if /^#/;
 	1 while s/\/\//\//;
 	1 while s/\/\.\//\//;
@@ -23,6 +27,10 @@ while(<>) {
 	if($key =~ /^\// and $val eq "") {
 		$val = $key;
 		$key = "NEW";
+	}
+	if($key eq "STI") {
+		push(@prefs,$val);
+		next;
 	}
 	if($key eq "CWD") {
 		$dir = $val;
@@ -33,11 +41,15 @@ while(<>) {
 		$files{$val}++;
 		next;
 	}
-#	if($key eq "STN" or $key eq "STL" or $key eq "ACC") {
-#		dodir($val);
-#		$files{$val}++;
-#		next;
-#	}
+	if($key eq "STN" or $key eq "STL" or $key eq "ACC") {
+		dodir($val);
+		foreach my $pref(@prefs) {
+			next if index($val,$prefs) != 0;
+			$files{$val}++;
+			next nf;
+		}
+		next;
+	}
 	if($key eq "NEW" or $key eq "NW?" or $key eq "DIR") {
 		dodir($val);
 		$files{$val}++;
@@ -80,10 +92,43 @@ while(<>) {
 	}
 }
 
-foreach $file(sort keys %files) {
+sub nsym($) {
+	my($nam) = @_;
+	my $num = 0;
+	do {
+		$nam = dirname ($nam);
+		$num++ if -l $nam;
+	} while ($nam ne "" and $nam ne "/" and $nam ne ".");
+	$num;
+}
+
+my %typ;
+sub gtyp($) {
+	my($x) = @_;
+	return $typ{$x} if defined $typ{$x};
+	my $y;
+	if(-l $x) {
+		$y = 2*nsym($x)+1;
+	} elsif(-d _) {
+		$y = 2*nsym($x);
+	} else {
+		$y = 999;
+	}
+	
+	$typ{$x} = $y;
+}
+
+sub fmode() {
+	#my $aa = gtyp $a;
+	#my $bb = gtyp $b;
+	gtyp($a) - gtyp($b) or length $a <=> length $b or $a cmp $b;
+}
+
+foreach $file(sort fmode keys %files) {
+	$file =~ s#/+d1/+#/usr/#;
+
 	next if $file !~ m#^/#;
 	next if $file =~ m#^/+usr/+src#;
-	next if $file =~ m#^/+d1/+src#;
 	next if $file =~ m#^/+dev/# and $file ^~ m#^/+dev/+MAKEDEV$#;
 	next if $file =~ m#/tmp/#;
 	next if $file =~ m#\.old$#i;

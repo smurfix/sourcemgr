@@ -12,12 +12,8 @@ set -ex
 
 cd /mnt
 
-if test -f /tmp/fstab.$$ ; then
-    cat /tmp/fstab.$$ >>etc/fstab
-    rm /tmp/fstab.$$ 
-fi
-
 mkdir -p cd proc dev fd
+touch proc/mounts
 cp -a /fd/STATUS fd
 rm -rf mnt; ln -s . mnt
 chroot /mnt /sbin/ldconfig -v
@@ -30,10 +26,15 @@ ln -sf /proc/mounts var/run/mtab
 
 #ln -sf ../boot/lilo.conf etc/lilo.conf
 cp -a /cd/etc/lilo.conf etc
-cp -a /etc/ld.so.conf /mnt/etc/
-cp -a /sbin/ldconfig /mnt/sbin/
+### TODO: Anpassen!
+cp /dev/null /mnt/etc/ld.so.conf
+# cp -a /sbin/ldconfig /mnt/sbin/
 mkfifo dev/initctl || true
 
 fi
 
-exec chroot /mnt /cd/usr/src/STATUS/bin/doinstall.4
+chroot /mnt /cd/usr/src/STATUS/bin/doinstall.4
+
+umount -av
+sync
+echo Reboot. Jetzt. Mal sehen was passiert...
