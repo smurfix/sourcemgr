@@ -109,11 +109,11 @@ fi
 
 trap '' 0
 if shlock /var/lock/bcvs-$what$dv  ; then : ; else
-	echo "$was$dv: Locked." >&2
+	echo "$what$dv: Locked." >&2
 	exit $nolock
 fi
 
-test -d /var/cache/cvs/bk/$was$dv || b.get -d $dir -v $vers $wset /var/cache/cvs/bk/$was$dv || true
+test -d /var/cache/cvs/bk/$what$dv || b.get -d $dir -v $vers $wset /var/cache/cvs/bk/$what$dv || true
 
 export BK_REPOSITORY=bk://bitkeeper.noris.de
 export CVS_REPOSITORY="$woher"

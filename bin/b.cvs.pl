@@ -791,7 +791,6 @@ END
 
 if($trev ne "" and $ENV{BK_TARGET_NEW}) { # tag must not exist
 	# Rollback bis hinter das Zieldatum
-	$DB::single=1;
 	die "Tag '$trev' exists" if bk("prs","-hd:I:", "-r$trev","ChangeSet");
 
 	$dt_done=$symdate{$trev};
@@ -813,7 +812,6 @@ my %last;
 my $x;
 my $done=0;
 my $ddone=0;
-$DB::single=1; $DB::single=1 if 0;
 
 while(@$cset) {
 	$x = $cset->[0];
