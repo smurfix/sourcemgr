@@ -13,10 +13,10 @@ Vendor: noris network GmbH
 Prefix: /usr
 Requires: rpm
 ## rpm-noris nur wenn RPMs gebaut werden sollen
-Requires: prcs
-Requires: bitkeeper-noris
-Requires: sudo
-Requires: shlock
+## dito sudo und shlock
+# Ob PRCS oder Bitkeeper ist auch so eine Sache ...
+#Requires: prcs
+#Requires: bitkeeper-noris
 
 %description
  Zustand unserer Sourcen, Binaries zum Bauen derselben
