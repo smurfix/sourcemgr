@@ -14,6 +14,7 @@ rm -f debian/changelog
 bk changes -d"$pn"' (_>:I:<_) unstable; urgency=low\n\n$each(:C:){  * (:C:)\n}\n -- BK_Importer <:USER:@:HOST:>  :Dd: :DM: :Dy: :T: +0000\n\n' |
 
 perl >debian/changelog -e'
+$maxchg=10
 unless(-f "debian/users") {
 	print while(<>);
 	exit(0);
@@ -29,7 +30,8 @@ close(F);
 
 sub vgrab($) {
 	my($vers)=@_;
-	return "($vers)" unless -f "rpm.version";
+	return "($vers)" if not -f "rpm.version" or not $maxchg;
+	--$maxchg;
 	$rev=`bk c2r -r$vers rpm.version`;
 	return "($vers)" unless $rev;
 	chop $rev;
