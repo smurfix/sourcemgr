@@ -1,3 +1,9 @@
+sourcemgr (1.377) unstable; urgency=low
+
+  * build-dep on python-dev
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 25 Jan 2005 14:43:28 +0100
+
 sourcemgr (1.376) unstable; urgency=low
 
   * b.new: openlogging to logging@openlogging.org, not changesets@
