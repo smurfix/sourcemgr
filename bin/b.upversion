@@ -14,11 +14,12 @@ test -z "$NO_NEW_VERSION" || exit 0
 
 BF=rpm.version; F=SCCS/s.rpm.version
 if ! test -f $F ; then BF=debian/version; F=debian/SCCS/s.version; fi
-if test -f $F ; then
+if test -f $F ; then # simple version file
 	OV="$(bk get -qp "$BF" | head -1)"
-else
+else # Debian changelog
 	BF=debian/changelog; F=debian/SCCS/s.changelog
 	test -f $BF || bk get -q $BF
+	test -f $BF || exit 0
 	OV="$(dpkg-parsechangelog | sed -ne 's/^Version: *//p')"
 fi
 

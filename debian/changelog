@@ -1,3 +1,11 @@
+sourcemgr (1.304) unstable; urgency=low
+
+  * b.upversion:
+       don't complain if debian/changelog is missing
+  * 
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon, 26 Jan 2004 15:37:16 +0100
+
 sourcemgr (1.303) unstable; urgency=low
 
   * b.upversion: did not work for textual commits because they
