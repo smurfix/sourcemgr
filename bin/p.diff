@@ -4,6 +4,7 @@ usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Diffs zur letzten Version
        [ -d dest-directory ]
+	   [ -b (suppress differences in blanks) ]
        [ -V fromreleasename ]
        [ -v toreleasename ]
 END
@@ -13,8 +14,9 @@ exit 1
 dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
 overs="-rnoris.@"
 vers=
+b=
 
-   set -- $(getopt "d:v:V:h" $*)
+   set -- $(getopt "d:bv:V:h" $*)
    if test $? != 0
    then
 	   usage
@@ -25,6 +27,8 @@ vers=
 	   in
 		   -h)
 		       usage ;;
+		   -b)
+			   b="-b"; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -V)
@@ -43,5 +47,5 @@ what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
 
 set -xe
 
-prcs diff $overs $vers $what "$@" -- -u 2>&1 |less
+prcs diff $overs $vers $what "$@" -- -u -b 2>&1 |less
 

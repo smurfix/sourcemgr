@@ -3,21 +3,14 @@ v-0-6-4 lib/ssleay
 ? net/www/squid	Cacheserver
 #-4-01 editor/nedit	GUI-Editor
 v-2-12 gnu/autoconf	Software automagisch konfigurieren
-#v-1-14-7 gnu/bash	Bourne Again SHell # => bash2
-v-1-02 gnu/bc	Rechner
 #v-2-7-0-3 gnu/bfd	BFD-Library => cygnus
 v-1-0-10 lib/gsm	Soundkompression
 #v-2-7-0-3 gnu/binutils	as, ld und Konsorten
-v-1-25 gnu/bison	Parsergenerator
 v-2-3 kernel/ipfwadm
 #-2-02 gnu/calc -- emacs
-v-1-3-0 gnu/cfengine
-v-4-2-4 gnu/compress
 v-2-1a gnu/cperf	Perfect Hash-Tabellenbauer
 v-2-4-1 gnu/cpio	CoPy In and Out, kann auch tar und andere Formate
 #-3-0 gnu/crefine
-v-1-8-1 gnu/cvs	Concurrent Versioning System
-v-0-2 gnu/dc	Rechner, Postfixnotation
 #-1-2 gnu/dejagnu
 #-3-2-4 gnu/dld	dynamischer Linker -- im libc bereits enthalten
 #-1-1 gnu/doschk
@@ -54,7 +47,6 @@ v-1-09 gnu/groff
 v-1-2-4 gnu/gzip
 #-1-3 gnu/hello
 #-3-2 gnu/id-utils
-v-1-9-1 gnu/indent
 #-1-1 gnu/inetutils
 #-0-50 gnu/iostream
 v-4-0 gnu/ispell
@@ -65,27 +57,19 @@ v-1-4 gnu/m4
 #-1-0 gnu/man
 v-2-3-10 gnu/man-db
 #-0-06 gnu/ms
-v-3-7 gnu/mtools
-v-5-2 misc/fdutils
 #-3-0 gnu/nihcl
 #-3-5 gnu/obst
 #-1-6 gnu/oleo
 #-0-27 gnu/para
-v-2-1 gnu/patch
-v-5-004 gnu/perl
 v-400-201 misc/perl/tk
 v-5-05 misc/perl/libwww
 #-2-0 gnu/plot
 #-2-7 gnu/pseudo	Pseudoscheme (Scheme unter Common Lisp
 #-0-3 gnu/ptx
-v-5-7 gnu/rcs
-v-2-0 gnu/readline
-v-3-4 gnu/recode
 v-7-6 lib/tcl/tcl
 v-4-2 lib/tcl/tk
 #-0-12 gnu/regex	in libc enthalten
 #-1-0 gnu/rx	nicht in libc enthalten, aber tut nicht
-v-3-7-2 gnu/screen
 v-2-0-5 gnu/sed	r-3-0	3.0 ist nicht verwendbar
 v-1-15 gnu/sh-utils
 #-1-1-1 gnu/smalltalk
@@ -99,9 +83,7 @@ v-1-11 gnu/textutils
 v-1-6 gnu/time
 # gnu/tput
 v-1-06-1 gnu/uucp
-v-1-0 gnu/uuencode
 #-1-5 gnu/vh
-v-0-5 gnu/wdiff
 v-1-5 kernel/bdflush
 v-1-06 kernel/e2fs
 v-01 kernel/freeramdisk
@@ -129,9 +111,7 @@ v-2-69 kernel/sysvinit
 v-1-85 lib/db
 v-0-62 lib/dialog
 v-2-0-5 lib/efence
-v-6-a lib/jpeg
 ? lib/libc5
-v-1-99-e-295 lib/ncurses	Termcap/info/curses-Superset
 v-0-1-19 lib/objc
 v-0-89-c lib/png	Portable Network Graphics
 v-3-3-1 lib/shadow
@@ -150,10 +130,7 @@ v-0-9-3 misc/mingetty
 v-3-0-11 misc/strace
 v-6-06 misc/tcsh
 #v-96-e misc/timezone ## in glibc
-v-5-12 misc/unzip
 v-2-5 misc/util-linux
-v-01 misc/yacc
-v-2-01 misc/zip
 v-2-3-0 net/backup/amanda/client
 v-2-3-0 net/backup/amanda/server
 v-3-0 net/debug/tcpdump	-- Cleanup notwendig!
@@ -178,7 +155,6 @@ v-2-6-3 security/pgp
 # security/tamu/drawbridge
 # security/tamu/tiger
 v-3-4-13 server/plp
-v-6-1-3 server/rdist
 v-3-5-f server/xntp
 # x11/gimp	Bildbearbeitung hoch zehn
 v-0-75-a x11/lesstif	Ich hasse Motif.
@@ -330,17 +306,83 @@ v-3-11-p-4	net/mail/procmail ftp://ftp.informatik.rwth-aachen.de/pub/packages/pr
 v-0-10	misc/perl/dns
 v-1-6-3 misc/rsync ftp://samba.anu.edu.au/pub/rsync
 v-var	gnu/cygnus
-v-2-01	gnu/bash2
 v-3-5-8 gnu/gv
 v-1 misc/colm
-*	misc/bzip2	bzip2.0.1	Kompressor (besser als gzip?)	-
-*	gnu/diffutils	gnu.2.7	diff, diff3 und co.	-
+*	misc/bzip2	*	Kompressor (besser als gzip?)	2.0.1	-
+*	gnu/diffutils	*	diff, diff3 und co.	2.7	ftp://ftp.gnu.org/pub/gnu/
 *	emulators/ibcs	ibcs.960823	Sys5-Emulator	-
-*	security/ssh	*ssh.1.2.21	Secure Shell	1.2.21	http://www.cs.hut.fi/ssh/
-*	server/hylafax	*	HylaFax-Faxserver	4.0.1	ftp://ftp.sgi.com/sgi/fax/source
-*	server/bintec	*	CAPI-Utilities von Bintec	1.5	ftp://ftp.bintec.de//pub/brick/libcapi
+*	security/ssh	*	Secure Shell	1.2.21	http://www.cs.hut.fi/ssh/
+*	server/hylafax	*	HylaFax-Faxserver	4.0.1	ftp://ftp.sgi.com/sgi/fax/source/
+*	server/bintec	*	CAPI-Utilities von Bintec	1.5	ftp://ftp.bintec.de//pub/brick/libcapi/
 *	gnu/make	*	GNU Make	3.76	ftp://ftp.gnu.org/pub/gnu/
 *	gnu/automake	*	GNU Automake	1.2	ftp://ftp.gnu.org/pub/gnu/
-*	gnu/bash	*	GNU bash	ftp://ftp.gnu.org/pub/gnu
-*	misc/vim	*	Vi IMproved	4.6	ftp://ftp.vim.org/pub/misc/editors/vim/unix
-*	gnu/less	*	More or less ...	332	ftp://ftp.gnu.org/pub/gnu
+*	gnu/bash	*	GNU bash	2.01.1	ftp://slc2.ins.cwru.edu/pub/dist/
+*	misc/vim	*	Vi IMproved	4.6	ftp://ftp.vim.org/pub/misc/editors/vim/unix/
+*	gnu/less	*	More or less ...	332	ftp://ftp.gnu.org/pub/gnu/
+### /bin/ipmask
+### buffer
+### cfi
+### cmp
+### dialog
+### diff
+### formail
+### funzip
+### gnuplot
+### ident
+### lockfile
+### mev
+### mzip
+### newgrp
+### newslock
+### notifier
+### pbmtog3
+### pgp
+### plan
+### procmail
+### python
+### rpm
+### sdiff
+### sdr
+### sg
+### tcl
+### tk
+### virmf
+### we
+### wine
+### wpe
+### xb
+### xdfcopy
+### xmpeg
+### xwe
+*	misc/pdksh	*	Public Domain Korn Shell	ftp://ftp.cs.mun.ca:/pub/pdksh/
+*	misc/zsh	*	Z Shell	ftp://ftp.cs.elte.hu/pub/zsh/
+*	gnu/bison	*	bison (yacc-Ersatz)	ftp://ftp.gnu.org/pub/gnu
+*	gnu/rcs	*	RCS Versionsmanagement	5-7	ftp://ftp.cs.purdue.edu/pub/RCS/
+*	gnu/cvs	*	CVS Versionsmanagementsystem	1-8-1	http://www.loria.fr/~molli/cvs-index.html
+*	gnu/compress	*	GNU Compress	4-1	ftp://ftp.gnu.org/pub/gnu
+*	gnu/bc	*	Rechenprogramm	1-02	ftp://ftp.gnu.org/pub/gnu
+*	gnu/dc	*	Rechenprogramm (RPN)	0-2	ftp://ftp.gnu.org/pub/gnu
+*	misc/yacc	*	Parsergenerator	xxx	?
+*	misc/zip	*	Kompressions- und Archivierprogramm	2-01	?
+*	misc/unzip	*	Dekompressions- und Auspackprogramm	5-12	?
+*	server/rdist	*	Automagisches Programmverteilen	6-1-3	ftp://usc.edu/pub/rdist/
+*	gnu/screen	*	Terminalmultiplexer	3.7.4	ftp://ftp.gnu.org/pub/gnu
+*	gnu/patch	*	Diffs auf Dateien anwenden	2.5	ftp://ftp.gnu.org/pub/gnu
+*	gnu/uuencode	*	uuencode und uudecode	1-0	ftp://ftp.gnu.org/pub/gnu
+*	gnu/cfengine	*	gnu/cfengine	1-3-0	ftp://ftp.gnu.org/pub/gnu
+*	lib/jpeg	*	JPEG-Library	6-a	?
+*	lib/dialog	*	Dialogfenster etc. ohne X11	0-62	?
+*	lib/png	*	Portable Network Graphics	0-96	?
+*	lib/ncurses	*	portable Terminalansteuerung	1-99-e-295	ftp://ftp.netcom.com/pub/zm/zmbenhal/ncurses
+*	gnu/wdiff	*	diff auf Wörter, nicht Zeilen	0-5	ftp://ftp.gnu.org/pub/gnu
+*	gnu/mtools	*	MS-DOS-Floppy-Tools	3-7	http://linux.wauug.org/pub/knaff/mtools/mtools_toc.html
+*	gnu/recode	*	Der ultimative Zeichensatzumkodierer	3-4	ftp://ftp.gnu.org/pub/gnu
+*	gnu/indent	*	C-Source-Umformatierer	1-9-1	ftp://ftp.gnu.org/pub/gnu
+*	gnu/perl	*	Practical Extraction and Report Language	5.4.4	ftp://ftp.leo.org/pub/comp/programming/languages/script/perl/CPAN/src/5.0
+*	kernel/mgetty	*	mgetty+sendfax	1-1-8	ftp://ftp.leo.org/xxx
+*	pop/fax	*	Unsere Faxerei	-	-
+*	pop/datenbank	*	Unsere Datenbankeinbindung	-	-
+*	pop/logger	*	Billigprogramm zur Analyse bidirektionaler Protokolle	-	-
+*	misc/fdutils	*	Floppysteuerung und -konfiguration	5-2	-
+*	gnu/readline	*	Readline-Library	2-1-a-1	xxx
+*	gnu/autoconf	*	Automatisches Konfigurieren von Sourcen	2-12	-

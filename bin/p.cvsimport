@@ -5,16 +5,24 @@ cat >&2 <<END
 Usage: $(basename $0)  -- Importieren eines CVS-Archivs
        [ -d dest-directory ]
 	   [ -V origreleasename ]
-	   [ -t Beschreibungstext ]
+	   [ -v releasename ]
+	   [ -t CVS-Dateiname ]
+	   [ -u URL ]
+	   [ -g (goto Source and do internal version too) ]
+	   [ Beschreibungstext ]
 END
 exit 1
 }
 
 dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
-overs=base
+overs=
+vers=noris
 txt="$dir"
+url=
+cfile=
+LV=/tmp/lv.$$
 
-   set -- $(getopt "d:v:V:eih" $*)
+   set -- $(getopt "gd:t:V:v:hu:" $*)
    if test $? != 0
    then
 	   usage
@@ -25,29 +33,50 @@ txt="$dir"
 	   in
 		   -h)
 		       usage ;;
+		   -g)
+			   goto="y"; shift;;
+		   -t)
+			   shift; cfile="$1"; shift;;
+		   -u)
+			   shift; url="$1"; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
-		   -t)
-			   shift; txt="$1"; shift;;
+		   -v)
+			   shift; vers="$1"; shift;;
 		   -V)
 			   shift; overs="$1"; shift;;
+		   --)
+		       shift; break ;;
 	   esac
    done
 
 if test -z "$dir"; then usage; fi
+if test -n "$*" ; then txt="$*"; fi
+if test -n "$goto" ; then
+	cd /usr/src
+	if test ! -d "$dir" ; then
+		mkdir -p $dir
+		cd $dir
+		cvs -Q checkout -ko -d . $dir
+	else
+	    cd $dir
+	fi
+	if test -n "$cfile" ; then 
+		cfile="$(pwd)/$cfile"
+	fi
+fi
 
 export PRCS_REPOSITORY=/archiv/src/prcs
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
 
 cd /tmp/; mkdir x.$$; cd x.$$
 
-set -xe
+set -e
 
-if test -z "$exto" ; then
-
-prcs checkout -r $overs $what </dev/tty
+if test -n "$overs" ; then ov="$overs.@"; else ov="base.@"; fi
+prcs checkout -r $ov $what </dev/tty
 perl -p -e '
-  s,\(Project-Description \"\"\),(Project-Description "'$txt'"),;
+  s#\(Project-Description \"\"\)#(Project-Description "'"$txt"'")#;
 ' < $what.prj > $what.prx && mv $what.prx $what.prj
 
 cat <<END >>$what.prj
@@ -57,6 +86,13 @@ cat <<END >>$what.prj
 ;;*
 END
 
+(
+    if test -n "$cfile" ; then 
+	   cvs log "$cfile" 
+	else
+       while read a ; do echo "$a"; done
+	fi
+) |
 perl -e '
 while(<>) { push(@lst,$_) if s/.*?\br-([-0-9a-z]*)($|[^-0-9a-z].*)/$1/; }
 print reverse @lst;
@@ -67,7 +103,8 @@ nsv=$(echo $sv | \
    -e 's/-/./g' \
    -e 'y/abcdefghijklmnopqrstuvwxyz/12345678912345678912345678/' \
    -e 's/\.0*\([0-9]\)/.\1/g' \
-   -e 's/$/.1/'
+   -e 's/..*/./g' \
+   -e 's/$/.@/'
 )
 
 echo $dir: Cleanup...
@@ -88,7 +125,9 @@ perl -p -e '
 
 echo $dir: Checking in $nsv '<=' $sv
 
-prcs checkin -f -r$overs.$nsv $what </dev/tty
+if test -n "$overs" ; then nsv="$overs.$nsv" ; else nsv="base.@"; fi
+prcs checkin -f -r$nsv $what
+echo $sv >$LV
 
 ov="$overs.$nsv"
 
@@ -96,28 +135,33 @@ done
 
 echo $dir: DONE, Version ist $ov
 cd ..
-rm -rf x.$$
 
-echo "* $dir $ov $txt ?" >>/usr/src/STATUS/build
+if test -z "$url" ; then url="?"; fi
+lv="$(cat $LV)"
+if test -n "$overs" ; then ov="$overs"; else ov="*"; fi
 
-exit 0
+echo "*	$dir	$ov	$txt	$lv	$url" >>/usr/src/STATUS/build
 
+rm -rf x.$$ LV.$$
 
+if test -n "$goto" ; then
 
+cd /usr/src/$dir
 
-
-
-fi
-
-if test -z "$into" ; then
-
-perl -n -i -e 'print unless /^;;\*/;' $what.prj
+if test -n "$overs" ; then ov="$overs.@"; else ov="base.@"; fi
+prcs checkout -r $ov $what $what.prj
+perl -n -i -e '
+   s#\(Populate-Ignore\s+\(#(Populate-Ignore ("/CVS/" "^CVS/" "\\\\.rej\$" "\\\\.orig\$" #;
+    print unless /^;;\*/;
+' $what.prj
 
 cat <<END >>$what.prj
 ;;*
 ;;* Interne Version. 
 ;;*
 END
+
+if test ! -f Makefile.Linux ; then
 
 cat <<'END' >Makefile.Linux
 #!/usr/bin/make -f
@@ -137,10 +181,18 @@ clean: Makefile
 	$(MAKE) clean $(flags)
 
 END
-prcs populate $what Makefile.Linux </dev/tty
+fi
+
+prcs populate -f -u $what
+
+perl -p -e '
+   s/\(New-Version-Log \"\"\)/(New-Version-Log "'"Initialer Checkin aus CVS, Version $lv"'")/;
+   # s/^  \((.*)\(\)\)/  ($1() :no-keywords)/;
+' < $what.prj > $what.prx && mv $what.prx $what.prj
 
 vi $what.prj </dev/tty
 prcs checkin -f -r$vers $what </dev/tty
+redo $dir
 
 fi
 

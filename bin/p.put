@@ -38,5 +38,6 @@ vi $what.prj
 
 set -xe
 
-exec prcs checkin -f $vers $what
+prcs checkin -f $vers $what
+redo $dir
 

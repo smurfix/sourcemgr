@@ -58,7 +58,7 @@ if test -z "$dir"; then usage; fi
 export PRCS_REPOSITORY=/archiv/src/prcs
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
 
-set -ex
+set -e
 
 if test -z "$exto" ; then
 
@@ -85,7 +85,12 @@ fi
 
 if test -z "$into" ; then
 
-perl -n -i -e 'print unless /^;;\*/;' $what.prj
+perl -i -n -e '
+   s#\(Populate-Ignore\s+\(#(Populate-Ignore ("/CVS/" "^CVS/" "\\\\.rej\$" "\\\\.orig\$" #;
+   s/\(New-Version-Log \"\"\)/(New-Version-Log "'Import\ $sv'")/;
+   # s/^  \((.*)\(\)\)/  ($1() :no-keywords)/;
+   print unless /^;;\*/;
+' $what.prj
 
 cat <<END >>$what.prj
 ;;*

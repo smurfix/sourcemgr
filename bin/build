@@ -163,7 +163,7 @@ while read ver dir rest ; do # {
 						# XXXXXXXXX
 							ver=
 						# XXXXXXXXX
-						cd $goto; cvs checkout $ver $where $what
+						cd $goto; cvs -Q checkout $ver $where $what
 						did=$?
 						touch $out/AUTOREMOVE
 					fi # }
@@ -180,7 +180,7 @@ while read ver dir rest ; do # {
 						if make -C $dir LD_PRELOAD=/usr/lib/log-install.so LOGFILE=/usr/src/STATUS/work/$tag -f Makefile.Linux $inst </dev/null ; then # {
 							mv STATUS/work/$tag STATUS/done/$tag
 							echo "+++ $dir +++ Release"
-#						if test -n "$ver" -a ! -f STATUS/keep/$tag -a -f $dir/AUTOREMOVE ; then # {
+						if test ! -f STATUS/keep/$tag -a -f $dir/AUTOREMOVE ; then # {
 							if test -n "$pv" ; then # {
 								cd $dir
 								echo NO prcs checkin -f -r "$pv.@" $ptag
@@ -192,7 +192,7 @@ while read ver dir rest ; do # {
 								yes n | cvs release $dir && rm -rf $dir || echo "*** $dir *** Release failed"
 								:
 							fi # }
-#						fi # }
+						fi # }
 ###
 							echo "Building file list in background."
 							(
@@ -235,5 +235,7 @@ set -x
 ./gen.distfile | tee STATUS/distfiles | while read a ; do 
 	rdist -f STATUS/dist/$a
 done 
+
+rm -f "$sl"
 
 cd "$ld"
