@@ -33,6 +33,6 @@ W="$(expr $W + 1)" ## 1.2.3 => 1.2.4
 bk edit -qg "$BF"
 ( echo "$V$W"; bk get -qp "$BF" | tail +2 ) > "$BF"
 
-bk ci -q -y"Version $V.$W" rpm.version >/dev/null
-bk sfiles -pC rpm.version >> "$BK_PENDING"
+bk ci -q -y"Version $V.$W" "$BF" >/dev/null
+bk sfiles -pC "$BF" >> "$BK_PENDING"
 exit 0
