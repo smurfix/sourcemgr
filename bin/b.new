@@ -73,7 +73,7 @@ END
 else
 
 	cat <<END >>$tmpcf
-logging:    changesets@openlogging.org
+logging:    logging@openlogging.org
 END
 
 fi
