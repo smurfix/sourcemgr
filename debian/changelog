@@ -1,3 +1,10 @@
+sourcemgr (1.313) unstable; urgency=low
+
+  * Another case of the fucked-up backslash, or:
+    how not to test software.
+
+ -- Matthias Urlichs <smurf@debian.org>  Fri, 30 Jan 2004 17:25:56 +0100
+
 sourcemgr (1.312) unstable; urgency=low
 
   * b.debuild, helper/upload_to:
