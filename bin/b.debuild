@@ -24,7 +24,7 @@ Usage: $(basename $0)  -- Baue Debian-Source-Pakete.
 		[ -b (build a binary) ]  [ -B (with pbuilder) ]
 			[ -i (install binaries afterwards) ]
 		[ -s? (pass to dpkg-*) ]  [ -k (keep tempdir) ]
-		[ -n (ignore lintan errors) ]
+		[ -n (ignore lintan errors) ] [ -V VERS -- include changes since VERS ]
 END
     trap "" 0
     exit 1
@@ -40,6 +40,7 @@ pbin=
 opt_s=
 keep=
 lwarn=
+opt_v=
 
    eval set -- "$(getopt "bBd:ikns:t:v:h" "$@")"
    if test $? != 0
@@ -62,6 +63,8 @@ lwarn=
 		   		shift; keep=y ;;
 		   -B)
 		   		shift; pbin=y ;;
+		   -V)
+			   shift; opt_v="-v $1"; shift;;
 		   -s)
 			   shift; opt_s="-s$1"; shift;;
 		   -d)
@@ -183,7 +186,7 @@ cd $T
 # dpkg-source -b -sa "$N-$VV"
 cd "$T/$N-$VV"
 fakeroot dpkg-buildpackage -S $opt_s -uc -us
-dpkg-genchanges -S $opt_s > "../${N}_${DV}_source.changes"
+dpkg-genchanges $opt_v -S $opt_s > "../${N}_${DV}_source.changes"
 test -z "$bin" || fakeroot dpkg-buildpackage -nc -b -uc -us
 test -z "$pbin" || pdebuild --buildresult "$T" -- --debbuildopts "-nc -b"
 
