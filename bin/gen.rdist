@@ -9,11 +9,13 @@ use vars qw( $opt_f );
 chdir("/usr/src") || die "No sources!";
 
 my $label = ($opt_f ? "all" : "dist");
+my %allhosts;
 
 if(@ARGV) {
-	foreach $host(@ARGV) {
+	foreach my $host(@ARGV) {
 		$allhosts{$host}++;
 	}
+	$label = "";
 } else {
 	opendir(HOSTS,"STATUS/hosts");
 	while(defined($_ = readdir HOSTS)) {
@@ -26,20 +28,22 @@ if(@ARGV) {
 	closedir HOSTS;
 }
 
-foreach $host(keys %allhosts) {
-	print $host."\n";
+foreach my $host(keys %allhosts) {
+	print "$host\n";
 
+	my $pid;
 	die "No fork: $!" unless defined ($pid=fork());
 	next if $pid != 0;
 	#opendir(DIST,"STATUS/dist");
 	#while(($dir = readdir DIST) ne "") {
 	open(DIST,"STATUS/sequence");
-	while(<DIST>) { chop; $dir = $_;
+	while(<DIST>) { chop; my $dir = $_;
 		next if -f "STATUS/sent/$host/$dir" and -M "STATUS/sent/$host/$dir" > -M "STATUS/dist/$dir";
 		print "*** $host *** $dir ***\n";
 		die "No fork: $!" unless defined ($pid=fork());
 		if($pid == 0) {
-			exec {"/usr/bin/rdist"} ("rdist $host","-x","-m",$host,"-f","STATUS/dist/$dir",$label);
+			($label eq "") ? (exec {"/usr/bin/rdist"} ("rdist $host","-x","-m",$host,"-f","STATUS/dist/$dir")) : (
+			exec {"/usr/bin/rdist"} ("rdist $host","-x","-m",$host,"-f","STATUS/dist/$dir",$label));
 			die "no rdist: $!";
 			exit(99);
 		}

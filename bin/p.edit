@@ -30,8 +30,16 @@ dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 
 if test -z "$dir"; then usage; fi
 
+desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
+
+if test -f "/usr/src/STATUS/checkout/$desc" ; then
+    desc=$(sed  -e 's/[ 	].*//' "/usr/src/STATUS/checkout/$desc")
+    what=$(echo $desc | sed -e 's/[:\/]/_/g' -e 's/_*$//')
+else
+    what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
+fi
+
 export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
-what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 
 set -ex
 

@@ -60,3 +60,5 @@ misc:klog.console
 lib:libc5
 misc:bzip2
 misc:sudo
+gnu:bash.small
+lib:ld.so

@@ -17,6 +17,9 @@ Installation auch wieder automatisch gelöscht, _ohne_ irgendwas
 einzuchecken. Abhilfe: (a) selber einchecken, (b) Datei "AUTOREMOVE"
 löschen, (c) -n-Option beim Installieren verwenden. Methode (a) ist
 eindeutig vorzuziehen!
+
+Beim Installieren wird automagisch "sudo" aufgerufen.
+Das Paßwort ist folglich das eigene.
 END
 exit 1
 }
@@ -73,12 +76,7 @@ desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 dir=$(echo $desc | sed -e 's/:/\//g')
 
 if test -z "$doinstall" -a "$(whoami)" = "root" ; then
-    echo "Programme werden NICHT als Root compiliert, nur installiert."
-    exit 1
-fi
-
-if test -n "$doinstall" -a "$(whoami)" != "root" ; then
-    echo "Programme werden als Root installiert."
+    echo "Bitte NICHT als Root!"
     exit 1
 fi
 
@@ -86,9 +84,13 @@ set -e
 
 if test -z "$islocal" ; then
 	cd /usr/src
-	if test -f "STATUS/checkout/$desc" ; then
+	if test -n "$doinstall" -a ! -d "$dir" ; then
+		echo "$desc: erst auschecken und bauen!"
+		exit 1
+	fi
+	if test -f "/usr/src/STATUS/checkout/$desc" ; then
 		# set -- $(grep "^$desc[	 ]" STATUS/checkout/$desc)
-		set -- $(cat STATUS/checkout/$desc)
+		set -- $(cat /usr/src/STATUS/checkout/$desc)
 		what=$1
 		compile=$2
 		install=$3
@@ -159,9 +161,11 @@ fi
 
 bad=
 if test -z "$doinstall" ; then # compile
+	echo + make -f Makefile.Linux $compile
 	make -f Makefile.Linux $compile || bad=y
 else # install
-	LD_PRELOAD=/usr/lib/log-install.so LOGFILE=/usr/src/STATUS/work/$desc \
+	echo + make -f Makefile.Linux $install
+	sudo env LD_PRELOAD=/usr/lib/log-install.so LOGFILE=/usr/src/STATUS/work/$desc \
 	make -f Makefile.Linux $install || bad=y
 fi
 

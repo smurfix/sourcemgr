@@ -446,3 +446,12 @@ x	kernel/linux 	*	Master-Kernelsource	2.0.33/2.1.77	ftp.kernel.org
 *	server/plp	*	server/plp	3-4-13	?
 *	gnu/ed	*	gnu/ed	0-2	?
 *	gnu/groff	*	gnu/groff	1-09	?
+*	x11/gimp/data-min	*	Notwendige Dateien für den GIMP	-
+*	gnu/man-db	*	gnu/man-db	2-3-10	?
+*	gnu/gdbm	*	gnu/gdbm	1-7-3	?
+*	x11/xpinguin	*	x11/xpinguin	0	?
+*	x11/xsnow	*	x11/xsnow	1-40	?
+*	x11/xlockmore	*	x11/xlockmore	4.0.a.9	?
+*	misc/fillup	*	misc/fillup	1-0	?
+*	kernel/sysklogd	*	kernel/sysklogd	1-3	?
+*	gnu/sh-utils	*	gnu/sh-utils	1-15	?

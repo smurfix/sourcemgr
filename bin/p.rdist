@@ -5,7 +5,7 @@ cat >&2 <<END
 Usage: $(basename $0)  -- Verteile an alle betroffenen Rechner
        [ -f (verteilt an Rechner, auf denen das Programm installiert ist) ]
        [ -F (verteilt an -f und Distributionsrechner) ]
-	   [ -k Kiste (verteile nur an diesen Rechner, der muss es aber kriegen) ]
+       [ -k Kiste (verteile nur an diesen Rechner, der muss es aber kriegen) ]
        [ was ]
 
 Ohne -f/-F wird an die als Distributionskisten bekannten Rechner verteilt
@@ -18,7 +18,7 @@ dir=
 wer=dist
 kiste=
 
-   set -- $(getopt "d:hfFk" $*)
+   set -- $(getopt "d:hfFk:" $*)
    if test $? != 0
    then
 	   usage
@@ -28,13 +28,13 @@ kiste=
 	   case "$i"
 	   in
 		   -k)
-		       kiste="-m $2"; shift; shift; wer=""; break ;;
+		       kiste="-m $2"; shift; shift; wer="" ;;
 		   -F)
-		       wer=""; shift; break ;;
+		       wer=""; shift ;;
 		   -f)
-		       wer="all"; shift; break ;;
+		       wer="all"; shift ;;
 		   -d)
-		       dir="$2"; shift; break ;;
+		       dir="$2"; shift ;;
 		   -h)
 		       usage ;;
 		   --)
@@ -65,7 +65,7 @@ set -e
 cd /usr/src
 if test -f "STATUS/done/$desc" ; then
 	echo + rdist -f STATUS/dist/$desc $kiste $wer
-	exec rdist -f STATUS/dist/$desc $kiste $wer
+	exec sudo rdist -f STATUS/dist/$desc $kiste $wer
 else
 	echo >&2 "$desc: Nicht fertig gebaut und installiert und so."
 	exit 1

@@ -26,7 +26,8 @@ Usage: $(basename $0)  -- Bauen und Installieren eines Programms
 Ohne "was_gebaut_werden_soll" wird alles gebaut, was noch nicht fertig ist.
 Programme markiert man mit "redo was_gebaut_werden_soll" als unfertig.
 
-Gebaut wird als normaler Benutzer. Installiert wird als Root.
+Gebaut und installiert wird als normaler Benutzer.
+Der Installer ruft automatisch "sudo" auf, das PW ist also das eigene.
 END
 }
 

@@ -29,8 +29,8 @@ while(<>) {
 		next;
 	}
 	if($key eq "OLD") {
-		dodir($val1);
-		$files{$val1}++;
+		dodir($val);
+		$files{$val}++;
 		next;
 	}
 #	if($key eq "STN" or $key eq "STL" or $key eq "ACC") {
@@ -45,8 +45,8 @@ while(<>) {
 	}
 	if($key eq "LNK") {
 		if($val2 eq "") {
-			dodir($val1);
-			$files{$val1}++;
+			dodir($val);
+			$files{$val}++;
 		} else {
 			dodir($val2);
 			$files{$val2}++;

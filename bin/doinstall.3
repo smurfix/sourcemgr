@@ -2,19 +2,20 @@
 
 . /fd/STATUS
 
-if test -d /mnt/usr/share ; then
+if test -d /mnt/usr/share/fuppu ; then
 	echo "/mnt/usr/share gefunden, keine Installation."
 else
 	echo "/mnt/usr/share nicht gefunden => installiere."
-
-set +e 
-
 PATH=/cd/usr/src/STATUS/bin:/bin:/sbin:/usr/sbin:/cd/bin:/cd/sbin:/cd/usr/bin:/cd/usr/sbin
 
-mkdir /mnt/usr ## just in case
+set -ex
+
+mkdir -p /mnt/usr ## just in case
+mkdir -p /mnt/var/lib/packages
 
 cd /mnt/usr
-mkdir share share/man share/info share/doc
+mkdir -p share share/man share/info share/doc
+rm -f man doc info
 ln -s share/man man
 ln -s share/doc doc
 ln -s share/info info

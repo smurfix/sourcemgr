@@ -15,7 +15,39 @@ if test -b /dev/sdd ; then : ; else
     ./MAKEDEV -v generic
     cd /
 fi
+cd /
+test -d boot -o -L boot || ln -s boot-$who boot
+cd /lib; test -d modules -o -L modules || ln -s modules-$who modules
+cd /
+
 /sbin/mklilo
+
+#    who=$who master=$master slave=$slave mask=$mask imask=$netbits
+#    broad=$broad netz=$netz def=$def name=$name
+
+cat <<END >/tmp/cf.$$
+##
+## Was für eine Art Linuxsystem ist diese Kiste überhaupt?
+##
+SYSTYPE=$who
+##
+## Hostname mit Domain
+##
+FQHOSTNAME=$name
+##
+## Hostname ohne Domain
+##
+HOSTNAME=$(echo $name | sed -e 's#\..*##')
+##
+## Ethernetinterface(s) und dazugehörende IP-Adressen
+##
+NETWORK="eth0,$slave,$imask,$def"
+##
+END
+fillup /etc/rc.config /tmp/cf.$$ || true
+rm /tmp/cf.$$
+
+/sbin/sysconfig
 
 cd /dev
 ln -sf tty1 syscons
@@ -25,35 +57,11 @@ fi
 if test ! -f /etc/ssh/ssh_host_key ; then
 	ssh-keygen -b 1024 -f /etc/ssh/ssh_host_key -N ''
 fi
-if test ! -f /etc/ssh/sshd_config ; then
-	cp /cd/etc/ssh/sshd_config /etc/ssh
-fi
-
-xname=$(perl -e '$name="'"$name"'"; $name =~ s/\..*//; print $name; ')
-perl -p -i -e "
-	s/^FQHOSTNAME=.*/FQHOSTNAME=$name/;
-	s/^HOSTNAME=.*/HOSTNAME=$xname/;
-	s/^MOUSE=.*/#MOUSE=\/dev\/ttyS0/;
-	s/^MODEM=.*/#MODEM=\/dev\/ttyS1/;
-	s/^IPADDR_0=.*/IPADDR_0=$slave/;
-	s/^IFCONFIG_0=.*/IFCONFIG_0=\"$slave broadcast $broad netmask $mask\"/;
-	s/^NETWORK_0=.*/NETWORK_0=\"-net $netz netmask $mask\"/;
-	s/^GATEWAY_0=.*/GATEWAY_0=$def/;
-	s/^SMTP=.*/SMTP=qmail/;
-	s/^CREATE_FVWM_CONFIG=.*/CREATE_FVWM_CONFIG=no/;
-	s/^X11=.*/X11=no/;
-	s/^REMOTELOG=.*/REMOTELOG=no/;
-" /etc/rc.config
 
 . /etc/rc.config
 
 hostname $HOSTNAME
 
-if test ! -f /etc/inetd.conf ; then
-	cp -a /cd/etc/inetd.conf /etc
-fi
-
-cd /
 if killproc -TEST /usr/sbin/inetd ; then : ; else
 	/usr/sbin/inetd
 fi
@@ -61,5 +69,3 @@ if killproc -TEST /usr/sbin/sshd ; then : ; else
 	/usr/sbin/sshd
 fi
 
-
-/sbin/sysconfig

@@ -25,6 +25,7 @@ if test ! -s /fd/STATUS ; then
 	echo "export master=$master" >>/fd/STATUS
 	echo "export slave=$slave" >>/fd/STATUS
 	echo "export mask=$mask" >>/fd/STATUS
+	echo "export imask=$netbits" >>/fd/STATUS
 	echo "export broad=$broad" >>/fd/STATUS
 	echo "export netz=$netz" >>/fd/STATUS
 	echo "export def=$def" >>/fd/STATUS

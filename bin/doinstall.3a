@@ -20,6 +20,7 @@ fi
 mkdir -p cd proc dev fd
 cp -a /fd/STATUS fd
 rm -rf mnt; ln -s . mnt
+chroot /mnt /sbin/ldconfig -v
 chroot /mnt /bin/mount $master:/ /cd
 chroot /mnt /bin/mount /proc
 touch var/run/utmp
@@ -34,7 +35,5 @@ cp -a /sbin/ldconfig /mnt/sbin/
 mkfifo dev/initctl || true
 
 fi
-
-ROOT=/mnt /mnt/sbin/sysconfig
 
 exec chroot /mnt /cd/usr/src/STATUS/bin/doinstall.4
