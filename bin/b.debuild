@@ -11,6 +11,7 @@ usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Baue Debian-Source-Pakete.
 	   [ -d Paket ]  [ -v release ]
+	   [ -t HOST (upload there) ]
 END
     trap "" 0
     exit 1
@@ -19,8 +20,9 @@ END
 dir=
 defvers=noris
 vers=
+dest=local
 
-   eval set -- "$(getopt "d:v:h" "$@")"
+   eval set -- "$(getopt "d:t:v:h" "$@")"
    if test $? != 0
    then
 	   exit 1
@@ -112,13 +114,13 @@ else # original package
 	( cd $T ;  dpkg-source -b -sn "$N-$V" )
 fi
 ( cd "$T/$N-$V" ; dpkg-genchanges -S > "../${N}_${V}_source.changes" )
-( cd $T; debsign "${N}_${V}_source.changes"  ${N}_${V}.dsc )
+( cd $T;  debsign "${N}_${V}_source.changes" )
 ( cd $T ; for i in * ; do if test -d $i; then rm -rf $i; fi; done )
 echo "Built:"
 ls $T
 echo ""
 #mv $T/* ..
-( cd $T; dput sourcemgr_1.189_source.changes )
+( cd $T; dput $dest "${N}_${V}_source.changes" )
 
 #dpkg-buildpackage -S -rfakeroot -IPENDING -Idebian/users -Idebian/version -IBitkeeper -ISCCS "$@"
 
