@@ -276,19 +276,18 @@ if test -z "$again" -a -z "$qpack" ; then
 	export BK_RPM=$BUILD/tmp.$archive
 	export BK_DIR=$BUILD/$archive
 	echo "Hole Sourcen aus dem Archiv ..."
-	export BK_RPM_SRC=$BUILD/tmp/$archive
-	b.rpmget -n -d $what $vget 
+	cache="$(b.cache -d "$what" $vget)"
 	FR=/tmp/b.r.$$
 	rm -rf $FR
 	mkdir $FR
-	bkvers="$( cd $BK_RPM_SRC; bk get -q -p rpm.version 2>/dev/null | head -1 )"
+	bkvers="$( cd "$cache"; bk get -q -p rpm.version 2>/dev/null | head -1 )"
 	if test -z "$bkvers" ; then
-		bkvers="$( cd $BK_RPM_SRC; bk prs -ah -r+ -d:I: ChangeSet )"
+		bkvers="$( cd "$cache"; bk prs -ah -r+ -d:I: ChangeSet )"
 	fi
 
 	for i in rpm.spec rpm.tags rpm.sub rpm.clean rpm.verify \
 			rpm.pre rpm.post rpm.preun rpm.postun ; do
-		(	cd $BK_RPM_SRC
+		(	cd "$cache"
 			bk get -q -p $i 2>/dev/null || true
 		) | sed \
 			-e 's/\$ARCHIVE\$/'"$what/g" \

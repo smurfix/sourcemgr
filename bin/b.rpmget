@@ -40,48 +40,31 @@ nix=
 	   esac
    done
 
-
 test -z "$1"
 
 trap "" 0
 dc="$(pwd)"
 cd /
 
-if test -n "$BK_RPM_SRC" ; then
-	d="$BK_RPM_SRC"
-else
-	d="$(dirname "$dc")/tmp/$(basename "$dc")"
-fi
-dtmp="$d.x"
-
-export BK_NO_GET=1
 if test -z "$vers" ; then
 	vget="" 
 else   
 	vget="-v $vers"
 fi
 
-if test -d "$d" ; then 
-	mv "$d" "$dtmp"
-	cd "$dtmp"
-	bk pull
-	mv "$dtmp" "$d"
-else
-	rm -rf "$d" "$dtmp"
-	cache="$(b.cache -d "$dir" $vget)"
-	if bk lclone -q "$cache" "$dtmp" ; then : ; else
-		rm -rf "$dtmp"
-		bk clone -q "$cache" "$dtmp"
-	fi
-	mv "$dtmp" "$d"
-fi
+cache="$(b.cache -d $dir $vget)"
 
 test -z "$nix" || exit 0
 
 rm -rf "$dc"
 export -n BK_NO_GET
-bk lclone "$d" "$dc"
+echo "$dc: Create build copy" >&2
+if bk lclone -q "$cache" "$dc" ; then : ; else
+	rm -rf "$dc"
+	bk clone -q "$cache" "$dc"
+fi
 cd "$dc"
+echo "$dc: Checkout sources" >&2
 bk -r get -q
 
 exit 0

@@ -35,7 +35,7 @@ optp=
 test -n "$dir"
 test -z "$1"
 
-trap '' 0
+trap "" 0
 
 mod=p
 if b.exists -v "$vers" $dir > /tmp/tf.$$ ; then : ; else
@@ -50,18 +50,33 @@ test -z "$dv" || dv="-$dv"
 
 dir="$what$dv"
 
-if test -d /var/cache/bk ; then
-	c=/var/cache/bk/$what$dv
-	if test -d "$c" ; then
-		pw="$(pwd)"
-		cd $c
-		bk pull -q $BK_REPOSITORY/$what$dv 
-		cd "$pw"
-	else
-		bk clone -q $BK_REPOSITORY/$what$dv $c
-	fi
-	echo "/var/cache/bk/$what$dv"
-else
-	echo "$BK_REPOSITORY/$what$dv"
+cbase="/var/cache/bk"
+
+if test -d "$cbase" ; then : ; else
+	echo "$cbase: Cache Directory doesn't exist." >&2
+	exit 1
 fi
+
+if shlock /var/lock/b.cache.$what$dv ; then : ; else
+	echo "$what$dv: Locked." >&2
+	exit 1
+fi
+trap "rm -f /var/lock/b.cache.$what$dv" 0
+
+c="$cbase/$what$dv"
+if test -d "$c" ; then
+	mv "$c" "$c.x"
+	cd "$c.x"
+
+	echo "$what$dv: Updating cache. Changes:" >&2
+	bk changes -L -nd":I:	:USER:@:DOMAIN:" | cat >&2 # sonst less
+	echo "... end of change list" >&2
+	bk pull -q $BK_REPOSITORY/$what$dv 
+else
+	echo "$what$dv: Importing to cache" >&2
+	rm -rf "$c.x"
+	bk clone -q $BK_REPOSITORY/$what$dv "$c.x"
+fi
+mv "$c.x" "$c"
+echo "/var/cache/bk/$what$dv"
 
