@@ -55,14 +55,16 @@ else
 	echo "Ethernettreiber nicht gefunden => installiere und konfiguriere."
    set -e
 
-   if test -z "$ETHER" ; then
-   echo -n "Ethernet-Treiber (wd.o): "
-   read ETHER
-   echo export ETHER=\""$ETHER"\" >>/fd/STATUS
+   if test -z "$etherconf" ; then
+     echo -n "Ethernet-Treiber (wd.o): "
+     read etherconf
+     if test -z "$etherconf" ; then etherconf="wd.o"; fi
+       echo export etherconf=\""$etherconf"\" >>/fd/STATUS
+     fi
    fi
 
 	echo -n "insmod "
-   insmod /modules/${foo:-wd.o}
+   insmod /modules/$etherconf
 fi
 	echo -n "ifconfig "
 ifconfig ${eth} $slave netmask $mask
