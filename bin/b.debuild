@@ -177,8 +177,13 @@ mv debian/changelog "$T/$N-$VV"/debian
 
 if test -n "$E" ; then # non-original package
 	if wget -O "$T/${N}_$VV.orig.tar.gz" \
-		"http://smurf.noris.de/code/debian/public/${N}_$VV.orig.tar.gz"
-	then : ; else
+		"http://smurf.noris.de/code/debian/public/${N}_$VV.orig.tar.gz" ||
+	   wget -O "$T/${N}_$VV.orig.tar.gz" \
+		"http://smurf.noris.de/code/debian/unstable/source/${N}_$VV.orig.tar.gz"
+	then
+		echo + get original source via HTTP
+	else
+		echo + create new original source archive
 		rm -f "$T/${N}_$VV.orig.tar.gz"
 		bk export -T -w -tplain -rEXTERN . "$T/$N-$VV.orig"
 	fi
