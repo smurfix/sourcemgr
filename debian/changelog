@@ -1,3 +1,10 @@
+sourcemgr (1.361) unstable; urgency=low
+
+  * b.debuild: don't tilt directories if -k
+  * 
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 13 Jul 2004 17:13:20 +0200
+
 sourcemgr (1.360) unstable; urgency=low
 
   * b.debuild: yet another stupid bug

@@ -326,7 +326,6 @@ else
 	test -n "$nosign" -o -z "$pbin$bin" || rm "${N}_${DV}_$A.changes"
 fi
 
-for i in * ; do if test -d $i; then rm -rf $i; fi; done
 echo "Built:"
 ls 
 echo ""
@@ -347,7 +346,9 @@ if test -n "$inst" ; then
 	sudo dpkg -i *.deb
 fi
 if test -n "$destdir" ; then
-	mv * "$destdir"
+	for f in * ; do
+		test -d "$f" || mv "$f" "$destdir"
+	done
 fi
 
 #dpkg-buildpackage -S -rfakeroot -IPENDING -Idebian/users -Idebian/version -IBitkeeper -ISCCS "$@"
