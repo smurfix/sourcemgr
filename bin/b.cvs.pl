@@ -14,7 +14,7 @@ use File::ShLock;
 my $lock;
 if($ENV{BKCVS_LOCK}) {
 	nl: while(1) {
-		$i = 0;
+		my $i = 0;
 		while($i++ < $ENV{BKCVS_LOCK}) {
 			last nl if ref ($lock = new File::ShLock("b.cvs.$i"));
 		}
