@@ -31,7 +31,7 @@ Usage: $(basename $0)  -- Hole aus Archiv, baue, installiere, wirf weg.
        [ was ]
 rpm.spec   komplette .spec-Datei
          ansonsten:
-rpm.version
+debian/version oder rpm.version
            Versionsnummer, automagisch inkrementiert beim Einchecken
 rpm.pre .preun .post .postun .check .verify
            Standard-Skripts (/bin/sh)
@@ -48,7 +48,7 @@ RPM Setup:
 Variablen in RPM-Dateien:
 	\$ARCHIVE\$   Archivname (pop_datenbank, ...)
 	\$RELEASE\$   Art (noris, test, ...)
-	\$VERSION\$   Versionsnummer, aus rpm.version oder ChangeSet
+	\$VERSION\$   Versionsnummer, aus debian/version, rpm.version oder ChangeSet
 
 END
     trap "" 0
@@ -280,7 +280,7 @@ if test -z "$again" -a -z "$qpack" ; then
 	FR=/tmp/b.r.$$
 	rm -rf $FR
 	mkdir $FR
-	bkvers="$( cd "$cache"; bk get -q -p rpm.version 2>/dev/null | head -1 )"
+	bkvers="$( cd "$cache"; ( bk get -q -p debian/version || bk get -q -p rpm.version ) 2>/dev/null | head -1 )"
 	if test -z "$bkvers" ; then
 		bkvers="$( cd "$cache"; bk prs -ah -r+ -d:I: ChangeSet )"
 	fi

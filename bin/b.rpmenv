@@ -5,7 +5,7 @@ if test -z "$RPM_PACKAGE_VERSION" ; then
 	read RPM_PACKAGE_NAME RPM_PACKAGE_RELEASE </tmp/bn.$$
 	rm -f /tmp/bn.$$
 	test -n "$RPM_PACKAGE_RELEASE" || RPM_PACKAGE_RELEASE="noris"
-	RPM_PACKAGE_VERSION="$(bk get -p rpm.version 2>/dev/null | head -1)"
+	RPM_PACKAGE_VERSION="$( ( bk get -p debian/version || bk get -p rpm.version ) 2>/dev/null | head -1)"
 	test -n "$RPM_PACKAGE_VERSION" || RPM_PACKAGE_VERSION="$(bk prs -ah -d:I: -r+ ChangeSet )"
 
 fi
