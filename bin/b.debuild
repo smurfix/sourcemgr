@@ -337,10 +337,12 @@ for f in *.changes; do
 	fi
 done
 
-if test -n "$dest" ; then
-	for f in *.changes; do
-		dput $dest "$f"
-	done
+if test -n "$nosign" ; then
+	if test -n "$dest" ; then
+		for f in *.changes; do
+			dput $dest "$f"
+		done
+	fi
 fi
 if test -n "$inst" ; then
 	sudo dpkg -i *.deb
