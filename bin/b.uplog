@@ -55,6 +55,6 @@ while(<>) {
 '
 
 chmod 444 debian/changelog
-bk get -p -q debian/changelog.old >> debian.changelog 2>/dev/null || true
+bk get -p -q debian/changelog.old >> debian/changelog 2>/dev/null || true
 
 exit 0
