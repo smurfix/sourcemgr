@@ -69,6 +69,7 @@ make -f Makefile.Linux install
 %dir /usr/src/STATUS/work
 /usr/src/STATUS/rpmmacros
 /usr/src/STATUS/rpmrc
+/usr/src/STATUS/checkout/*
 /usr/local/bin/p.h
 /usr/local/bin/put
 /usr/local/bin/p.bk
