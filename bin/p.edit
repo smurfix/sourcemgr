@@ -38,8 +38,8 @@ fi
 
 export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 
-set -x
 trap '' 0
+set -x
 
 vi $what.prj
 

@@ -60,7 +60,7 @@ install=install
 	   esac
    done
 
-if test -z "$dir" ; then dir="$(p.name "$*")" ; else test -z "$*" ;  fi
+if test -z "$dir" ; then dir="$(p.name -n "$*")" ; else test -z "$*" ;  fi
 
 export PRCS_REPOSITORY=/usr/src/archiv/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
