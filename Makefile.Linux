@@ -3,9 +3,9 @@ compile:
 
 install:
 	install $$(bk sfiles -g bin) /usr/local/bin
+	install $$(bk sfiles -g sbin) /usr/local/sbin
 	@install -d /usr/src/STATUS
 	@install -d /usr/src/STATUS/after
-	@install -d /usr/src/STATUS/bin
 	@install -d /usr/src/STATUS/checkout
 	@install -d /usr/src/STATUS/cvsup
 	@install -d /usr/src/STATUS/dist
