@@ -280,13 +280,16 @@ sub set_lod($;$) {
 
 	my $dir = bkdir(++$maxlod);
 	print STDERR " => $maxlod\n";
-	bk("lclone","."=>$dir);
+	$this =~ s/^\d+/1/;
+	if($tip) {
+		bk("lclone","."=>$dir);
+	} else {
+		bk("clone","-r".$this, "."=>$dir);
+	}
 	chdir($dir);
 	open(CD,">>$bk.cmd");
 	print CD "cd $dir\n";
 	close(CD);
-	$this =~ s/^\d+/1/;
-	bk("undo","-qsf","-a"=>$this) unless $tip;
 	$maxlod;
 }
 sub cleanout() {
@@ -468,7 +471,10 @@ sub process($) {
 			cdbk($lod);
 			bk("pull","-qR",bkdir($branch));
 			system("env @AU @DT bk resolve -a -mp.bk.merge '-yFake-Merge from ".$p->{major}.".".$p->{minor}."'");
-			die "The usual problem" if -d "RESYNC";
+			if(-d "RESYNC") {
+				die "The usual problem" if `find RESYNC -type f | wc -l` != 1;
+				system("rm -rf RESYNC");
+			};
 			system("env @AU @DT bk citool");
 
 			if($cmx < $maxlod and $branch == $maxlod) { # not needed here
@@ -482,7 +488,10 @@ sub process($) {
 			## bk("admin","-r$sym","-M$dsym");
 		}
 	}
-	die "The usual problem" if -d "RESYNC";
+	if(-d "RESYNC") {
+		die "The usual problem" if `find RESYNC -type f | wc -l` != 1;
+		system("rm -rf RESYNC");
+	};
 	prcs(checkout => '-f', "-r".$d->{major}.".".$d->{minor}, "$pn.prj");
 	prcs(checkout => '-f', "-r".$d->{major}.".".$d->{minor}, "$pn.prj") if $?;
 	if($?) {

@@ -30,7 +30,7 @@ Usage: $(basename $0)  -- Hole aus Archiv, baue, installiere, wirf weg.
        [ was ]
 rpm.spec   komplette .spec-Datei
          ansonsten:
-rpm.pre .preun .post .postun .check .verify
+rpm.pre .preun .post .postun .check .verify .version (Versionsnummer)
            Standard-Skripts
 rpm.tags   Tags für den Standardheader, interpretiert
 rpm.sub    Zusatz für die .spec, nicht interpretiert
@@ -197,7 +197,11 @@ rm -f /tmp/b.rpm.$$
 
 if test -z "$bkrel" ; then bkrel="noris" ; else dv="-$bkrel"; fi
 archive="$what$dv"
-bkvers="$( bk tip "$BK_REPOSITORY/$archive" )"
+if test -f $FR/rpm.version ; then
+	bkvers="$( head -1 $FR/rpm.version )"
+else
+	bkvers="$( bk tip "$BK_REPOSITORY/$archive" )"
+vi
 
 if test -f "STATUS/work/$desc$dv$submode" ; then
 	read host pid < STATUS/work/$desc$dv$submode
@@ -262,7 +266,7 @@ if test -z "$again" -a -z "$qpack" ; then
 		sudo b.get -d $what -v "$vers" $RFR
 	fi
 	for i in rpm.spec rpm.tags rpm.sub rpm.clean rpm.verify \
-			rpm.pre rpm.post rpm.preun rpm.postun ; do
+			rpm.pre rpm.post rpm.preun rpm.postun rpm.version ; do
 		(	cd $RFR
 			bk get -q -p $i || true
 		) | sed \
