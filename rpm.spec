@@ -139,3 +139,4 @@ make -f Makefile.Linux install
 /usr/local/bin/p.version
 /usr/local/bin/k.add
 /usr/local/sbin/k.reset
+/usr/local/bin/b.pfp

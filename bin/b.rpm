@@ -261,7 +261,7 @@ if test -z "$again" -a -z "$qpack" ; then
 	RFR=$BUILD/tmp.$archive
 	FR=/tmp/b.r.$$
 	mkdir $FR
-	rm -rf "$RFR"
+	sudo rm -rf "$RFR"
 	echo "Hole Sourcen aus dem Archiv ..."
 	sudo b.get -d $what $vget $RFR
 	bkvers="$( cd $RFR; bk get -q -p rpm.version 2>/dev/null | head -1 )"
