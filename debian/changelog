@@ -1,3 +1,11 @@
+sourcemgr (1.256) unstable; urgency=low
+
+  * b.debuild:
+    Ignore SCCS spuriousities.
+  * 
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Fri, 13 Jun 2003 11:29:24 +0200
+
 sourcemgr (1.255) unstable; urgency=low
 
   * b.debuild:
