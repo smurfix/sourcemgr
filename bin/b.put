@@ -68,7 +68,7 @@ You can:
 END
 	else
 		echo + bk push $BK_REPOSITORY/$what$dv
-		bk push -q $BK_REPOSITORY/$what$dv
+		bk push $BK_REPOSITORY/$what$dv
 		# Update cache now.
 		##echo + bk push CACHE
 		##bk push -q . $(b.cache -d "$what" -v $vers -n)
@@ -78,6 +78,6 @@ else
 	test -z "$vers" -o "$vers" = "-" || dv="-$vers"
 	echo "Branch '$vers' doesn't exist -- it will be created."
 	echo + bk clone . $BK_REPOSITORY/$pub$what$dv
-	bk clone -q . $BK_REPOSITORY/$pub$what$dv
+	bk clone . $BK_REPOSITORY/$pub$what$dv
 fi
 
