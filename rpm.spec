@@ -17,15 +17,19 @@ Requires: sudo
 Requires: shlock
 
 %description
- Noris: Version noris.@
- STATUS noris.34 Mon, 09 Oct 2000 09:17:58 +0200 by smurf
- Parent-Version:      noris.33
- Project-Description: Zustand unserer Sourcen, Binaries zum Bauen derselben
+ Zustand unserer Sourcen, Binaries zum Bauen derselben
 
 %prep
-%setup -T -c
-# $Format: "p.get -d $Project$ -v $ProjectVersion$"$
-
+%setup -n sourcemgr -T -c
+cd ..
+rm -rf sourcemgr
+if test -d tmp.sourcemgr ; then
+    mv -f tmp.sourcemgr sourcemgr
+else
+    b.get -v noris -d sourcemgr sourcemgr
+fi
+cd sourcemgr
+bk -r get -q
 
 %build
 make -f Makefile.Linux compile
