@@ -1,3 +1,10 @@
+sourcemgr (1.367) unstable; urgency=low
+
+  * b.cvs.pl: im Login-String-Suchtext zuviel weggeschmissen
+  * 
+
+ -- Matthias Urlichs <smurf@debian.org>  Thu, 16 Sep 2004 16:47:02 +0200
+
 sourcemgr (1.366) unstable; urgency=low
 
   * b.cvs.pl: fix .cvspass parsing

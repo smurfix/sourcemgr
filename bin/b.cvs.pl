@@ -185,7 +185,7 @@ sub new {
 	bless($self,$what);
 
 	$repo =~ s#/+$##;
-	if($repo =~ s/^:pserver:(?:(.*?)(?::(.*?))?@)?(.*?)(?::\(\d+\))?:?\///) {
+	if($repo =~ s/^:pserver:(?:(.*?)(?::(.*?))?@)?(.*?)(?::\(\d+\))?//) {
 		my($user,$pass,$serv,$port) = ($1,$2,$3,$4);
 		$user="anonymous" unless defined $user;
 		$port=2401 unless $port;
