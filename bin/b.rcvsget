@@ -93,7 +93,7 @@ tmp="/var/cache/cvs/bk/tmp/$$"
 rm -rf "$tmp"
 dest=/var/cache/cvs/bk/"$dir-$vers"
 
-if $(b.exists "$dir" -v "$vers" >/tmp/bn.$$)  ; then
+if $(b.exists -d "$dir" -v "$vers" >/tmp/bn.$$)  ; then
 	if test -n "$nvers" -a "$vers" != "$nvers"; then
 		rm -rf "bk/$dir-$nvers"
 		b.get -d "$dir" -v "$vers" -w "$nvers" -n "bk/$dir-$nvers"
