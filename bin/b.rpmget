@@ -18,7 +18,7 @@ tmp.NAME und ttmp.NAME.
 END
 }
 
-vers=noris
+vers=
 dir=
 nix=
 
