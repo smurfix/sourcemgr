@@ -1,3 +1,9 @@
+sourcemgr (1.332) unstable; urgency=low
+
+  * b.cvs.pl: typo
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon,  8 Mar 2004 02:54:48 +0100
+
 sourcemgr (1.331) unstable; urgency=low
 
   * tell BK after undo that the latest change has been logged
