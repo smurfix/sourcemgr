@@ -128,7 +128,7 @@ echo $dir: Checking in $nsv '<=' $sv
 
 if test -n "$overs" ; then nsv="$overs.@" ; else nsv="base.@"; fi
 #if test -n "$overs" ; then nsv="$overs.$nsv" ; else nsv="base.@"; fi
-prcs checkin -r$nsv $what </dev/tty
+prcs checkin -f -r$nsv $what </dev/tty
 echo $sv >$LV
 
 ov="$overs.$nsv"
@@ -193,7 +193,7 @@ perl -p -e '
 ' < $what.prj > $what.prx && mv $what.prx $what.prj
 
 vi $what.prj </dev/tty
-prcs checkin -f -r$vers $what
+prcs checkin -r$vers $what </dev/tty
 redo $dir
 
 fi

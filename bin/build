@@ -28,22 +28,22 @@ Programme markiert man mit "redo was_gebaut_werden_soll" als unfertig.
 
 Gebaut wird als normaler Benutzer. Installiert wird als Root.
 END
-	exit 1
 }
 
 
-set -- `getopt fcipCP $*`
+set -- `getopt ih $*`
 if test $? != 0
 then
 	usage
-        echo 'Usage: build [ -i(nstall) ] [ what... ]'
-        exit 2
+    exit 2
 fi
 doinstall=
 
 for i ; do
         case "$i"
         in
+				-h)
+						usage; exit 2;;
                 -i)
                         doinstall=y; shift;;
                 --)

@@ -2,7 +2,6 @@
 v-0-6-4 lib/ssleay
 ? net/www/squid	Cacheserver
 #-4-01 editor/nedit	GUI-Editor
-#v-2-7-0-3 gnu/bfd	BFD-Library => cygnus
 v-1-0-10 lib/gsm	Soundkompression
 #v-2-7-0-3 gnu/binutils	as, ld und Konsorten
 v-2-3 kernel/ipfwadm
@@ -26,7 +25,6 @@ v-2-5-2 gnu/flex	!r-2-5-3 Lexikalischer Analyzer
 v-0-6 gnu/fontutils	Zeichensatzbearbeitung
 v-3-0-0 gnu/gawk	awk-Klon
 v-2-7-2-1 gnu/gcc	C-Compiler
-v-4-16 gnu/gdb	Debugger, Legacy for now
 v-1-7-3 gnu/gdbm	Indexbibliothek
 v-0-10-24 gnu/gettext	Sprachunterstützung
 v-3-53 gnu/ghostscript	Postscript-Klon
@@ -84,7 +82,6 @@ v-1-5 kernel/bdflush
 v-01 kernel/freeramdisk
 v-2-9 kernel/hdparm
 v-0-91 kernel/kbd
-#-19 kernel/lilo # aus, wegen Problemen...
 v-2-0-30 kernel/linux-pci 
 v-0-6 kernel/hfs-pci
 r-43 kernel/isdn-pci
@@ -114,7 +111,6 @@ s-1 misc/bind-inaddr	Bind() auf via BIND_INADDR=xxx spezifizierte Adresse
 v-1-17 misc/buffer
 v-3-0-1 misc/cron
 v-1-0 misc/fillup
-s-1 misc/install-log	Installationen etc. mitprotokollieren
 v-01 misc/klog.console
 v-0-9-3 misc/mingetty
 v-3-0-11 misc/strace
@@ -267,8 +263,6 @@ v-0-2	net/mail/qmapop	bert-send-apop@mc.bio.uva.nl
 v-4-11	lib/gc	http://reality.sgi.com/employees/boehm_mti/gc_source
 v-1-9-1	lib/ld.so
 v-0		net/meta/midentd	???
-? x11/xfree386/contrib
-v-3-1-3	lib/snmp	ftp.ece.ucdavis.edu:/pub/snmp
 v-1997-04-09	kernel/automount	ftp://ftp.kernel.org/pub/linux/daemons/autofs/
 v-0-4-8	misc/tex/tetex/lib
 v-0-4-7	misc/tex/tetex/src
@@ -282,7 +276,6 @@ v-1-1701	misc/perl/msql	CPAN
 v-2-3-0 kernel/pppd ftp://cs.anu.edu.au/pub/software/ppp/
 v-3-11-p-4	net/mail/procmail ftp://ftp.informatik.rwth-aachen.de/pub/packages/procmail/
 v-1-6-3 misc/rsync ftp://samba.anu.edu.au/pub/rsync
-v-var	gnu/cygnus
 v-3-5-8 gnu/gv
 v-1 misc/colm
 *	misc/bzip2	*	Kompressor (besser als gzip?)	2.0.1	-
@@ -387,23 +380,19 @@ v-1 misc/colm
 *	gnu/tar	*	GNU tar	1.12	ftp://ftp.gnu.org/pub/gnu/
 *	gnu/texinfo	*	GNU TeXInfo	3.9	ftp://ftp.gnu.org/pub/gnu/
 *	net/windows/samba	*	SMB-Client+Server	1-9-16-11	ftp://samba.anu.edu.au/pub/samba/
-*	x11/kde/libs	*	KDE Libraries	ftp://ftp.kde.org/
 *	x11/qt	*	QT Toolkit	ftp://ftp.troll.no/qt/source/
+*	x11/kde/support	*	KDE Supportlibraries	ftp://ftp.kde.org/
+*	x11/kde/libs	*	KDE Libraries	ftp://ftp.kde.org/
 *	x11/kde/base	*	KDE Base	ftp://ftp.kde.org/
-*	gnu/cygnus/binutils	*	GNU Binutils	2-7	-
 *	x11/gtk	*	GTK Toolkit	ftp://ftp.gimp.org/pub/gtk/
 *	x11/kde/utils	*	KDE Utilities	ftp://ftp.kde.org/
 *	x11/kde/games	*	KDE Games	ftp://ftp.kde.org/
 *	x11/kde/graphics	*	KDE Graphics	ftp://ftp.kde.org/
 *	x11/kde/multimedia	*	KDE Multimedia	ftp://ftp.kde.org/
 *	x11/kde/network	*	KDE Network	ftp://ftp.kde.org/
-*	x11/kde/support	*	KDE Supportlibraries	ftp://ftp.kde.org/
 *	gnu/textutils	*	GNU Textutils	1-11	ftp://ftp.gnu.org
-*	gnu/gcc	*		2-7-2	?
 *	gnu/egcs	*	EGCS	ftp://ftp.cygnus.com
 *	misc/metamail	*	Metamail-Krempel	-
-*	gnu/cygnus	*	Binutils; HJL, mostly	2-7	-
-*	gnu/cygnus	*	gnu/cygnus	2-8-1-0-11	?
 *	gnu/libc	*	GNU libc, 2.1	ftp://ftp.kernel.org/pub/software/libs/glibc/
 *	lib/pam	*	Pluggable Authentication Modules	0.57b	http://linux.kernel.org/pub/linux/libs/pam/
 *	net/misc/radius	*	RADIUS-Server	1-16	-
@@ -411,3 +400,36 @@ v-1 misc/colm
 *	kernel/net-tools	*	Basis-Netzwerktools	1-3-50-b-6-f	xxx
 *	kernel/e2fs	*	Ext2 Utilities	1-10	-
 *	pop/config	*	Unser Standardkonfigurationsunsinn	-	-
+*	server/xntp	*	NTP-Server, Client, etc.	3-5-b	-
+*	net/yp/tools	*	YP-Tools	-
+*	net/yp/server	*	YP-Server	-/ypserv
+*	net/yp/bind	*	YP-Client-Setup	-/ypbind
+*	kernel/mount	*	Mount etc.	2.5g	-
+*	kernel/sfdisk	*	Diskpartitionierer	3.05	ftp://ftp.win.tue.nl/.../sfdisk*
+*	kernel/sysvinit	*	/sbin/init und Konsorten	2-69	ftp://sunsite.unc.edu/pub/Linux/system/Daemons/init/
+*	gnu/sed	*	stream editor	2-0-5	ftp://ftp.gnu.org/
+*	misc/sudo	*	mach-als-Superuser	-
+*	gnu/flex	*	flex	2-5-2	-
+*	misc/install-log	*	Installationen etc. mitprotokollieren	-	-
+*	lib/gif	*	GIF-Library	-
+-	gnu/binutils/gdb	*	Gnu DeBugger	4-16	ftp://ftp.gnu.org/pub/gnu/
+*	misc/perl/libnet	*	misc/perl/libnet	1-04	?
+*	x11/gimp	*	The GIMP	0-54-1	http://www.gimp.org/
+*	x11/gnome	*	Noch ein Desktopsystem	0-9	ftp://ftp.nuclecu.unam.mx/GNOME/
+*	gnu/guile/slib	*	Scheme Library	ftp://infoserv.cc.uni-augsburg.de//pub/pc/.gnu/scm/
+*	x11/xmhtml	*	HTML-Widget für Motif	http://www.SoftHome.net/pub/users/timj/gemvt/index.htm
+*	x11/mnemonic	*	WWW-Browser 1997-12-16	ftp://oloon.student.utwente.nl/pub/Mnemonic/
+*	lib/ssleay	*	lib/ssleay	0-6-6	?
+*	x11/scwm	*	Scheme-Configurable Window Manager	http://web.mit.edu/mstachow/www/scwm.html
+*	misc/perl/snmp	*	SNMP-Library für Perl	1-6	CPAN
+*	lib/snmp	*	SNMP-Library	3-1-3	-
+*	misc/perl/snmp	*	misc/perl/snmp	1-6	?
+*	kernel/lilo	*	LInux LOader	18-d-3	-
+*	misc/tex/tetex/src	*	TeTeX-Sourcen	0-4-7	-
+*	misc/tex/tetex/lib	*	TeTeX-Library	0-4-8	-
+*	x11/xv	*	Bildchenbetrachter	3-10-a	-
+*	x11/fvwm	*	FVWM	2-0-43	-
+*	x11/xfree386/contrib	*	X11-contrib	3-3	-
+*	gnu/m4	*	GNU M4	1-4	ftp://ftp.gnu.org
+*	misc/perl/qt	*	PerlQt	CPAN
+*0.26	misc/perl/nntp	*	NNTP-Client	CPAN

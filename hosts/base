@@ -59,3 +59,4 @@ net:debug:ping
 misc:klog.console
 lib:libc5
 misc:bzip2
+misc:sudo

@@ -59,4 +59,4 @@ fi
 set -xe
 
 prcs checkout -r$vers $what.prj $imp "$@"
-
+# prcs execute -r$vers --match :tag=project -- p.sub -v$vers $what '{}'

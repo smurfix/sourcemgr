@@ -46,5 +46,5 @@ what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 
 set -xe
 
-exec prcs merge $auto -r "$vers.@" $what
+exec prcs merge $auto -r $vers $what
 

@@ -7,13 +7,13 @@ Usage: $(basename $0)  -- update externer Sourcen
        [ -W origreleasename ]
        [ -V neworigreleasename ] | [ -v releasename ]
        [ -e (editiere Projektdatei) ]
-       Kurzbeschreibung
+       [ Kurzbeschreibung ]
 END
 exit 1
 }
 
 dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
-overs=base
+overs=
 nvers=base
 vers=
 edit=
@@ -38,14 +38,14 @@ edit=
 		   -e)
 		       edit=y; shift;;
 		   -v)
-			   shift; vers="$1"; shift;;
+			   shift; vers="$1"; test -n "$overs" || overs="$1"; shift;;
 		   --)
 		       shift; break ;;
 	   esac
    done
 
+if test -z "$overs" ; then overs=base; fi
 if test -z "$dir"; then usage; fi
-if test -n "$*"; then usage; fi;
 if test -z "$vers" ; then
 vers=$(echo $nvers | \
 	perl -pe '
@@ -61,8 +61,15 @@ fi
 export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 
-test -f $what.prj || prcs checkout -r $overs.@ $what $what.prj
+test -f $what.prj || prcs checkout -r $overs $what $what.prj
+cp $what.prj $what.backup
 prcs populate -f -d $what
+prcs depopulate -f -d $what $what.backup
+
+perl -p -i -e '
+    s/^  \((.*)\(\)\)/  ($1() :no-keywords)/;
+' $what.prj
+
 
 if test -n "$edit" ; then
   vi $what.prj
@@ -72,7 +79,7 @@ elif grep -q 'New-Version-Log ""' $what.prj ; then
 		BEGIN { $s="'"$*"'"; $s =~ s/"/'\''/g; }
 	    s/\(New-Version-Log \"\"\)/(New-Version-Log "$s")/;
   ' $what.prj
-elif jjj
+  fi
 fi
 
 set -xe

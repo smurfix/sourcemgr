@@ -20,4 +20,5 @@ p.put       Speichern von Änderungen im Archiv
 p.rdist     Verteile an alle betroffenen Rechner
 p.rmcvs     Rekursives Löschen von CVS-spezifischen Subdirectories
 p.update    Update lokaler Sourcen nach externen Änderungen
+p.unchecked	Listet fertiggebaute aber noch vorhandene Verzeichnisse
 END

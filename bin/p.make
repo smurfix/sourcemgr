@@ -113,11 +113,21 @@ if test -z "$islocal" ; then
 		echo "$desc: Muß installiert werden."
 		exit 0
 	fi
-	if test -f "STATUS/to-install/$desc" ; then
-		mv STATUS/to-install/$desc STATUS/work/$desc 
+	echo $(hostname) $$ > STATUS/work/$desc
+	if test -f "STATUS/fail/$desc" ; then
+		cat STATUS/fail/$desc >> STATUS/work/$desc 
 		echo '# RESTART' $(hostname) $$ >> STATUS/work/$desc
-	else
-		echo $(hostname) $$ > STATUS/work/$desc
+		rm -f STATUS/fail/$desc
+	fi
+	if test -f "STATUS/to-install/$desc" ; then
+		cat STATUS/to-install/$desc >> STATUS/work/$desc 
+		echo '# RESTART' $(hostname) $$ >> STATUS/work/$desc
+		rm -f STATUS/to-install/$desc
+	fi
+	if test -f "STATUS/done/$desc" ; then
+		cat STATUS/done/$desc >> STATUS/work/$desc 
+		echo '# RESTART' $(hostname) $$ >> STATUS/work/$desc
+		rm -f STATUS/done/$desc
 	fi
 
 	mkfifo /tmp/ff.$$
@@ -151,6 +161,7 @@ bad=
 if test -z "$doinstall" ; then # compile
 	make -f Makefile.Linux $compile || bad=y
 else # install
+	LD_PRELOAD=/usr/lib/log-install.so LOGFILE=/usr/src/STATUS/work/$desc \
 	make -f Makefile.Linux $install || bad=y
 fi
 
