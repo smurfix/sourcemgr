@@ -99,7 +99,7 @@ test -n "$V"
 if bk prs -r+ -d'$if(:TAG:){$each(:TAG:){:TAG:\\n}}' -h ChangeSet | fgrep -xqs "DEBIAN-$V"
 then : ; else
 	bk tag -r+ DEBIAN-$V
-	bk push
+	bk push -q
 fi
 
 # Now build the source archives
