@@ -1,3 +1,9 @@
+sourcemgr (1.339) unstable; urgency=low
+
+  * b.get: set parent right when copying to public
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue,  9 Mar 2004 12:27:28 +0100
+
 sourcemgr (1.338) unstable; urgency=low
 
   * file deletion now works again.

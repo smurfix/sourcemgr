@@ -112,7 +112,7 @@ cd "$ddir"
 if test "$nvers" != "not/given" ; then
 	echo -n -e "$dir: copy source back    |\r"
 	test -n "$noback" || bk clone -q . $BK_REPOSITORY/$pub$what$ndv
-	bk parent $BK_REPOSITORY/$what$ndv
+	bk parent $BK_REPOSITORY/$pub$what$ndv
 	dv="$ndv"
 fi
 bk parent $BK_REPOSITORY/$what$dv
