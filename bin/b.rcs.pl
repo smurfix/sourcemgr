@@ -449,7 +449,7 @@ END
 		close(OK);
 		# bk("new"=>"BitKeeper/etc/logging_ok");
 		# bk('-r', ci => '-qG', "-yLogging_OK");
-		# system("bk sfiles -pC | env @DT @AU bk cset -q -yLogging_OK");
+		# system("bk sfiles -pC | env @DT @AU bk commit -q -yLogging_OK -");
 		bk("parent","$ENV{BK_REPOSITORY}/$pn");
 		bk("clone",".","$ENV{BK_REPOSITORY}/$pn");
 	}
@@ -670,7 +670,7 @@ END
 	# $scmt =~ s/\'/\"/g;
 	open(FP,"|-") or do {
 		$scmt =~ s/\001//g;
-		exec("env", @DT,@AU, "bk", "cset", "-q","-y$scmt");
+		exec("env", @DT,@AU, "bk", "commit", "-q","-y$scmt", "-");
 		exit(99);
 	};
 	open(P,"bk sfiles -pC |");

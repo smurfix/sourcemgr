@@ -82,7 +82,7 @@ sub bkfiles($) {
 	unless($cv) {
 		print STDERR "Ignoriere CVS...\n";
 		bk("ignore","CVS",".cvsignore","CVSROOT");
-		bk(undef,"bk sfiles -pC | env @DT bk cset -q -y\"CVS-Ignore\"");
+		bk(undef,"bk sfiles -pC | env @DT bk commit -q -y\"CVS-Ignore\" -");
 	}
 }
 
@@ -128,5 +128,5 @@ if(@new and @gone) {
 }
 
 bk('-r', ci => '-qG', "-y$cmt");
-bk(undef,"bk sfiles -pC | env @DT bk cset -q -y\"$cmt\"");
+bk(undef,"bk sfiles -pC | env @DT bk commit -q -y\"$cmt\" -");
 

@@ -163,14 +163,14 @@ if(@new and @gone) {
 }
 
 bk(ci => '-qG', "-y@ARGV", bkfiles("gl"));
-# bk(undef,"bk sfiles -pC | env @DT bk cset -q -y\"$cmt\"");
+# bk(undef,"bk sfiles -pC | env @DT bk commit -q -y\"$cmt\" -");
 #unlink("ChangeSet");
 #unlink("SCCS/p.ChangeSet");
 bk("clean","-q","ChangeSet");
 open(FP,"|-") or do {
 	$cmt =~ s/\001//g;
-	print "bk sfiles -pC | env @DT bk cset -y[".length($cmt)."]\n";
-	exec("env", @DT, "bk", "cset", "-y$cmt");
+	print "bk sfiles -pC | env @DT bk commit -y[".length($cmt)."]\n";
+	exec("env", @DT, "bk", "commit", "-y$cmt", "-");
 	exit(99);
 };
 open(P,"bk sfiles -pC |");
