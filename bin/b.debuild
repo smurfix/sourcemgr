@@ -237,7 +237,11 @@ if test -n "$E" ; then # non-original package
 	if \
 	   cp ../${N}_$VV.orig.tar.gz "$T/" 2>/dev/null ||
  	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
-		"${web}/$DI/source/${N}_$VV.orig.tar.gz" ||
+		"${web}/experimental/source/${N}_$VV.orig.tar.gz" ||
+ 	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
+		"${web}/unstable/source/${N}_$VV.orig.tar.gz" ||
+ 	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
+		"${web}/stable/source/${N}_$VV.orig.tar.gz" ||
 	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
 		"${web}/public/${N}_$VV.orig.tar.gz" ||
 	   false

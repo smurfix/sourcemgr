@@ -1,3 +1,9 @@
+sourcemgr (1.299) unstable; urgency=low
+
+  * b.debuild: Check all distributions, not just this one
+
+ -- Matthias Urlichs <smurf@debian.org>  Sun, 18 Jan 2004 13:02:16 +0100
+
 sourcemgr (1.298) unstable; urgency=low
 
   * b.debuild: Use the correct distribution for orig-source download
