@@ -184,15 +184,17 @@ sub new {
 	$self->{'buffer'} = "";
 	bless($self,$what);
 
-	my $rr = $repo;
 	$repo =~ s#/+$##;
-	if($repo =~ s/^:pserver:(?:(.*?)(?::(.*?))?@)?(.*?)(?::\(\d+\))?://) {
+	if($repo =~ s/^:pserver:(?:(.*?)(?::(.*?))?@)?(.*?)(?::\(\d+\))?:?\///) {
 		my($user,$pass,$serv,$port) = ($1,$2,$3,$4);
 		$user="anonymous" unless defined $user;
 		$port=2401 unless $port;
+		my $rr = ":pserver:$user\@$serv:$port/$repo";
+
 		unless($pass) {
 			open(H,$ENV{'HOME'}."/.cvspass") and do {
 				while(<H>) {
+					s/^\\\d+\s+//;
 					my ($w,$p) = split;
 					if($w eq $rr) {
 						$pass = $p;
