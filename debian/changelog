@@ -1,3 +1,11 @@
+sourcemgr (1.253) unstable; urgency=low
+
+  * debian/control
+       require dh-make
+  * 
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Fri, 13 Jun 2003 10:20:33 +0200
+
 sourcemgr (1.252) unstable; urgency=low
 
   * Updated b.deb
