@@ -1,3 +1,11 @@
+sourcemgr (1.349) unstable; urgency=low
+
+  * b.cvs.pl:
+    Restore symbol processing
+    report symbols and dates (including when skipped)
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon, 14 Jun 2004 23:00:11 +0200
+
 sourcemgr (1.348) unstable; urgency=low
 
   * b.debuild:
