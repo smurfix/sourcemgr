@@ -377,7 +377,18 @@ if(-f "$tmpcv/$cn.data") {
 			}
 			proc(@buf) if @buf;
 			close(LOG);
-			$done++;
+
+			opendir(D,".");
+			my $dn;
+			while(defined($dn=readdir(D))) {
+				next if $dn eq "." or $dn eq "..";
+				next if $dn eq "CVS" or $dn eq "CVSROOT";
+				$done++;
+				last;
+			}
+			closedir(D);
+			my $fl = `/bin/ls`;
+			$done++ if $
 		}
 		last unless $done;
 	} continue {
