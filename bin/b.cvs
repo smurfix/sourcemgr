@@ -8,7 +8,7 @@ cat >&2 <<END
 Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -d Paket ]
        [ -l (kein PSERVER) ]
-       [ -n (kein push) ]
+       [ -n # (Intermediate-Push alle # Importe; Default 10; 0=garnicht) ]
        [ -p parent-Repository ]
        [ -r Fork (im CVS) ]
        [ -v releasename (cvs / extern) ]
@@ -29,7 +29,7 @@ PATH=/usr/src/STATUS/bin:/usr/local/bin:$PATH
 
 dir=
 vers=cvs
-nopush=
+push=10
 rvers=
 rdir=
 parent=
@@ -41,7 +41,7 @@ diff=
 loc=
 df=0
 
-   eval set -- "$(getopt "Vd:v:r:hDZlnp:e:E:" "$@")"
+   eval set -- "$(getopt "Vd:v:r:hDZln:p:e:E:" "$@")"
    for i
    do
 	   case "$i"
@@ -67,7 +67,7 @@ df=0
 		   -r)
 			   shift; rvers="-r $1"; rdir="-$1"; shift;;
 			-n)
-				shift; nopush=y ;;
+				shift; push=$1 ; shift ;;
 			-l)
 				shift; loc=y ;;
 			--)
@@ -105,5 +105,5 @@ export CVS_REPOSITORY="$woher"
 export BKCVS_COMP=$comp
 export BKCVS_EACH=$each
 test -n $diff && test -z "$BKCVS_DIFF" && export BKCVS_DIFF=$diff
-test -n $nopush && export BKCVS_NOPUSH=$nopush
+test -z "$BKCVS_PUSH" && export BKCVS_PUSH=$push
 exec $run "$was" "$dir-$vers"

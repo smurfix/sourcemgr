@@ -630,7 +630,7 @@ sub process($$$$) {
 
 my %last;
 my $x;
-$DB::single=1;
+my $done=0;
 while(@$cset) {
 	$x = $cset->[0];
 	next if $x->{wann} <= $dt_done;
@@ -689,16 +689,26 @@ while(@$cset) {
 			$i++;
 		}
 		process($autor,$ldiff,\%adt,0+@$cset);
+		$done++;
 	}
 
 	if(defined $x->{sym}) {
 		foreach my $sym(@{$x->{sym}}) {
 			bk("cset","-r+","-S$sym");
+			$done++;
 		}
 	}
 } continue {
 	shift @$cset;
+	if($ENV{BKCVS_PUSH} and $done >= $ENV{BKCVS_PUSH}) {
+		print STDERR "Push $done                                          \r";
+		bk("push","-q");
+		$done=0;
+	}
 }
-bk("push","-q") unless $ENV{BKCVS_NOPUSH};
+if($ENV{BKCVS_PUSH}) {
+	print STDERR "Push LAST                                          \r";
+	bk("push","-q");
+}
 print STDERR "OK                                                 \n";
 unlink("$tmpcv.data");
