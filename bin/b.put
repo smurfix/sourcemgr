@@ -39,7 +39,9 @@ trap '' 0
 b.name "$dir" >/tmp/bn.$$
 read dir overs </tmp/bn.$$
 rm -f /tmp/bn.$$
-test -n "$vset" || vers="$overs"
+if test -z "$vset" ; then
+	test -z "$overs" || vers="$overs"
+fi
 
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 

@@ -5,6 +5,10 @@ if rpm -q rpm | grep -q noris ; then : ; else
 	echo >&2 "Zum RPM-Bauen braucht es das noris-RPM-Paket. Sorry."
 	exit 1
 fi
+if test -f /mach ; then
+	echo >&2 "Geht nur auf Linux. Sorry.
+	exit 1
+fi
 
 set -e
 trap 'test -n "$superset" && kill $SUPERPID; usage; exit 1' 0

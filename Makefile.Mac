@@ -2,7 +2,7 @@
 compile:
 
 install:
-	install $$(bk sfiles -g | grep ^bin/) /usr/local/bin
+	install -c $$(bk sfiles -g | grep ^bin/ | fgrep -v '/p.' ) /usr/local/bin
 	@install -d /usr/src/STATUS
 	@install -d /usr/src/STATUS/after
 	@install -d /usr/src/STATUS/bin
@@ -24,10 +24,3 @@ install:
 	@install -d /usr/src/STATUS/subst
 	@install -d /usr/src/STATUS/to-install
 	@install -d /usr/src/STATUS/work
-
-	@install -d /usr/src/STATUS/rpmmacros
-	@install -d /usr/src/STATUS/rpmrc
-
-	@install -d /usr/src/STATUS/RPM/BUILD
-	@install -d /usr/src/STATUS/RPM/RPMS
-	@install -d /usr/src/STATUS/RPM/RPMS/i686
