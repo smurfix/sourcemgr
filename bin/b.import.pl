@@ -106,7 +106,7 @@ bk(get => "-qeg",@cur) if @cur;
 
 if(@new and @gone) {
 	bk(get=>"-qeg",@gone);
-	open(RN,"| bk renametool");
+	open(RN,"| env @DT bk renametool");
 	foreach my $f(sort { $a cmp $b } @gone) { print RN "$f\n"; }
 	print RN "\n";
 	foreach my $f(sort { $a cmp $b } @new) { print RN "$f\n"; }

@@ -37,6 +37,7 @@ sdatum=now
 quiet=-q
 comp=-z3
 loc=
+df=0
 
    eval set -- "$(getopt "Vd:v:w:r:hD:Zlnp:" "$@")"
    for i
@@ -50,7 +51,8 @@ loc=
 		   -V)
 		   	   shift; quiet="" ;;
 		   -D)
-			   shift; D=$(echo $1|sed -e 's/_/ /g'); datum="$D"; sdatum="$D"; shift;;
+			   shift; D=$(echo $1|sed -e 's/_/ /g'); datum="$D"; sdatum="$D";
+			   df=$(expr $(date -d "now" "+%s") - $(date -d "$D" "+%s" )); shift;;
 		   -p)
 			   shift; parent="$1"; shift;;
 		   -d)
@@ -97,9 +99,9 @@ tmp="/var/cache/cvs/bk/tmp/$$"
 rm -rf "$tmp"
 dest=/var/cache/cvs/bk/"$dir-$vers"
 
-if test -d "$dest" ; then :
+if test -d "$dest" ; then
 	cd "$dest"
-	bk pull -q
+	test -n "$nopush" || bk pull -q
 	test -n "$nopush" || bk push
 	cd /var/cache/cvs
 elif test -n "$parent" ; then
@@ -119,7 +121,8 @@ elif $(b.exists -d "$dir" -v "$vers" >/tmp/bn.$$)  ; then
 	fi
 else
 	test -z "$nvers" -o "$vers" = "$nvers"
-	b.new -d "$dir" -v "$vers" "aus CVS: $woher / $was"
+	env LD_PRELOAD=/usr/lib/datefudge.so DATEFUDGE=$df \
+		b.new -d "$dir" -v "$vers" "aus CVS: $woher / $was"
 	b.get -d "$dir" -v "$vers" -n "$dest"
 fi
 
@@ -172,6 +175,7 @@ undoit() {
 		mv "$a" "$dest/$a"
 	  done
     )
+	find . -type d -depth -print0 | xargs -0r rmdir 2>/dev/null
 }
 trap "rm -rf $tmp; undoit; exit 1" 0
 
@@ -185,5 +189,4 @@ set +e
 rm -rf $tmp
 undoit
 cd $dest
-exec bk -r check -a
 exit 0

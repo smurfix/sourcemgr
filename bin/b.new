@@ -82,6 +82,8 @@ END
 tmp=/tmp/b.s.$$
 trap 'rm -rf $tmp $tmpcf' 0
 bk setup -f -c $tmpcf $tmp
+
+cd $tmp
 mkdir -p BitKeeper/triggers
 cat <<'END' >BitKeeper/triggers/pre-commit.upversion 
 #!/bin/sh
@@ -91,7 +93,6 @@ END
 bk new BitKeeper/triggers/pre-commit.upversion
 bk sfiles -pC | bk cset -q -y"Versionsnummern-Updateskript"
 
-cd $tmp
 bk clone -q . $BK_REPOSITORY/$what$dv
 echo "Archiv '$what' angelegt."
 exit 0
