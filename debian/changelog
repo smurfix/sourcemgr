@@ -1,3 +1,11 @@
+sourcemgr (1.259) unstable; urgency=low
+
+  * bin/b.cvs
+       Korrektur Usernamensangabe
+  * 
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Tue,  8 Jul 2003 19:24:49 +0200
+
 sourcemgr (1.258) unstable; urgency=low
 
   * bin/b.cvs

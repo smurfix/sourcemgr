@@ -105,10 +105,10 @@ fi
 
 test -n "$2"
 test -z "$3"
-if test -z "$loc" ; then
-	woher=":pserver:$1"
-elif test -n "$user" ; then
+if test -n "$user" ; then
 	woher="$user@$1"
+elif test -z "$loc" ; then
+	woher=":pserver:$1"
 else
 	woher="$1"
 fi
@@ -146,6 +146,5 @@ test -z "$BKCVS_NORENAME" && export BKCVS_NORENAME=$rename
 test -n "$verbose" && export BK_VERBOSE=1
 test -n "$ignore" && export BKCVS_IGNORE_ERROR=1
 test -n "$tag" && export BKCVS_TAG=$tag
-test -n "$user" && export BKCVS_USER=$tag
 export BKCVS_LOCK=$bg
 exec $run "$was" "$what$dv"
