@@ -318,7 +318,7 @@ rm -rf $archive
 if test -d tmp.$archive ; then
 	mv -f tmp.$archive $archive
 else
-	b.get -v $vers -d $archive $archive
+	b.get -v $vers -d $what $archive
 fi
 cd $archive
 # bk -r get -q ## ist schon geholt
