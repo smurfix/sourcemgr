@@ -49,11 +49,12 @@ if b.exists -v "$vers" -d $dir > /tmp/tf.$$ ; then
 
 	test -z "$dv" || dv="-$overs"
 
-	echo + bk push $BK_REPOSITORY/$what$dv
-	if bk push $BK_REPOSITORY/$what$dv ; then : ; else
+	if bk pull -n $BK_REPOSITORY/$what$dv 2>&1 | grep -q "Nothing to pull from " ; then
+		echo + bk push $BK_REPOSITORY/$what$dv
+		bk push -q $BK_REPOSITORY/$what$dv
+	else
 		cat >&2 <<END
-
-Wahrscheinliches Problem:
+Problem:
 Das Archiv "$what$dv" hat Änderungen, die du noch nicht hast.
 
 Mögliche Abhilfen:
