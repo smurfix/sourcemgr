@@ -1,3 +1,13 @@
+sourcemgr (1.285) unstable; urgency=low
+
+  * debu, b.debuild:
+       Use apt-get build-dep and dpkg-checkbuilddeps
+  * bin/b.debuild
+       Build an inclusive .changes file with -b/-B
+  * 
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon, 29 Sep 2003 09:34:57 +0200
+
 sourcemgr (1.284) unstable; urgency=low
 
   * debu:

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-dpkg-checkbuilddeps || exit 1
+dpkg-checkbuilddeps || sudo apt-get build-dep || exit 1
 
 if test "x$1" = "x-i" ; then INST=1; shift; fi
 
