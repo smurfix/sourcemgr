@@ -447,6 +447,16 @@ sub proc(@) {
 			$cutoff{$fn}=$dt if $rev eq "1.2";
 			$state = 6;
 			next;
+		} elsif($state == 5 and $x =~ /^date:\s+(\d+)-(\d+)-(\d+)\s+(\d+)\:(\d+)\:(\d+)\s*[+-]\d{4}\s*\;\s+author\:\s+(\S+)\;\s+state\:\s+(\S+)\;/) {
+			$gone=1 if lc($8) eq "dead";
+			$autor = $7;
+			my($y,$m,$d,$hh,$mm,$ss)=($1,$2,$3,$4,$5,$6);
+			$y-=1900 if $y>=1900; $m--;
+			$dt=timelocal($ss,$mm,$hh,$d,$m,$y);
+			die "Datum: $x" unless $dt;
+			$cutoff{$fn}=$dt if $rev eq "1.2";
+			$state = 6;
+			next;
 		}
 		if($state==6) {
 			next if $x =~ /^branches\:\s+/;
@@ -523,7 +533,7 @@ if(-f "$tmppn.data") {
 				}
 				cvs(undef,"get","-r$mr.$x",$cne);
 
-				chdir($cne) or last;  # no-op when $cne eq "."
+				chdir($cne) or next;  # no-op when $cne eq "."
 			}
 
 			print STDERR "$CLR $pn: processing $mr.$x\r";
