@@ -1,3 +1,11 @@
+sourcemgr (1.252) unstable; urgency=low
+
+  * bin/b.debuild
+       Originale vernuenftig holen
+  * 
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Sat, 28 Jun 2003 08:35:08 +0200
+
 sourcemgr (1.251) unstable; urgency=low
 
   * b.upversion: use FULLNAME, EMAIL, DISTRIBUTION, URGENCY
