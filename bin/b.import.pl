@@ -33,6 +33,8 @@ if($ARGV[0] =~ /^(\d\d\d\d)-(\d\d)-(\d\d)$/) {
 my $cmt = "@ARGV"; $cmt =~ s/"/'/g;
 
 $ENV{BK_LICENSE}="ACCEPTED";
+$ENV{CLOCK_DRIFT}="1";
+
 $|=1;
 
 use Shell qw(); ## bk prcs
@@ -60,6 +62,8 @@ sub bk {
 	};
 	wantarray ? @res : (0+@res);
 }
+
+bk("-r","unlock","-fpxz");
 
 sub bkfiles($) {
 	my($f) = @_;
@@ -122,6 +126,6 @@ if(@new and @gone) {
 	}
 }
 
-bk('-r', ci => '-qG', "-y\"$cmt\"");
+bk('-r', ci => '-qG', "-y$cmt");
 bk(undef,"bk sfiles -pC | env @DT bk cset -q -y\"$cmt\"");
 

@@ -23,6 +23,7 @@ Usage unless @ARGV;
 Usage unless $ENV{BK_REPOSITORY};
 Usage unless $ENV{PRCS_REPOSITORY};
 $ENV{BK_LICENSE}="ACCEPTED";
+$ENV{CLOCK_DRIFT}="1";
 select(STDERR); $|=1; select(STDOUT);
 
 use Shell qw(); ## bk prcs
@@ -465,7 +466,7 @@ sub process($) {
 			my $branch = set_lod($p->{tag});
 
 			cdbk($lod);
-			bk("pull","-qr",bkdir($branch));
+			bk("pull","-qR",bkdir($branch));
 			system("env @AU @DT bk resolve -a -mp.bk.merge '-yFake-Merge from ".$p->{major}.".".$p->{minor}."'");
 			die "The usual problem" if -d "RESYNC";
 			system("env @AU @DT bk citool");

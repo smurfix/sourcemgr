@@ -130,7 +130,7 @@ else
 	if test "$was" != "." ; then cd $gdir$rdir; fi
 fi
 
-trap "rm -rf $tmp" 0
+trap "rm -rf $tmp; exit 1" 0
 
 done=/tmp/done.$$
 ( cd $dest; find . -type d -name SCCS -prune -print | grep -v "^\./BitKeeper/"
@@ -153,10 +153,15 @@ undoit() {
 	  done
     )
 }
-trap "rm -rf $tmp; undoit" 0
+trap "rm -rf $tmp; undoit; exit 1" 0
 
 echo Importing into Bitkeeper
 b.import.pl $datum "CVS:$datum"
 
 test -n "$nopush" || bk push
+
+trap "" 0
+set +e
+rm -rf $tmp
+undoit
 exit 0
