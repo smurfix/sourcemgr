@@ -393,8 +393,9 @@ if(-f "$tmppn.data") {
 				return;
 			}
 		}
-		return unless $File::Find::name =~ /^(.+)\/RCS\/(.+),v$/;
+		return unless $File::Find::name =~ /^(?:(.+)\/)?RCS\/(.+),v$/;
 		my($dir,$file)=($1,$2);
+		$dir="." if not defined $dir or $dir eq "";
 
 		print STDERR " $pn: processing $dir/$file       |\r";
 
