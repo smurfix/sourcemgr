@@ -43,6 +43,8 @@ submode=
 recargs=
 skipdone=
 freinst=
+ARCH=Linux
+if test -f /mach ; then ARCH=Mac; fi
 
    eval set -- "$(getopt "v:hignd:s:IlNf" "$@")"
    if test $? != 0
@@ -232,17 +234,17 @@ if test -z "$islocal" ; then
 else
 	cd $(bk root)
 fi
-test -f Makefile.Linux || bk -r get -q
+test -f Makefile.$ARCH || bk -r get -q
 
 bad=
-if test -f Makefile.Linux ; then
-	MF=Makefile.Linux
-elif test -f ../Makefile.Linux.sub ; then
-	MF=../Makefile.Linux.sub
-elif test -f ../../Makefile.Linux.sub ; then
-	MF=../../Makefile.Linux.sub
+if test -f Makefile.$ARCH ; then
+	MF=Makefile.$ARCH
+elif test -f ../Makefile.$ARCH.sub ; then
+	MF=../Makefile.$ARCH.sub
+elif test -f ../../Makefile.$ARCH.sub ; then
+	MF=../../Makefile.$ARCH.sub
 else
-	echo No Makefile.Linux found >&2
+	echo No Makefile.$ARCH found >&2
 	exit 1
 fi
 
