@@ -1,6 +1,11 @@
 #!/bin/bash
 BK_REPOSITORY=bk://bitkeeper.noris.de
 
+if rpm -q rpm | grep -q noris ; then : ; else
+	echo >&2 "Zum RPM-Bauen braucht es das noris-RPM-Paket. Sorry."
+	exit 1
+fi
+
 set -e
 trap 'test -n "$superset" && kill $SUPERPID; usage; exit 1' 0
 

@@ -11,8 +11,9 @@ Source: BK::$ARCHIVE$
 Packager: smurf@noris.net
 Vendor: noris network GmbH
 Prefix: /usr
-Requires: rpm-noris
-Requires: prcs-noris
+Requires: rpm
+## rpm-noris nur wenn RPMs gebaut werden sollen
+Requires: prcs
 Requires: bitkeeper-noris
 Requires: sudo
 Requires: shlock
