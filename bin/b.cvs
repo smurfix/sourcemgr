@@ -137,6 +137,7 @@ fi
 test -d /var/cache/cvs/bk/$what$dv || b.get -d $dir -v $vers $wset /var/cache/cvs/bk/$what$dv || true
 
 export CVS_REPOSITORY="$woher"
+export BK_REPOSITORY
 export BKCVS_COMP=$comp
 export BK_TARGET_REV="$rvers"
 export BKCVS_SHELLS=$shells
