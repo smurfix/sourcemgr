@@ -141,8 +141,8 @@ trap '' 0
 #test "$(bk changes -d':I:\n' -R | wc -l)" -eq 0
 
 # Tag this release with the current version and push it
-bk get -q debian/version debian/control
-V="$(head -1 debian/version)"
+bk get -q debian/control debian/changelog
+V="$(dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*//p')"
 
 N="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
 test -n "$N" || N="$(basename "$dir")"

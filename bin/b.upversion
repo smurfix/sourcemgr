@@ -14,16 +14,23 @@ test -z "$NO_NEW_VERSION" || exit 0
 
 BF=rpm.version; F=SCCS/s.rpm.version
 if ! test -f $F ; then BF=debian/version; F=debian/SCCS/s.version; fi
+if test -f $F ; then
+	OV="$(bk get -qp "$BF" | head -1)"
+else
+	BF=debian/changelog; F=debian/SCCS/s.changelog; fi
+	test -f $BF || bk get -q $BF
+	OV="$(dpkg-parsechangelog | sed -ne 's/^Version: *//p')"
+fi
 
 test -n "$BK_PENDING" || exit 0
 test -s "$BK_PENDING" || exit 0
 test -s "$F" || exit 0
 
 if grep -q '^'"$F"'|' "$BK_PENDING" ; then
-	NEW_VERSION="$(head -1 $BF)"
+	NEW_VERSION="$OV"
 else
 	if test -z "$NEW_VERSION" ; then 
-		set -- $(bk get -qp "$BF" | head -1 | sed -e 's/\([0-9][0-9]*\)$/ \1/')
+		set -- $(echo "$OV" | sed -e 's/\([0-9][0-9]*\)$/ \1/')
 		V="$1"
 		W="$2"
 		if test -z "$W" ; then
@@ -37,14 +44,17 @@ else
 		W="$(expr $W + 1)" ## 1.2.3 => 1.2.4
 		NEW_VERSION="$V$W"
 	fi
-	bk edit -qg "$BF"
-	( echo "$NEW_VERSION"; bk get -qp "$BF" | tail +2 ) > "$BF"
 
-	bk ci -q -y"Version $NEW_VERSION" "$BF" >/dev/null
-	bk sfiles -pC "$BF" >> "$BK_PENDING"
+	if test "$BF" != "debian/changelog" ; then
+		bk edit -qg "$BF"
+		( echo "$NEW_VERSION"; bk get -qp "$BF" | tail +2 ) > "$BF"
+
+		bk ci -q -y"Version $NEW_VERSION" "$BF" >/dev/null
+		bk sfiles -pC "$BF" >> "$BK_PENDING"
+	fi
 fi
 
-## now update the changelog if possible
+## now update the changelog if possible/necessary
 
 BF=debian/changelog; F=debian/SCCS/s.changelog
 if ! test -f $F ; then exit 0; fi

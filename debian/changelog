@@ -1,3 +1,14 @@
+sourcemgr (1.270) unstable; urgency=low
+
+  * b.debuild:
+       Use version number from debian/changelog
+  * b.upversion:
+       Use version number from debian/changelog
+           if debian/version doesn't exist
+  * 
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Wed, 10 Sep 2003 03:16:02 +0200
+
 sourcemgr (1.269) unstable; urgency=low
 
   * drop "anonymous@" from default anon-CVS
