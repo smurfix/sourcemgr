@@ -798,7 +798,7 @@ while(@$cset) {
 }
 if ($ENV{BKCVS_TAG}) {
 	my $do_tag=$ENV{BKCVS_TAG};
-	foreach my $tag (bk('prs', '-r+', '-d$if(:TAG:){$each(:TAG:){:TAG:\n}}', '-h', 'ChangeSet')) {
+	foreach my $tag (bk('prs', '-r+', '-d$if(:TAG:){$each(:TAG:){:TAG:\\n}}', '-h', 'ChangeSet')) {
 		if ($tag eq $do_tag) {
 			$do_tag=undef;
 			last;
