@@ -14,7 +14,7 @@ rm -f debian/changelog
 bk changes -d"$pn"' (_>:I:<_) unstable; urgency=low\n\n$each(:C:){  * (:C:)\n}\n -- BK_Importer <:USER:@:HOST:>  :Dd: :DM: :Dy: :T: +0000\n\n' |
 
 perl >debian/changelog -e'
-$maxchg=10
+$maxchg=10;
 unless(-f "debian/users") {
 	print while(<>);
 	exit(0);
