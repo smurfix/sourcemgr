@@ -83,13 +83,13 @@ if bk lclone -q "$cache" "$ddir"; then : ; else
 	bk clone -q "$cache" "$ddir"
 fi
 
+cd "$ddir"
 if test "$nvers" != "gibts/nicht" ; then
 	echo Kopiere Quelldaten...
-	cd "$ddir"
 	bk clone -q . $BK_REPOSITORY/$what$ndv
 	bk parent $BK_REPOSITORY/$what$ndv
-else
-	cd "$ddir"
+	dv="$ndv"
 fi
+bk parent $BK_REPOSITORY/$what$dv
 echo "Archiv '$what$dv' nach '$ddir' kopiert."
 
