@@ -174,7 +174,7 @@ VV="$(echo "$V" | sed -e 's/^[0-9][0-9]*://')"
 DV="$(echo "$DV" | sed -e 's/^[0-9][0-9]*://')"
 
 bk export -T -w -tplain -r+ . "$T/$N-$VV"
-mv debian/changelog "$T/$N-$VV"/debian
+test -f "$T/$N-$VV"/debian/changelog || mv debian/changelog "$T/$N-$VV"/debian
 
 if test -n "$E" ; then # non-original package
 	if wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
