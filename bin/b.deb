@@ -23,18 +23,19 @@ chmod +x BitKeeper/triggers/post-commit.changelog
 bk new BitKeeper/triggers/post-commit.changelog
 fi
 
-if test ! -f BitKeeper/triggers/SCCS/s.post-incoming.changelog ; then
-cat <<'END' >BitKeeper/triggers/post-incoming.changelog
-#!/bin/sh
-
-b.uplog
-END
-chmod +x BitKeeper/triggers/post-incoming.changelog
-bk new BitKeeper/triggers/post-incoming.changelog
-fi
-
+#if test ! -f BitKeeper/triggers/SCCS/s.post-incoming.changelog ; then
+#cat <<'END' >BitKeeper/triggers/post-incoming.changelog
+##!/bin/sh
+#
+#b.uplog
+#END
+#chmod +x BitKeeper/triggers/post-incoming.changelog
+#bk new BitKeeper/triggers/post-incoming.changelog
+#fi
+#
 if test -d debian ; then 
-	bk mv debian/changelog debian/changelog.old
+	: 
+	# bk mv debian/changelog debian/changelog.old
 else
 D="$(basename "$(pwd)")"-"$(bk prs -ah '-d:I:' -r+ ChangeSet)"
 
@@ -52,17 +53,18 @@ rm -f debian/*.ex debian/ex.* debian/README.Debian
 fi
 
 b.uplog
-cat <<_ >debian/users
-smurf@noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
-smurf@smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
-smurf@play.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
-smurf@rz0.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
-smurf@smurf-o-linux.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
-smurf@linux.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
-smurf@linux.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
-_
-bk new debian/users
+#cat <<_ >debian/users
+#smurf@noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
+#smurf@smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
+#smurf@play.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
+#smurf@rz0.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
+#smurf@smurf-o-linux.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
+#smurf@linux.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
+#smurf@linux.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
+#_
+#bk new debian/users
 
-bk ignore debian/changelog "*-stamp" debian/files "debian/tmp/*"
+bk ignore "*-stamp" debian/files "debian/tmp/*"
 bk chmod 755 debian/rules
+echo 4 > debian/compat
 
