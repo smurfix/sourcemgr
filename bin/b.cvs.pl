@@ -76,7 +76,7 @@ if($ENV{BKCVS_LOCK}) {
 #	die "RevProb $i\n" if rev_ok("x",$i);
 #}
 
-my $debug=0;
+my $debug=$ENV{BK_VERBOSE}||0;
 my $diff=$ENV{BKCVS_DIFF}||60; # Zeitraum für "gleichzeitige" Änderungen im CVS
 my $shells=$ENV{BKCVS_SHELLS}||0;
 
@@ -142,32 +142,6 @@ sub dateset($;$) {
     ## TODO: set the check-in date
 }
 
-sub dupsi($$) {
-	my($ncp,$check)=@_;
-	# This will tell us if we have any dups anywhere in the tree.
-	die "Main Bang in ".`pwd` if $check and not $ncp and system("bk -r check -acp");
-
-	my %dups;
-	if($check) {
-		open(DUP,"bk -r prs -hr1.0.. -nd:KEY: |");
-		while(<DUP>) {
-			chomp;
-			die "Dup!" if $dups{$_}++;
-		}
-		close(DUP);
-		if(-d "RESYNC") {
-			%dups = ();
-			die "Resync Bang in ".`pwd` if system("bk -r check -cR");
-			open(DUP,"cd RESYNC; bk -r prs -hr1.0.. -nd:KEY: |");
-			while(<DUP>) {
-				chomp;
-				die "Dup!" if $dups{$_}++;
-			}
-			close(DUP);
-		}
-	}
-}
-
 my $seq = 0;
 
 sub bk {
@@ -181,7 +155,6 @@ sub bk {
 
 	#die "ChangeSet files are not nice\n" if -f "ChangeSet";
 	unlink("ChangeSet");
-	dupsi($ncp,$check);
 	if(defined $cmd[0]) {
 		print STDERR ">>> bk @cmd\n" if $check;
 		# print C "bk @cmd\n";
@@ -211,7 +184,6 @@ sub bk {
 		system("bk -r check -ag | env @AU @DT bk gone -");
 		system("env @AU @DT bk citool");
 	}
-	dupsi($ncp,$check);
 	wantarray ? @res : join(" ",@res);
 }
 
@@ -288,7 +260,8 @@ sub pdate($) {
 	$date;
 }
 
-my %symdate;
+my %symldate; # limit on that symbol -- earliest
+my %symdate; # actual date - latest
 my $cset;
 my $dt_done;
 
@@ -344,8 +317,8 @@ sub add_date($;$$$$$) {
 		$cs->{$fn}{gone} = 1 if $gone;
 	} else {
 		$cs->{sym} = [] unless defined $cs->{sym};
-		return $cs->{sym};
 	}
+	return $cs;
 }
 
 sub rev_ok($$) {
@@ -354,8 +327,7 @@ sub rev_ok($$) {
 # OK: 1.1 1.1.1.1 1.1.1.2 1.2 1.3 1.4  2.0 2.1 2.2 2.2.4.1 2.2.4.2 2.2.4.3
 # !OK: 1.2.3.4 2.3 2.3.4.5 2.2.3.1 2.2.5.1 2.2.4.1.4.4 3.1 
 
-# Vorsicht -- 1.1.1.* muss separat rausgefiltert werden, wenn es
-# zeitlich nach 1.2 kommt.
+# Danger -- we need to filter 1.1.1.* separately if it occurs before 1.2.
 
 	my @f = split(/\./,$rev);
 	return (0+@f == 2 or (0+@f==4 and $f[0]==1 and $f[1]==1 and $f[2]==1))
@@ -369,7 +341,7 @@ sub rev_ok($$) {
 
 	my $rt = shift @t;
 	my $rf = shift @f;
-	if($rt != $rf) { # Special für 1.9 => 2.0: nimm die Baseline
+	if($rt != $rf) { # Special for 1.9 => 2.0: use baseline
 		return 0 if 0+@f > 2;  # !OK: 1.2.3.4
 		return ($rt > $rf); # OK: 1.?  !OK: 3.1
 	}
@@ -385,8 +357,8 @@ sub rev_ok($$) {
 }
 
 # Process one CVS log entry
-sub proc1($$$$$$$) {
-	my($fn,$dt,$rev,$cmt,$autor,$syms,$gone) = @_;
+sub proc1($$$$$$) {
+	my($fn,$dt,$rev,$cmt,$autor,$gone) = @_;
 
 	return if 
 		 $fn =~ m#^CVS/# or
@@ -394,18 +366,11 @@ sub proc1($$$$$$$) {
 		 $fn =~ m#^CVSROOT/# or
 		 $fn =~ m#/CVSROOT/# or
 		 0;
-	return unless rev_ok($fn,$rev);
-	add_date($dt,$fn,$rev,$autor,$cmt,$gone);
-
-	# Branch: tags get the earliest position, everything else gets the latest.
-	foreach my $sym(@$syms) {
-		if($sym =~ /^branch:/i) {
-			$symdate{$sym}=$dt if not defined $symdate{$sym} or $symdate{$sym}>$dt;
-		} else {
-			$symdate{$sym}=$dt if not defined $symdate{$sym} or $symdate{$sym}<$dt;
-		}
-	}
+	return undef unless rev_ok($fn,$rev);
+	return add_date($dt,$fn,$rev,$autor,$cmt,$gone)
+		if $rev ne "1.1" or not $gone;
 }
+
 sub proc(@) {
 	my $state=0;
 	my $fn;
@@ -413,9 +378,11 @@ sub proc(@) {
 	my $dt;
 	my $autor;
 	my $cmt;
-	my %syms;
 	my $pre;
 	my $gone;
+
+	my %entry;
+	my %syms;
 	# It is helpful to have the output of "cvs log FILE" handy if you
 	# want to understand the next bits.
 	foreach my $x(@_) {
@@ -458,7 +425,7 @@ sub proc(@) {
 		}
 		if($state >= 2 and $x =~ /^\-+\s*$/) {
 			$state=4;
-			proc1($fn,$dt,$rev,$cmt,$autor,$syms{$rev},$gone) if $dt;
+			$entry{$rev} = proc1($fn,$dt,$rev,$cmt,$autor,$gone) if $dt;
 			$dt=0; $cmt=""; $gone=0;
 			next;
 		}
@@ -484,7 +451,38 @@ sub proc(@) {
 			next;
 		}
 	}
-	proc1($fn,$dt,$rev,$cmt,$autor,$syms{$rev},$gone) if $dt;
+	$entry{$rev} = proc1($fn,$dt,$rev,$cmt,$autor,$gone) if $dt;
+
+	while(my($rev,$syms)=each %syms) {
+		my $nxdate;
+		if($entry{$rev.".1.1"}) {
+			$nxdate = $entry{$rev.".1.1"}{wann}
+				if not $nxdate or $nxdate > $entry{$rev.".1.1"}{wann};
+		}
+		if($entry{$rev.".2.1"}) {
+			$nxdate = $entry{$rev.".2.1"}{wann}
+				if not $nxdate or $nxdate > $entry{$rev.".2.1"}{wann};
+		}
+		my $drev = $rev; $drev =~ s/(\d+)$/1+$1/e;
+		if($entry{$drev}) {
+			$nxdate = $entry{$drev}{wann}
+				if not $nxdate or $nxdate > $entry{$drev}{wann};
+		}
+		foreach my $sym(@$syms) {
+			if ($sym =~ /^Branch:/) {
+				next unless $nxdate;
+				$symdate{$sym}=$nxdate-1
+					if not $symdate{$sym} or $symdate{$sym} >= $nxdate;
+			} else {
+				my $dt = $entry{$rev};
+				next unless $dt;
+				$dt = $dt->{wann};
+				next unless $dt;
+				$symdate{$sym}=$dt
+					if not $symdate{$sym} or $symdate{$sym} < $dt;
+			}
+		}
+	}
 }
 
 my $tmpcv = "/var/cache/cvs";
@@ -495,11 +493,6 @@ if(-f "$tmppn.data") {
 	$cset = retrieve("$tmppn.data");
 
 	foreach my $x (@$cset) {
-		if($x->{sym}) {
-			foreach my $s(@{$x->{sym}}) {
-				$symdate{$s}=$x->{wann};
-			}
-		}
 		my $ff=$x->{files};
 		foreach my $f (keys %$ff) {
 			$cutoff{$f}=$x->{wann}
@@ -532,7 +525,7 @@ if(-f "$tmppn.data") {
 
 			print STDERR "$CLR $pn: processing $mr.$x\r";
 			my $lines=`find . -name CVS -prune -o -type f -print | wc -l`;
-			last unless (0+$lines);
+			last if not (0+$lines) and $x eq "1";
 
 			my @buf = ();
 			open(LOG,"cvs log |");
@@ -562,8 +555,9 @@ if(-f "$tmppn.data") {
 	} continue {
 		$mr++;
 	}
+	
 	foreach my $sym(keys %symdate) {
-		push(@{add_date($symdate{$sym})},$sym);
+		push(@{add_date($symdate{$sym})->{sym}},$sym);
 	}
 	nstore($cset,"$tmppn.data");
 }
@@ -614,8 +608,9 @@ system("bk prs -anhd:KEY: -r+ ChangeSet | tail -1 > BitKeeper/etc/SCCS/x.lmark")
 
 sub cleanout() {
 	unlink bkfiles("x");
-	bk("-r","unlock","-f");
 	bk("-r","clean","-q");
+	bk("-r","unedit");
+	bk("-r","unlock","-f");
 }
 
 # Finde den letzten Import
@@ -870,8 +865,6 @@ if($trev ne "" and $ENV{BK_TARGET_NEW}) { # tag must not exist
 	# Rollback beyond the target date
 	die "Tag '$trev' exists" if bk("prs","-hd:I:", "-r$trev","ChangeSet");
 
-	$dt_done=$symdate{$trev};
-	die "no date for '$trev'\n" unless $dt_done;
 	foreach my $pre(keys %tpre) {
 		die "Kein Vorläufer-Branch '$pre' für '$trev' gefunden\n"
 			unless bk("prs","-hd:I:", "-r$pre","ChangeSet");
