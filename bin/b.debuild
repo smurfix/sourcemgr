@@ -68,7 +68,7 @@ opt_v=
 		   -S)
 		   		shift; nosign=y ;;
 		   -V)
-			   shift; opt_v="-v $1"; shift;;
+			   shift; opt_v="-v$1"; shift;;
 		   -s)
 			   shift; opt_s="-s$1"; shift;;
 		   -d)
