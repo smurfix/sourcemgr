@@ -4,8 +4,10 @@ use strict;
 use warnings;
 no warnings 'uninitialized';
 use Carp qw(confess);
+use Time::Local qw(timegm);
 
 my $debug=1;
+my @DT;
 
 sub Usage() {
 	print STDERR <<END;
@@ -15,6 +17,19 @@ END
 }
 
 Usage unless @ARGV;
+if($ARGV[0] =~ /^(\d\d\d\d)-(\d\d)-(\d\d)$/) {
+	my $sec = timegm(0,0,0,$3,$2-1,$1-1900);
+	shift;
+	my $dtf;
+	if(-f "/usr/lib/datefudge.so") {
+    	$dtf = "/usr/lib";
+	} elsif(-f "/home/smurf/datefudge/datefudge.so") {
+    	$dtf = "/home/smurf/datefudge";
+	} else {
+    	die "No DateFudge";
+	}
+	@DT = ("LD_PRELOAD=$dtf/datefudge.so","DATEFUDGE=".(time-$sec));
+}
 my $cmt = "@ARGV"; $cmt =~ s/"/'/g;
 
 $ENV{BK_LICENSE}="ACCEPTED";
@@ -26,7 +41,7 @@ sub bk {
 	my @cmd = @_;
 
 	if(defined $cmd[0]) {
-		unshift(@cmd,"bk");
+		unshift(@cmd,"env",@DT,"bk");
 	} else {
 		shift(@cmd);
 	}
@@ -43,7 +58,7 @@ sub bk {
 		warn $! ? "*** Error closing pipe: $!" : "Exit status $? from BK";
 		return undef;
 	};
-	wantarray ? @res : join(" ",@res);
+	wantarray ? @res : (0+@res);
 }
 
 sub bkfiles($) {
@@ -54,6 +69,20 @@ sub bkfiles($) {
 		: ( chmod((0600|0777&((stat $_)[2])),$_) or 1 );
 	} bk(sfiles=>"-U$f");
 	@new;
+}
+
+{
+	my $cv;
+	foreach my $fn(bk("get","-p","BitKeeper/etc/ignore")) {
+		$cv++ if $fn =~ /CVS/;
+	}
+	unless($cv) {
+		print STDERR "Ignoriere CVS...\n";
+		bk("ignore","CVS",".cvsignore","CVSROOT");
+		bk(undef,"bk sfiles -pC | env @DT bk cset -q -y\"CVS-Ignore\"");
+	} else {
+		print STDERR "CVS bereits ignoriert.\n";
+	}
 }
 
 my @new = grep { if(-l $_) { unlink $_; undef; } else { 1; } } bkfiles("x");
@@ -84,8 +113,13 @@ if(@new and @gone) {
 	bk(new => '-qG', "-yNew:$cmt", @new);
 } elsif(@gone) {
 	bk(rm => @gone);
+} else {
+	if(bk("-r","sfiles","-lg") == 0) {
+		print STDERR "...no changes.\n";
+		exit 0;
+	}
 }
 
 bk('-r', ci => '-qG', "-y\"$cmt\"");
-bk(undef,"bk sfiles -pC | bk cset -q -y\"$cmt\"");
+bk(undef,"bk sfiles -pC | env @DT bk cset -q -y\"$cmt\"");
 
