@@ -197,11 +197,6 @@ rm -f /tmp/b.rpm.$$
 
 if test -z "$bkrel" ; then bkrel="noris" ; else dv="-$bkrel"; fi
 archive="$what$dv"
-if test -f $FR/rpm.version ; then
-	bkvers="$( head -1 $FR/rpm.version )"
-else
-	bkvers="$( bk tip "$BK_REPOSITORY/$archive" )"
-fi
 
 if test -f "STATUS/work/$desc$dv$submode" ; then
 	read host pid < STATUS/work/$desc$dv$submode
@@ -265,8 +260,11 @@ if test -z "$again" -a -z "$qpack" ; then
 		echo "Hole Sourcen aus dem Archiv ..."
 		sudo b.get -d $what -v "$vers" $RFR
 	fi
+	bkvers="$( cd $RFR; bk get -q -p rpm.version 2>/dev/null | head -1 )"
+	test -n "$bkvers" || bkvers="$( cd $RFR; bk prs -ah -r+ -d:I: ChangeSet )"
+
 	for i in rpm.spec rpm.tags rpm.sub rpm.clean rpm.verify \
-			rpm.pre rpm.post rpm.preun rpm.postun rpm.version ; do
+			rpm.pre rpm.post rpm.preun rpm.postun ; do
 		(	cd $RFR
 			bk get -q -p $i || true
 		) | sed \

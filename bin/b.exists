@@ -53,10 +53,10 @@ fi
 trap '' 0
 
 test -z "$vers" || dv="-$vers"
-if bk tip -q "$BK_REPOSITORY/$what$dv" >/dev/null ; then
+if bk rootkey -q "$BK_REPOSITORY/$what$dv" >/dev/null ; then
 	dv=$vers
 elif test "$vers" = "noris" && \
-	bk tip -q "$BK_REPOSITORY/$what" >/dev/null ; then
+	bk rootkey -q "$BK_REPOSITORY/$what" >/dev/null ; then
 	dv=
 else
 	exit 1

@@ -6,7 +6,7 @@ if test -z "$RPM_PACKAGE_VERSION" ; then
 	rm -f /tmp/bn.$$
 	test -n "$RPM_PACKAGE_RELEASE" || RPM_PACKAGE_RELEASE="noris"
 	RPM_PACKAGE_VERSION="$(bk get -p rpm.version 2>/dev/null | head -1)"
-	test -n "$RPM_PACKAGE_VERSION" || RPM_PACKAGE_VERSION="$(bk tip)"
+	test -n "$RPM_PACKAGE_VERSION" || RPM_PACKAGE_VERSION="$(bk prs -ah -d:I: -r+ ChangeSet )"
 
 fi
 
