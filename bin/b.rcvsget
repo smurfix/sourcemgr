@@ -171,4 +171,6 @@ trap "" 0
 set +e
 rm -rf $tmp
 undoit
+cd $dest
+exec bk -r check -a
 exit 0
