@@ -19,17 +19,26 @@ bk root >/dev/null 2>&1
 trap '' 0
 
 fr() {
-	nr=
 	if test -n "$1" ; then
-		nr=$(bk rset -l$1 | perl -ne 'print if s/^rpm\.version\|//;')
-		nr=$(bk get -p -r$nr "$(bk root)"/rpm.Version 2>/dev/null || true | head -1)
+		if test -f rpm.version -o -f SCCS/s.rpm.version ; then
+			nr="$(bk prs -h -d":REV: :C:\n" rpm.version | grep " $1\$" | while read a b ; do bk r2c -r$a rpm.version ; done )"
+		else
+			nr="$1"
+		fi
 	else
-		nr=$(bk get -p "$(bk root)"/rpm.Version 2>/dev/null || true | head -1)
+		nr="+"
 	fi
-	if test -n "$nr" ; then
-		nr="	noris:$nr"
-	fi
-	bk prs -ah '-d:I:	:UTC:'"$nr"'\n:KEY:\n' -r$1 ChangeSet
+
+	for r in $nr ; do
+		if test -f rpm.version -o -f SCCS/s.rpm.version ; then
+			if test -n "$1" ; then
+				nr="	noris:$1"
+			else
+				nr="	noris:$(head -1 rpm.version)"
+			fi
+		fi
+		bk prs -ah '-d:I:	:UTC:'"$nr"'\n:KEY:\n' -r$r ChangeSet
+	done
 }
 
 if test -z "$1" ; then
