@@ -77,9 +77,11 @@ if test -e "$dir" ; then
 fi
 
 ### $opt_p -- geht momentan nicht
-cache="$(b.cache -d "$dir" -v "$vers")"
-bk lclone -q "$cache" $ddir || \
-bk clone -q "$cache" $ddir || \
+cache="$(b.cache -d "$what" -v "$vers")"
+if bk lclone -q "$cache" "$ddir"; then : ; else
+	rm -rf "$ddir"
+	bk clone -q "$cache" "$ddir"
+fi
 
 if test "$nvers" != "gibts/nicht" ; then
 	echo Kopiere Quelldaten...

@@ -68,7 +68,11 @@ if test -d "$d" ; then
 	mv "$dtmp" "$d"
 else
 	rm -rf "$d" "$dtmp"
-	b.get -d "$dir" $vget "$dtmp"
+	cache="$(b.cache -d "$dir" $vget)"
+	if bk lclone -q "$cache" "$dtmp" ; then : ; else
+		rm -rf "$dtmp"
+		bk clone -q "$cache" "$dtmp"
+	fi
 	mv "$dtmp" "$d"
 fi
 
