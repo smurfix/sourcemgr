@@ -128,15 +128,13 @@ if($cn eq ".") {
 
 my @DT; my @AU; my $mdate;
 
-my $dtf = $ENV{"DATEFUDGE_LIB"};
-
 sub dateset($;$) {
 	my($dt,$au) = @_;
 	@DT=();
 	@AU=();
 
-	@DT = ("LD_PRELOAD=$dtf","DATEFUDGE=".(time-$dt-($$%(1+$diff)))) if $dt;
 	@AU = ("LOGNAME=$au","USER=$au","BK_USER=$au","BK_HOST=$rhost") if $au;
+    ## TODO: set the check-in date
 }
 
 sub dupsi($$) {

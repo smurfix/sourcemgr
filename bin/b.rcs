@@ -1,8 +1,6 @@
 #!/bin/sh
 . /usr/share/sourcemgr/repository
-. /usr/share/sourcemgr/fudge
 export LANG=C
-export DATEFUDGE_LIB
 
 set -e
 trap 'usage; exit 1' 0

@@ -1,6 +1,5 @@
 #!/bin/bash
 . /usr/share/sourcemgr/repository
-. /usr/share/sourcemgr/fudge
 
 set -e
 trap 'usage; exit 1' 0
@@ -114,7 +113,7 @@ rm -rf $tmp $done
 
 sec=$(expr $(date '+%s') - $zeit)
 
-LD_PRELOAD=$DATEFUDGE_LIB DATEFUDGE=$(expr $(date '+%s') - $zeit) \
+# LD_PRELOAD=$DATEFUDGE_LIB DATEFUDGE=$(expr $(date '+%s') - $zeit) \
 b.import.pl "$cmt"
 
 test -z "$tag" || bk tag -r+ "$tag"

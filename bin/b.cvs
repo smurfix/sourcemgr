@@ -1,6 +1,5 @@
 #!/bin/sh
 . /usr/share/sourcemgr/repository
-. /usr/share/sourcemgr/fudge
 export LANG=C
 
 set -e
