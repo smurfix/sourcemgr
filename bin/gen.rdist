@@ -1,6 +1,14 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
+
+use Getopt::Std;
+use strict 'vars';
+use vars qw( $opt_f );
+
+&getopts("f");
 
 chdir("/usr/src") || die "No sources!";
+
+my $label = ($opt_f ? "all" : "dist");
 
 if(@ARGV) {
 	foreach $host(@ARGV) {
@@ -31,7 +39,7 @@ foreach $host(keys %allhosts) {
 		print "*** $host *** $dir ***\n";
 		die "No fork: $!" unless defined ($pid=fork());
 		if($pid == 0) {
-			exec {"/usr/bin/rdist"} ("rdist $host","-x","-m",$host,"-f","STATUS/dist/$dir");
+			exec {"/usr/bin/rdist"} ("rdist $host","-x","-m",$host,"-f","STATUS/dist/$dir",$label);
 			die "no rdist: $!";
 			exit(99);
 		}

@@ -6,6 +6,7 @@ Usage: $(basename $0)  -- holt noris-Sourcecode aus dem Archiv
        [ -d dest-directory ]
        [ -v releasename ]
        [ -i (Import, holt nur .prj) ]
+	   [ -n (holt nach /usr/src) ]
 END
 exit 1
 }
@@ -13,8 +14,9 @@ exit 1
 dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
 vers=noris
 imp=
+mkdir=
 
-   set -- $(getopt "d:v:ih" $*)
+   set -- $(getopt "d:v:ihn" $*)
    if test $? != 0
    then
 	   usage
@@ -29,6 +31,8 @@ imp=
 			   shift; dir="$1"; shift;;
 		   -i)
 			   shift; imp=y ;;
+		   -n)
+			   shift; mkdir=y ;;
 		   -v)
 			   shift; vers="$1"; shift;;
 			--)
@@ -42,6 +46,15 @@ export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 
 if test -n "$imp" ; then imp="$what.prj"; fi
+if test -n "$mkdir" ; then
+	cd /usr/src
+	if test -d "$dir" ; then
+		echo "??? $dir: Gibt es schon! Up-to-date??"
+	else
+		mkdir -p "$dir"
+		cd "$dir"
+	fi
+fi
 
 set -xe
 

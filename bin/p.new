@@ -5,6 +5,7 @@ cat >&2 <<END
 Usage: $(basename $0)  -- Initiales Installieren von eigenen Sourcen im Archiv
        [ -d dest-directory ]
 	   [ -v releasename ]
+	   [ kurze Beschreibung ]
 END
 exit 1
 }
@@ -50,3 +51,6 @@ vi $what.prj
 
 prcs checkin -f -r$vers $what
 
+if test -n "$*" ; then
+	echo "*	$dir	*	$*	file://" >> /usr/src/STATUS/build
+fi

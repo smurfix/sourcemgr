@@ -7,6 +7,8 @@ $ENV{'PATH'} = "/usr/src/STATUS/bin:".$ENV{'PATH'};
 my($fh) = "fh00";
 my $verbose = ($#ARGV < 0);
 
+my @all = qw( distribution.noris.net );
+
 sub procsub($$) {
 	my($who,$where) = @_;
 	my($ff) = $fh++;
@@ -160,7 +162,7 @@ while(($_ = &$dir) ne "") {
 	}
 	$newdist .= "HOSTS= (\n";
 	%thishosts = ();
-	if(-f "STATUS/hosts/$w" and open(HOSTS,"STATUS/hosts/$w")) {
+	if(open(HOSTS,"STATUS/hosts/$w")) {
 		while(<HOSTS>) {
 			chop;
 			s/#.*//;
@@ -171,23 +173,30 @@ while(($_ = &$dir) ne "") {
 		}
 		close HOSTS;
 	} else {
-		foreach $host(@hosts) {
+		foreach $host(sort { $a cmp $b } @hosts) {
 			$newdist .= "\t$host\n";
 			$thishosts{$host}++;
 		}
 	}
-	foreach $host(keys %{$dist{$w}}) {
+	foreach $host(sort { $a cmp $b } keys %{$dist{$w}}) {
 		next if $thishosts{$host};
 		$newdist .= "\t$host\n";
 		$thishosts{$host}++;
 	}
 	$newdist .= ")\n\n";
-	$newdist .= "all:\n";
+	$newdist .= "DISTHOSTS= (\n";
+	foreach $host(@all) {
+		$newdist .= "\t$host\n";
+	}
+	$newdist .= ")\n\n";
+
 	if($did[0]) {
+		$newdist .= "all:\n";
 		$newdist .= "\t\${FILES} -> \${HOSTS}\n";
 		$newdist .= "\t\tinstall -ochksym -ochknfs -onodescend -onoexist;\n";
 	}
 	if($did[1]) {
+		$newdist .= "all:\n";
 		$newdist .= "\t\${PROGS} -> \${HOSTS}\n";
 		$newdist .= "\t\tinstall -ochksym -ochknfs -onodescend;\n";
 	}
@@ -201,6 +210,32 @@ while(($_ = &$dir) ne "") {
 	foreach $cmds(@cmds) {
 		$newdist .= "\t\tcmdspecial \"$cmds config\";\n";
 	}
+	my $ww = $w; $ww =~ s/:/\\:/g;
+
+	$newdist .= "DISTFILE = ( /usr/src/STATUS/dist/$ww )\n";
+	if($did[0]) {
+		$newdist .= "dist:\n";
+		$newdist .= "\t\${FILES} -> \${DISTHOSTS}\n";
+		$newdist .= "\t\tinstall -ochksym -ochknfs -onodescend -onoexist;\n";
+	}
+	if($did[1]) {
+		$newdist .= "dist:\n";
+		$newdist .= "\t\${PROGS} -> \${DISTHOSTS}\n";
+		$newdist .= "\t\tinstall -ochksym -ochknfs -onodescend;\n";
+	}
+	if(($did[0] or $did[1]) and open(AFTER,"STATUS/after/$w")) {
+		while(<AFTER>) {
+			chop;
+			$newdist .= "\t\tcmdspecial \"$_\";\n";
+		}
+		close(AFTER);
+	}
+	foreach $cmds(@cmds) {
+		$newdist .= "\t\tcmdspecial \"$cmds config\";\n";
+	}
+	$newdist .= "dist:\n";
+	$newdist .= "\t\${DISTFILE} -> \${DISTHOSTS}\n";
+	$newdist .= "\t\tinstall;\n";
 	open(OUT,"STATUS/dist/$w"); $slash=$/; undef $/; $olddist = <OUT>; close OUT;
 	if($newdist ne $olddist) {
 		unlink("STATUS/dist/$w");
