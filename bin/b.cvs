@@ -139,6 +139,6 @@ test -n "$diff" && test -z "$BKCVS_DIFF" && export BKCVS_DIFF=$diff
 test -z "$BKCVS_PUSH" && export BKCVS_PUSH=$push
 test -z "$BKCVS_NORENAME" && export BKCVS_NORENAME=$rename
 test -n "$verbose" && export BK_VERBOSE=1
-test -n "$ignore" && export BK_IGNORE_ERROR=1
+test -n "$ignore" && export BKCVS_IGNORE_ERROR=1
 export BKCVS_LOCK=$bg
 exec $run "$was" "$what$dv"
