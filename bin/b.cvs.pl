@@ -352,7 +352,7 @@ sub proc(@) {
 			next;
 		}
 		if($state == 2) {
-			if($x =~ /^\s+(\S+)\:\s*(\S+)\s*$/) {
+			if($x =~ /^\s+(\S+)\:\s*(\S+)\s*$/) { # Branches
 				my $dsym=$1;
 				my $drev=$2;
 
@@ -366,6 +366,8 @@ sub proc(@) {
 					push(@{$syms{$drev}},$trev); 
 					$pre = $drev  # 1.2.0.3
 						if $drev =~ s/\.(\d+)\.\d+$/.0.$1/;
+				} elsif($drev =~ s/\.0\.\d+$//) {
+					push(@{$syms{$drev}},"Branch:".$dsym);
 				}
 				next;
 			} else {
@@ -408,8 +410,8 @@ sub proc(@) {
 }
 
 my $tmpcv = "/var/cache/cvs";
-
 my $tmppn="/var/cache/cvs/bk/$pn";
+
 if(-f "$tmppn.data") {
 	print STDERR "Reading stored CVS log\n";
 	$cset = retrieve("$tmppn.data");
@@ -590,28 +592,48 @@ sub process($$$$) {
 		foreach my $f(keys %$adt) {
 			my $rev = $adt->{$f}{rev};
 			push(@{$rev{$rev}}, $f);
-			if($ENV{CVS_REPOSITORY} =~ /\:pserver\:/) {
-				do {
-					$f = dirname($f);
-					mkpath("$f/CVS",1,0755);
-				} while($f ne ".");
-			} else {
+			dirs: while(1) {
 				$f = dirname($f);
-				rmdir("$f/CVS");
+				last dirs if -d "$f/CVS";
+				mkpath("$f/CVS",0,0755);
+				open(R,">$f/CVS/Repository");
+				if($f eq ".") {
+					print R "$cne\n";
+				} else {
+					print R "$cne/$f\n";
+				}
+				close(R);
+				open(R,">$f/CVS/Root");
+				print R $ENV{CVS_REPOSITORY},"\n";
+				close(R);
+				open(R,">$f/CVS/Entries");
+				close(R);
 			}
 		}
 		foreach my $rev(keys %rev) {
 			my %d;
 			my @f = @{$rev{$rev}};
-			foreach my $f(@f) {
-				push(@{$d{dirname($f)}}, basename($f));
-			}
-			foreach my $d(keys %d) {
-				@f = @{$d{$d}};
-				bk("get","-egq", map { "$d/$_" } @f);
+#			foreach my $f(@f) {
+#				push(@{$d{dirname($f)}}, basename($f));
+#			}
+#			foreach my $d(keys %d) {
+#				@f = @{$d{$d}};
+#				bk("get","-egq", map { "$d/$_" } @f);
 				unlink(@f);
-				cvs("get","-A","-d",$d,"-r",$rev, map { ($d eq ".") ? "$cne/$_" : "$cne/$d/$_" } @f);
-			}
+				while(@f) {
+					my @ff;
+					if(@f > 30) {
+						@ff = splice(@f,0,25);
+					} else {
+						@ff = @f; @f = ();
+					}
+					#cvs("get","-A","-d",$d,"-r",$rev, map { ($d eq ".") ? "$cne/$_" : "$cne/$d/$_" } @f);
+					my @lf = grep { -f $_ } map { dirname($_)."/SCCS/s.".basename($_) } @ff;
+ 					bk("get","-egq", @lf) if @lf;
+					cvs("-q","update","-A","-r",$rev, @ff);
+					utime($wann,$wann,@ff);
+				}
+#			}
 			push(@gone, grep {
 					-e dirname($_)."/SCCS/s.".basename($_) and ! -e $_ }
 				@{$rev{$rev}});
@@ -790,15 +812,12 @@ if($trev ne "" and $ENV{BK_TARGET_NEW}) { # tag must not exist
 
 	$dt_done=$symdate{$trev};
 	die "kein Datum für '$trev'\n" unless $dt_done;
-	my($ss,$mm,$hh,$d,$m,$y)=localtime($dt_done);
-	$m++; $y+=1900; ## zweistellig wenn <2000
-	my $tdate = sprintf "%04d-%02d-%02d %02d:%02d:%02d",$y,$m,$d,$hh,$mm,$ss;
 	foreach my $pre(keys %tpre) {
 		die "Kein Vorläufer-Branch '$pre' für '$trev' gefunden\n"
 			unless bk("prs","-hd:I:", "-r$pre","ChangeSet");
 	}
-	my $b_rev=bk("prs","-hd:I:", "-r$tdate","ChangeSet");
-	die "Keine Revisionsnummer für '$trev' '$tdate' gefunden.\n" unless $b_rev;
+	my $b_rev=bk("prs","-hd:I:", "-rBranch:$trev","ChangeSet");
+	die "Keine Revisionsnummer für '$trev' gefunden.\n" unless $b_rev;
 	bk("undo","-sfqa$b_rev");
 
 	bk("tag",$trev);
@@ -877,7 +896,7 @@ while(@$cset) {
 
 	if(defined $x->{sym}) {
 		foreach my $sym(@{$x->{sym}}) {
-			bk("cset","-r+","-S$sym");
+			bk("tag","-r+",$sym);
 			$done++;
 		}
 	}

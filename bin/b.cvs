@@ -121,4 +121,4 @@ fi
 test -n $diff && test -z "$BKCVS_DIFF" && export BKCVS_DIFF=$diff
 test -z "$BKCVS_PUSH" && export BKCVS_PUSH=$push
 test -z "$BKCVS_NORENAME" && export BKCVS_NORENAME=$rename
-exec $run "$was" "$dir$dv"
+exec $run "$was" "$was$dv"
