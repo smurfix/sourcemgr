@@ -74,6 +74,7 @@ trap 'rm -rf $done $tmp' 0
   echo BitKeeper ) |
 ( set -e
   while read a ; do
+	mkdir -p "$(dirname "$a")"
 	mv "$tmp/$a" "$a" || cp -a "$tmp/$a" "$a"
   done
   touch $done

@@ -71,16 +71,16 @@ sub dupsi($$) {
 			die "Dup!" if $dups{$_}++;
 		}
 		close(DUP);
-	}
-	if(-d "RESYNC") {
-		%dups = ();
-		die "Resync Bang in ".`pwd` if system("bk -r check -cR");
-		open(DUP,"cd RESYNC; bk -r prs -hr1.0.. -nd:KEY: |");
-		while(<DUP>) {
-			chomp;
-			die "Dup!" if $dups{$_}++;
+		if(-d "RESYNC") {
+			%dups = ();
+			die "Resync Bang in ".`pwd` if system("bk -r check -cR");
+			open(DUP,"cd RESYNC; bk -r prs -hr1.0.. -nd:KEY: |");
+			while(<DUP>) {
+				chomp;
+				die "Dup!" if $dups{$_}++;
+			}
+			close(DUP);
 		}
-		close(DUP);
 	}
 }
 
@@ -88,7 +88,7 @@ my $seq = 0;
 
 sub bk {
 	my @cmd = @_;
-	my $check = (not defined $cmd[0] or ($cmd[0] ne "sfiles" and $cmd[0] ne "prs" and $cmd[0] ne "get" and $cmd[0] ne "new" and $cmd[0] ne "rm" and $cmd[0] ne "setup" and $cmd[0] ne "prs" and $cmd[0] ne "setup"));
+	my $check = (not defined $cmd[0] or ($cmd[0] ne "sfiles" and $cmd[0] ne "prs" and $cmd[0] ne "get" and $cmd[0] ne "new" and $cmd[0] ne "rm" and $cmd[0] ne "setup" and $cmd[0] ne "prs"));
 	my $ncp = (defined $cmd[0] and $cmd[0] eq "-r" and $cmd[1] eq "ci");
 	my $undo = (defined $cmd[0] and $cmd[0] eq "undo");
 

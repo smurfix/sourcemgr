@@ -9,9 +9,9 @@ cat >&2 <<END
 Usage: $(basename $0)  -- Test ob das Verzeichnis existiert
        [ -v releasename ]
        [[-d]Paket ]
-		Rückmeldung: Paketname Version
-			Quellarchiv unter $Paketname-$Version
-			'-' fehlt wenn Version leer
+       Rückmeldung: Paketname Version
+           Quellarchiv unter $Paketname-$Version
+           (Version kann leer sein)
 END
 }
 
