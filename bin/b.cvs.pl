@@ -173,6 +173,7 @@ sub cvs {
 		push(@res,$_);
 	}
 	close(FP);
+	die "CVS error: $?\n" if $?;
 	wantarray ? @res : join(" ",@res);
 }
 
