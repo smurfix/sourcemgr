@@ -261,7 +261,9 @@ if test -z "$again" -a -z "$qpack" ; then
 		sudo b.get -d $what -v "$vers" $RFR
 	fi
 	bkvers="$( cd $RFR; bk get -q -p rpm.version 2>/dev/null | head -1 )"
-	test -n "$bkvers" || bkvers="$( cd $RFR; bk prs -ah -r+ -d:I: ChangeSet )"
+	if test -z "$bkvers" ; then
+		bkvers="$( cd $RFR; bk prs -ah -r+ -d:I: ChangeSet )"
+	fi
 
 	for i in rpm.spec rpm.tags rpm.sub rpm.clean rpm.verify \
 			rpm.pre rpm.post rpm.preun rpm.postun ; do
