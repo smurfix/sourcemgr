@@ -344,7 +344,7 @@ sub proc(@) {
 		if($state == 0 and $x =~ s/^Working file:\s+(\S+)\s*$/$1/) {
 			$fn = $x;
 			$state=1;
-			print STDERR " "x70,"\r  $fn\r";
+			# print STDERR " "x70,"\r  $fn\r";
 			next;
 		}
 		if($state == 1 and $x =~ /^symbolic names:/) {
@@ -413,7 +413,7 @@ my $tmpcv = "/var/cache/cvs";
 my $tmppn="/var/cache/cvs/bk/$pn";
 
 if(-f "$tmppn.data") {
-	print STDERR "Reading stored CVS log\n";
+	print STDERR "$pn: Reading stored CVS log\n";
 	$cset = retrieve("$tmppn.data");
 
 	foreach my $x (@$cset) {
@@ -430,14 +430,14 @@ if(-f "$tmppn.data") {
 	}
 } else {
 	$cset=[];
-	print STDERR "Processing CVS log\n";
+	print STDERR "$pn: Processing CVS log     |\r";
 	my $mr=1;
 	while(1) {
 		my $done=0;
 		foreach my $x (qw(1 1.2.1)) {
 			mkpath("$tmpcv/$mr.$x",1,0755);
 			
-			print STDERR "Fetch CVS files $mr.$x...\n";
+			print STDERR "$pn: Fetch CVS files $mr.$x     |\r";
 			chdir("$tmpcv/$mr.$x") or die "no dir $tmpcv/$mr.$x";
 			if(-d $cn) {
 				chdir($cn) or die "no chdir $cn: $!";
@@ -450,7 +450,7 @@ if(-f "$tmppn.data") {
 				cvs(undef,"get","-r$mr.$x",$cne);
 				chdir($cne) or last;  # no-op when $cne eq "."
 			}
-			print STDERR "processing $mr.$x ...\n";
+			print STDERR "$pn: processing $mr.$x       |\r";
 			my @buf = ();
 			open(LOG,"cvs log |");
 			while(<LOG>) {
@@ -492,7 +492,7 @@ unless(-d "$tmppn/BitKeeper") {
 	system("bk clone -q $ENV{BK_REPOSITORY}/$pn $tmppn");
 
 	if($?) {
-		print STDERR "Creating new Bitkeeper repository...\n";
+		print STDERR "$pn: Creating new Bitkeeper repository...\n";
 		my $tmpcf = "/tmp/cf.$$";
 		open(CF,">$tmpcf");
 		print CF <<END;
@@ -574,7 +574,7 @@ sub process($$$$) {
 	my($ss,$mm,$hh,$d,$m,$y)=localtime($wann);
 	$m++; $y+=1900; ## zweistellig wenn <2000
 	my $cvsdate = sprintf "%04d-%02d-%02d %02d:%02d:%02d",$y,$m,$d,$hh,$mm,$ss;
-	print STDERR " Processing $len: $cvsdate                        \r";
+	print STDERR " $pn: Processing $len: $cvsdate      |\r";
 	dateset($wann,$autor);
 
 	# system("(bk sfiles -gU; bk sfiles -x) | p.bk.filter | xargs -0r p.bk.mangler");
@@ -611,7 +611,7 @@ sub process($$$$) {
 			my @f = @{$rev{$rev}};
 			unlink(@f);
 			while(@f) {
-				print STDERR " Processing $len: $cvsdate $cnt ".(0+@f)." $rcnt      \r";
+				print STDERR " $pn: Processing $len: $cvsdate $cnt ".(0+@f)." $rcnt  |\r";
 				my @ff;
 				if(@f > 30) {
 					@ff = splice(@f,0,25);
@@ -639,7 +639,7 @@ sub process($$$$) {
 			push(@new,$n);
 			next;
 		}
-		print "Checking if '$n' is a resurrected file...\n";
+		print STDERR "$pn: Checking if '$n' is a resurrected file...\n";
 		rename($n,"x.$$");
 
 		open(FP,"|-") or do {
@@ -676,7 +676,7 @@ END
 			system($ENV{SHELL} || "/bin/sh","-i");
 			$shells--;
 		} else {
-			print STDERR "  *** rename ***\r";
+			print STDERR " $pn: *** rename ***\r";
 			open(RN,"|env @AU @DT bk renametool -p > $tmf");
 			foreach my $f(sort { $a cmp $b } @gone) { print RN "$f\n"; }
 			print RN "\n";
@@ -773,12 +773,15 @@ END
 	# $scmt =~ s/\'/\"/g;
 	open(FP,"|-") or do {
 		$scmt =~ s/\001//g;
-		exec("env", @DT,@AU, "bk", "cset", "-y$scmt");
+		exec("env", @DT,@AU, "bk", "cset", "-q","-y$scmt");
 		exit(99);
 	};
 	open(P,"bk sfiles -pC |");
 	print FP $_ while(<P>);
 	close(P); close(FP);
+	my $tip=bk("prs","-ahn","-r+","-d:I:");
+	print STDERR "$pn: $cvsdate  $tip     |\n";
+
 
 	# unlink(bkfiles("g"));
 #	bk("-r","unget");
@@ -885,14 +888,14 @@ while(@$cset) {
 	shift @$cset;
 	if($ENV{BKCVS_PUSH} and $done >= $ENV{BKCVS_PUSH}) {
 		$ddone += $done;
-		print STDERR "Push $ddone                                          \r";
+		print STDERR "$pn: Push $ddone     |\r";
 		bk("push","-q");
 		$done=0;
 	}
 }
 if($ENV{BKCVS_PUSH}) {
-	print STDERR "Push LAST                                          \r";
+	print STDERR "$pn: Push LAST        |\r";
 	bk("push","-q");
 }
-print STDERR "OK                                                 \n";
+print STDERR "$pn: OK     |\n";
 unlink("$tmppn.data");

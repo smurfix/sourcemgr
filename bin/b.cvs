@@ -9,6 +9,7 @@ Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -d Paket ]
        [ -l (kein PSERVER) ]
        [ -n # (Intermediate-Push alle # Importe; Default 100; 0=garnicht) ]
+       [ -L (kein Fehler wenn Lock nicht geht) ]
        [ -r Fork (im CVS) ]
 	   [ -s (shell instead of renametool) ] [ -S (kein Renametool) ]
        [ -v releasename (cvs) ]
@@ -30,6 +31,7 @@ vers=cvs
 push=100
 rvers=
 nvers=
+nolock=1
 run="$0.pl"
 comp=-z3
 diff=
@@ -38,7 +40,7 @@ shells=0
 loc=
 df=0
 
-   eval set -- "$(getopt "d:v:w:r:hDZln:e:sS" "$@")"
+   eval set -- "$(getopt "hd:De:lLn:r:sSv:w:Z" "$@")"
    for i
    do
 	   case "$i"
@@ -53,6 +55,8 @@ df=0
 		   	   shift; rename=1 ;;
 		   -D)
 			   shift; run="perl -d $(type -p "$0.pl")" ;;
+		   -L)
+		       shift; nolock=0 ;;
 		   -e)
 			   shift; diff="$1"; shift;;
 		   -d)
@@ -104,7 +108,7 @@ elif test -n "$vers" ; then
 fi
 if shlock /var/lock/bcvs-$was$dv  ; then : ; else
 	echo "$was$dv: Locked." >&2
-	exit 1
+	exit $nolock
 fi
 
 test -d /var/cache/cvs/bk/$was$dv || b.get -d $dir -v $vers $wset /var/cache/cvs/bk/$was$dv || true
