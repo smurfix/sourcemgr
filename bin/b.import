@@ -9,6 +9,7 @@ Usage: $(basename $0)  -- checkt neue Version von externem Source ein
        [ -d Paket ]
        [ -v altes-Release ]
        [ -w neues-Release ]
+	   [ -n ] (BK-Daten danach nicht löschen)
        Verzeichnis-mit-neuem-Source
        Kommentar
 
@@ -22,6 +23,7 @@ nvers=gibts/nicht
 dir=
 ext=
 parent=0
+nodelete=
 
    eval set -- "$(getopt "d:v:w:e:h" "$@")"
    for i
@@ -36,6 +38,8 @@ parent=0
 			   shift; vers="$1"; shift;;
 		   -w)
 			   shift; nvers="$1"; shift;;
+		   -n)
+		       shift; nodelete=y ;;
 			--)
 				shift; break ;;
 	   esac
@@ -92,6 +96,9 @@ b.import.pl "$cmt"
 bk push -q
 echo "Import OK:" $(bk prs -ah -r+ -d:I: ChangeSet)
 trap "" 0
+rm -rf $tmp
+test -z "$nodelete" || exit 0
+
 rm -rf $tmp ChangeSet BitKeeper
 find . -name SCCS -type d -prune -print0 | xargs -0r rm -rf
 exit 0

@@ -44,11 +44,18 @@ my $state=0;
 my $who="unknown";
 my $where="unknown";
 my $when=time;
-my $cmt="";
+my $cmt; $cmt="@ARGV\n" if @ARGV;
 
-while(<>) {
+sub isgone($) {
+	my($x)=@_;
+	return unless $x =~ s/#.* delete//;	# ...FOO#1.2 delete => FOO
+	return unless $x =~ s#^\.\.\. //depot/perl/##; # //depot/perl/FOO => FOO
+	unlink($x);
+}
+
+while(<STDIN>) {
 	chomp; s/\s*$//;
-	if($state==0 and /^Change (\d+) by (\S+)(?:\@(\S+))? on (\S+\s\S+)$/) {
+	if($state==0 and /^Change (\d+) by (\S+?)(?:\@(\S+))? on (\S+\s\S+)$/) {
 		use Time::ParseDate;
 
 		$state=1;
@@ -71,7 +78,9 @@ while(<>) {
 		$state=3;
 	} elsif($state==3 and /^\.\.\./) {
 		$state=4;
+		isgone($_);
 	} elsif($state==4 and /^\.\.\./) {
+		isgone($_);
 	} elsif($state==4 and /^$/) {
 		$state=5;
 	} elsif($state==5 and /^Differences/) {
@@ -89,7 +98,7 @@ if($ENV{REV}) {
 } else {
 	open(P,"| patch -g1 -p1 -E -f");
 }
-print P $_ while(<>);
+print P $_ while(<STDIN>);
 close(P) ;#or die "Patch close: $?";
 
 exit(0) if $ENV{REV};
@@ -118,7 +127,7 @@ if(@new and @gone) {
 	close(RN);
 	confess "No rename" if $?;
 } elsif(@new) {
-	bk(new => '-qG', "-yNew:$cmt", @new);
+	bk(new => '-qG', "-yNew:@ARGV", @new);
 } elsif(@gone) {
 	bk(rm => @gone);
 } else {
@@ -132,15 +141,23 @@ if(@new and @gone) {
 	}
 }
 
-bk(ci => '-qG', "-y$cmt", bkfiles("gl"));
+bk(ci => '-qG', "-y@ARGV", bkfiles("gl"));
 # bk(undef,"bk sfiles -pC | env @DT bk cset -q -y\"$cmt\"");
+unlink("ChangeSet");
+unlink("SCCS/p.ChangeSet");
 open(FP,"|-") or do {
 	$cmt =~ s/\001//g;
+	print "bk sfiles -pC | env @DT bk cset -y[".length($cmt)."]\n";
 	exec("env", @DT, "bk", "cset", "-y$cmt");
 	exit(99);
 };
+sleep(1);
 open(P,"bk sfiles -pC |");
-print FP $_ while(<P>);
+while(<P>) {
+	print $_;
+	print FP $_;
+}
+sleep(1);
 close(P); close(FP);
 
 
