@@ -524,6 +524,7 @@ sub process($) {
 			open(SH,"|env @AU @DT sh -x");
 			print SH $cmds;
 			close(SH);
+			# confess "No rename" if $?;
 		} else {
 			bk(get=>"-qeg",@gone);
 			# print STDERR ">>> bk -qeg @gone\n";
@@ -534,8 +535,8 @@ sub process($) {
 			foreach my $f(sort { $a cmp $b } @new) { print RN "$f\n"; }
 			close(RN);
 			print $rename "\n";
+			confess "No rename" if $?;
 		}
-		confess "No rename" if $?;
 		# bk(undef,"echo after renametool");
 	} elsif(@new) {
 		bk(new => '-G', "-q", "-yPRCS:$pn:".$d->{major}.".".$d->{minor}, @new);
