@@ -43,7 +43,7 @@ mv $D/debian .
 rm -rf $D
 rmdir $D.orig
 b.uplog
-bk ignore debian/changelog
+bk ignore debian/changelog "*-stamp" "debian/$D/*" "debian/tmp/*"
 rm -f debian/*.ex debian/ex.* debian/README.Debian
 perl -pi -e 's/\bdh_installdocs$/dh_installdocs -n/' debian/rules
 DN="$(bk prs -ah -d':USER:@:DOMAIN:\n' -r+ ChangeSet)"
