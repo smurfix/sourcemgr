@@ -41,7 +41,11 @@ parent=0
 	   esac
    done
 
-test -n "$dir" || dir="$(b.name)"
+if test -z "$dir" ; then
+	b.name > /tmp/bn.$$
+	read dir overs < /tmp/bn.$$
+	rm -f /tmp/bn.$$
+fi
 
 tmp=/var/tmp/bki.$$
 trap 'rm -rf $tmp' 0

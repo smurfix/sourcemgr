@@ -95,7 +95,10 @@ test -z "$vers" || dv="-$vers"
 #fi
 
 if test -z "$dir$dv" ; then
-	dir="$(b.name -n "$*")" ;
+	b.name -n "$*" > /tmp/bn.$$
+	read dir overs < /tmp/bn.$$
+	rm -f /tmp/bn.$$
+
     if test -f "/usr/src/STATUS/packages/$dir$dv" ; then
 		trap 'test -n "$superset" && kill $SUPERPID' 0
 		if test "$doinstall" = "b" ; then recargs="$recargs -I"; fi

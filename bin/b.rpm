@@ -45,6 +45,7 @@ freinst=
 defbase=base
 again=
 qpack=
+vset=
 
    eval set -- "$(getopt "v:w:hind:s:INfaD" "$@")"
    if test $? != 0
@@ -60,7 +61,7 @@ qpack=
 		   -d)
 			   shift; recargs="$recargs -d $1"; dir="$1"; shift;;
 		   -v)
-			   shift; recargs="$recargs -V $1"; basev="$1"; shift;;
+			   shift; recargs="$recargs -V $1"; vset=1; basev="$1"; shift;;
 		   -w)
 			   shift; recargs="$recargs -v $1"; vers="$1"; shift;;
 		   -s)
@@ -106,7 +107,11 @@ superset=
 #	superset=y
 #fi
 
-dir="$(b.name "$dir")"
+b.name "$dir" > /tmp/bn.$$
+read dir overs < /tmp/bn.$$
+if test -z "$vset" ; then vers="$overs" ; fi
+rm -f /tmp/bn.$$
+
 #if test -z "$dir" ; then
 #    if test -f "/usr/src/STATUS/packages/$dir" ; then
 #		trap 'test -n "$superset" && kill $SUPERPID' 0
@@ -386,13 +391,17 @@ else # install
 	mv -f "STATUS/work/$desc$submode" "STATUS/done/$desc$submode"
 	echo "$desc$submode: Generiere STATUS/dist/$desc$submode"
 	rm -f "STATUS/fail/$desc$submode"
-	test -n "$noflist" || sudo gen.flist.rpm < STATUS/done/$desc$submode >> STATUS/rpm/$desc$subtarget.spec
-
+	if test -z "$noflist" ; then
+		(
+			sudo gen.flist.rpm < STATUS/done/$desc$submode
+			echo ""; echo "# EOF"
+ 		) >> STATUS/rpm/$desc$subtarget.spec
+	fi
 	sudo gen.flist < STATUS/done/$desc$submode > STATUS/out/new.$desc$submode 
 
 	( test ! -f STATUS/removed/$desc$submode || cat STATUS/removed/$desc$submode ; test ! -f STATUS/out/$desc$submode || cat STATUS/out/$desc$submode ) | sort -u > /tmp/d1.$$
 	sort -u STATUS/out/new.$desc$submode > /tmp/d2.$$
-	comm -23 </tmp/d1.$$ </tmp/d2.$$ > STATUS/removed/new.$desc$submode
+	comm -23 /tmp/d1.$$ /tmp/d2.$$ > STATUS/removed/new.$desc$submode
 	rm -f /tmp/d1.$$ /tmp/d2.$$
 
 	mv -f STATUS/out/new.$desc$submode STATUS/out/$desc$submode

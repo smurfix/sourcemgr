@@ -1,35 +1,64 @@
 #!/bin/bash
+export BK_REPOSITORY=bk://bitkeeper.noris.de
 
-if test "x$1" = "x-h" ; then 
+set -e
+trap 'usage; exit 1' 0
+
+usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- spuckt den Namen des aktuellen Projekts aus
-       [ Paket ]
-
+Usage: $(basename $0)  -- Name des aktuellen Archivs
+		Rückmeldung: Paketname Version
 Algorithmus:
 
-bk root => Name.
+bk root/parent => Name.
 
 Ansonsten: Fehler.
 
 END
-	exit 2
-fi
+}
+
+vers=noris
+dir=
+
+   eval set -- "$(getopt "n:h" "$@")"
+   for i
+   do
+	   case "$i"
+	   in
+		   -h)
+		       exit 1 ;;
+		   -n)
+			   shift; optn=1 ;;
+			--)
+				shift; break ;;
+	   esac
+   done
 
 set -e
 
-f="$1"; shift || true
+dir="$1"; shift || true
 if test -n "$*" ; then exit 1; fi
-if test -n "$f" ; then echo "$f" | sed -e 's/\?.*//' -e 's/[:_]/\//g'; exit 0 ; fi
 
 trap '' 0
 
-bkr="$(bk root | sed -e 's#/archiv/bk/#/#' -e 's#-[^/]*$##')" || exit 1
-test -n "$bkr" || exit 1
+if test -n "$dir" ; then echo "$dir" | sed -e 's#\?.*##' -e 's#[:_]#/#g' -e 's#-\([^/]*\)$# \1#'; exit 0 ; fi
 
-dir=$(echo "$bkr"|sed -ne 's/^.*[\./]src\///p')
+set +e
+bkr="$(bk parent 2>/dev/null)"
+if test -n "$bkr" && echo "$bkr" | fgrep -q :// ; then
+	bkr="$(echo "$bkr" | sed -e 's#.* is ##' -e 's#.*://[^/]*/##' -e 's#-\([^/]*\)$# \1#')"
+	echo "$bkr"
+	exit 0
+else
+	bkr="$(bk root 2>/dev/null | sed -e 's#/archiv/bk/#/#' -e 's#-[^/]*$##')" || exit 1
+fi
+
+if test -n "$bkr" ; then
+	dir=$(echo "$bkr"|sed -ne 's#^.*[\./]src/##p')
+fi
 if test -z "$dir" ; then
 	echo "keine Root gefunden" >&2
 	exit 1
 fi
 
-echo "$dir"
+echo "$dir" | sed -e 's#-[^/]*$##'
