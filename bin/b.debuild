@@ -13,6 +13,9 @@ fi
 if test -f /usr/local/bin/ssh-agent-start.sh ; then
 	source /usr/local/bin/ssh-agent-start.sh
 fi
+if ssh-add -l >/dev/null 2>&1 ; then : ; else
+	ssh-add
+fi
 
 usage() {
 cat >&2 <<END
