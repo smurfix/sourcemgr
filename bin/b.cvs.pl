@@ -430,14 +430,14 @@ if(-f "$tmppn.data") {
 	}
 } else {
 	$cset=[];
-	print STDERR "$pn: Processing CVS log     |\r";
+	print STDERR " $pn: Processing CVS log     |\r";
 	my $mr=1;
 	while(1) {
 		my $done=0;
 		foreach my $x (qw(1 1.2.1)) {
 			mkpath("$tmpcv/$mr.$x",1,0755);
 			
-			print STDERR "$pn: Fetch CVS files $mr.$x     |\r";
+			print STDERR " $pn: Fetch CVS files $mr.$x     |\r";
 			chdir("$tmpcv/$mr.$x") or die "no dir $tmpcv/$mr.$x";
 			if(-d $cn) {
 				chdir($cn) or die "no chdir $cn: $!";
@@ -450,7 +450,7 @@ if(-f "$tmppn.data") {
 				cvs(undef,"get","-r$mr.$x",$cne);
 				chdir($cne) or last;  # no-op when $cne eq "."
 			}
-			print STDERR "$pn: processing $mr.$x       |\r";
+			print STDERR " $pn: processing $mr.$x       |\r";
 			my @buf = ();
 			open(LOG,"cvs log |");
 			while(<LOG>) {
@@ -886,13 +886,13 @@ while(@$cset) {
 	shift @$cset;
 	if($ENV{BKCVS_PUSH} and $done >= $ENV{BKCVS_PUSH}) {
 		$ddone += $done;
-		print STDERR "$pn: Push $ddone     |\r";
+		print STDERR " $pn: Push $ddone     |\r";
 		bk("push","-q");
 		$done=0;
 	}
 }
 if($ENV{BKCVS_PUSH}) {
-	print STDERR "$pn: Push LAST        |\r";
+	print STDERR " $pn: Push LAST        |\r";
 	bk("push","-q");
 }
 print STDERR "$pn: OK     |\n";

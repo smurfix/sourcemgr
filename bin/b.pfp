@@ -49,7 +49,7 @@ my $cmt; $cmt="@ARGV\n" if @ARGV;
 sub isgone($) {
 	my($x)=@_;
 	return unless $x =~ s/#.* delete//;	# ...FOO#1.2 delete => FOO
-	return unless $x =~ s#^\.\.\. //depot/perl/##; # //depot/perl/FOO => FOO
+	return unless $x =~ s#^\.\.\. //depot/(?:[-\._a-zA-Z0-9]+/)?perl/##; # //depot/perl/FOO => FOO
 	unlink($x);
 }
 
