@@ -96,7 +96,7 @@ cat <<END >>$what.prj
 ;;* Hier keine internen Modifiaktionen ablegen!
 ;;*
 END
-test -z "$edit" || vi $what.prj
+test -z "$edit" || ${VISUAL:-${EDITOR:-vi}} $what.prj
 prcs checkin -r$overs.@ $what </dev/tty
 #prcs admin compress $what
 
@@ -158,7 +158,7 @@ fi
 
 prcs populate $what 
 
-test -z "$edit" || vi $what.prj
+test -z "$edit" || ${VISUAL:-${EDITOR:-vi}} $what.prj
 
 prcs checkin -r$vers.@ $what </dev/tty
 #prcs admin compress $what

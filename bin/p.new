@@ -71,7 +71,7 @@ if test -n "$desc" ; then
 fi
 
 ## ist neu, also tu nix
-test -z "$edit" || vi $what.prj
+test -z "$edit" || ${VISUAL:-${EDITOR:-vi}} $what.prj
 prcs checkin -f -r$vers $what || true
 #prcs admin compress $what
 

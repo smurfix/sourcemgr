@@ -194,7 +194,7 @@ perl -p -e '
    # s/^  \((.*)\(\)\)/  ($1() :no-keywords)/;
 ' < $what.prj > $what.prx && mv $what.prx $what.prj
 
-vi $what.prj </dev/tty
+${VISUAL:-${EDITOR:-vi}} $what.prj </dev/tty
 prcs checkin -r$vers $what </dev/tty
 # prcs admin compress $what
 redo $dir

@@ -62,7 +62,7 @@ export PRCS_REPOSITORY=${PRCS_REPOSITORY:-/usr/src/archiv/prcs} PRCS_LOGQUERY=1
 trap '' 0
 
 if test -n "$edit" ; then
-  vi $what.prj
+  ${VISUAL:-${EDITOR:-vi}} $what.prj
 elif grep -q 'New-Version-Log ""' $what.prj ; then
 	perl -p -i -e '
 		BEGIN { $s="'"$*"'"; $s =~ s/"/'\''/g; }

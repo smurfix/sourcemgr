@@ -39,7 +39,7 @@ recopt=
 			-m)
 				shift; recopt="$recopt -m" ; auto= ;;
 			-e)
-				shift; recopt="$recopt -e" ; export PRCS_CONFLICT_EDITOR=vi ;;
+				shift; recopt="$recopt -e" ; export PRCS_CONFLICT_EDITOR=${VISUAL:-${EDITOR:-vi}} ;;
 			-R)
 				shift; recopt="$recopt -r" ; rec=only ;;
 			-r)

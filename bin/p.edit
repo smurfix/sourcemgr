@@ -41,5 +41,5 @@ export PRCS_REPOSITORY=${PRCS_REPOSITORY:-/usr/src/archiv/prcs} PRCS_LOGQUERY=1
 trap '' 0
 set -x
 
-vi $what.prj
+${VISUAL:-${EDITOR:-vi}} $what.prj
 

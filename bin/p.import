@@ -71,7 +71,7 @@ perl -p -i -e '
 
 
 if test -n "$edit" ; then
-  vi $what.prj
+  ${VISUAL:-${EDITOR:-vi}} $what.prj
 elif grep -q 'New-Version-Log ""' $what.prj ; then
   if test -n "$*" ; then
 	perl -p -i -e '
