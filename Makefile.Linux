@@ -25,8 +25,8 @@ install:
 	@install -d $(DESTDIR)/usr/src/STATUS/to-install
 	@install -d $(DESTDIR)/usr/src/STATUS/work
 
-	@install rpmmacros $(DESTDIR)/usr/src/STATUS/rpmmacros
-	@install rpmrc $(DESTDIR)/usr/src/STATUS/rpmrc
+	@install -m 644 rpmmacros $(DESTDIR)/usr/src/STATUS/rpmmacros
+	@install -m 644 rpmrc $(DESTDIR)/usr/src/STATUS/rpmrc
 
 	@install -d $(DESTDIR)/usr/src/STATUS/RPM/BUILD/tmp
 	@install -d $(DESTDIR)/usr/src/STATUS/RPM/RPMS
