@@ -12,7 +12,7 @@ use Storable qw(nstore retrieve);
 use File::ShLock;
 
 my $ENDFILE = "/var/run/b.cvs.stop";
-my $verbose = $ENV{"BK_VERBOSE"}
+my $verbose = $ENV{"BK_VERBOSE"};
 
 my $lock;
 if($ENV{BKCVS_LOCK}) {
