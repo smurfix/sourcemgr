@@ -184,6 +184,7 @@ sub bkfiles($) {
 		 m#^\.cvsignore$# or
 		 m#/\.cvsignore$# or
 		 m#\.prj$# or
+		 m#^core$# or
 		 m#/SCCS/x\.# or
 		 m#^CVS/# or
 		 m#/CVS/# or
@@ -329,11 +330,11 @@ sub proc(@) {
 	proc1($fn,$dt,$rev,$cmt,$autor,$syms{$rev}) if $dt; $dt=0;
 }
 
-my $tmpcv = "/var/cache/cvs/";
+my $tmpcv = "/var/cache/cvs";
 
-if(-f "$tmpcv.data") {
+if(-f "$tmpcv/$cn.data") {
 	print STDERR "Reading stored CVS log\n";
-	$cset = retrieve("$tmpcv.data");
+	$cset = retrieve("$tmpcv/$cn.data");
 } else {
 	$cset=[];
 	print STDERR "Processing CVS log\n";
@@ -370,7 +371,7 @@ if(-f "$tmpcv.data") {
 	foreach my $sym(keys %symdate) {
 		push(@{add_date($symdate{$sym})},$sym);
 	}
-	nstore($cset,"$tmpcv.data");
+	nstore($cset,"$tmpcv/$cn.data");
 }
 chdir("/");
 
@@ -538,7 +539,7 @@ sub process($$$$) {
 		rename("x.$$",$n);
 	}
 
-	if(@new and @gone) {
+	if(@new and @gone and not $ENV{BKCVS_NORENAME}) {
 		use IO::File;
 		# bk(get=>"-qeg",@gone); ## schon erledigt
 		# print STDERR ">>> bk -qeg @gone\n";
@@ -749,4 +750,4 @@ if($ENV{BKCVS_PUSH}) {
 	bk("push","-q");
 }
 print STDERR "OK                                                 \n";
-unlink("$tmpcv.data");
+unlink("$tmpcv/$cn.data");

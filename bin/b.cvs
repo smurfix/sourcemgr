@@ -10,7 +10,7 @@ Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -l (kein PSERVER) ]
        [ -n # (Intermediate-Push alle # Importe; Default 10; 0=garnicht) ]
 #      [ -r Fork (im CVS) ]
-	   [ -s (shell instead of renametool) ]
+	   [ -s (shell instead of renametool) ] [ -S (kein Renametool) ]
        [ -v releasename (cvs) ]
        [ -e CVS-Fudge-Sekunden (Default 120) ]
        [ -D (Debug) ] [ -Z (keine Kompression) ]
@@ -31,11 +31,12 @@ rvers=
 run="$0.pl"
 comp=-z3
 diff=
+rename=
 shells=0
 loc=
 df=0
 
-   eval set -- "$(getopt "d:v:r:hDZln:e:s" "$@")"
+   eval set -- "$(getopt "d:v:r:hDZln:e:sS" "$@")"
    for i
    do
 	   case "$i"
@@ -46,6 +47,8 @@ df=0
 		   	   shift; comp="" ;;
 		   -s)
 		   	   shift; shells=$(expr $shells + 1) ;;
+		   -S)
+		   	   shift; rename=1 ;;
 		   -D)
 			   shift; run="perl -d $(type -p "$0.pl")" ;;
 		   -e)
@@ -98,4 +101,5 @@ export BKCVS_SHELLS=$shells
 test -d /var/cache/cvs/bk/$was || b.get -d $dir -v $vers /var/cache/cvs/bk/$was || true
 test -n $diff && test -z "$BKCVS_DIFF" && export BKCVS_DIFF=$diff
 test -z "$BKCVS_PUSH" && export BKCVS_PUSH=$push
+test -z "$BKCVS_NORENAME" && export BKCVS_NORENAME=$rename
 exec $run "$was" "$dir-$vers"
