@@ -48,6 +48,11 @@ foreach my $arg(@ARGV) {
 	$excl{$arg}++;
 }
 
+my $cne=$cn;
+if($cn eq ".") {
+	$cn=$pn; $cn =~ s#.*_##;
+}
+
 my @DT; my @AU; my $mdate;
 
 my $dtf;
@@ -351,8 +356,9 @@ if(-f "$tmpcv/$cn.data") {
 				chdir($cn) or die "no chdir $cn: $!";
 				cvs(undef,"update","-d","-r$mr.$x");
 			} else {
-				cvs(undef,"get","-r$mr.$x",$cn);
-				chdir($cn) or last;
+				chdir($cn) if $cne eq ".";
+				cvs(undef,"get","-r$mr.$x",$cne);
+				chdir($cne) or last;
 			}
 			print STDERR "processing $mr.$x ...\n";
 			my @buf = ();
@@ -507,7 +513,7 @@ sub process($$$$) {
 				my @ff = splice(@f,0,$i||(1+@f));
 				bk("get","-egq", @ff);
 				unlink(@ff);
-				cvs("get","-r",$rev, map { "$cn/$_" } @ff);
+				cvs("get","-r",$rev, map { "$cne/$_" } @ff);
 			}
 			push(@gone, grep {
 					-e dirname($_)."/SCCS/s.".basename($_) and ! -e $_ }
@@ -518,7 +524,7 @@ sub process($$$$) {
 #	foreach my $f(keys %{$inf->{rev}}) {
 #		mkpath(dirname($f),0,0755);
 #		bk("get","-eg",$f);
-#		cvs("get","-d",dirname($f),"-r",$inf->{rev}{$f},"$cn/$f");
+#		cvs("get","-d",dirname($f),"-r",$inf->{rev}{$f},"$cne/$f");
 #	}
 #
 #	my $redo;
