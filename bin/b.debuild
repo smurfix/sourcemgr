@@ -169,13 +169,15 @@ bk export -T -w -tplain -r+ . "$T/$N-$VV"
 mv debian/changelog "$T/$N-$VV"/debian
 
 if test -n "$E" ; then # non-original package
+	cd "$T"
+	wget "http://smurf.noris.de/code/debian/public/${N}_$VV.orig.tar.gz" ||
 	bk export -T -w -tplain -rEXTERN . "$T/$N-$VV.orig"
 fi
 
 cd "$T/$N-$VV"
 rm -f debian/users debian/version debian/changelog.old || true
 cd $T
-dpkg-source -b -sa "$N-$VV"
+# dpkg-source -b -sa "$N-$VV"
 cd "$T/$N-$VV"
 fakeroot dpkg-buildpackage -S $opt_s -uc -us
 dpkg-genchanges -S $opt_s > "../${N}_${DV}_source.changes"
