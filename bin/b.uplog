@@ -1,6 +1,15 @@
 #!/bin/sh
 
-# Tool, um das Debian-ChangeLog automatisch zu produzieren
+if test "$1" = "-h" ; then
+	cat <<_END
+$0: auto-create a Debian changelog from Bitkeeper changeset comments.
+
+You usually don't use this program directly.
+Instead, install it (or rather, a small shell script which calls it)
+as a Bitkeeper post-commit and post-incoming trigger.
+_END
+	exit 0
+fi
 
 test -d "debian" || exit 0
 test -f "debian/SCCS/s.changelog" && exit 0

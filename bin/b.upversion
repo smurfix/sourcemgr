@@ -1,6 +1,19 @@
 #!/bin/sh
 
-# Tool, um eine Versionsnummer automagisch zu generieren
+if test "$1" = "-h" ; then
+	cat <<_END
+$0: auto-update a Debian changelog from Bitkeeper changeset comments.
+
+You cannot use this program directly.
+Instead, install it (or rather, a small shell script which calls it)
+as a Bitkeeper pre-commit trigger.
+
+NOTE: This script doesn't work as a pre-apply trigger for Merging.
+There's no point -- both branches should have modified the changelog
+file, and you need to manually edit it anyway. :-/
+_END
+	exit 0
+fi
 
 #exec >/tmp/bkt.$$ 2>&1
 #printenv | grep '^BK_'

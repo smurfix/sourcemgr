@@ -8,8 +8,11 @@ Standards-Version: 3.6.1
 Package: sourcemgr
 Architecture: any
 Suggests: bitkeeper, prcs
-Depends: devscripts (>> 2.7.92.1), dput, rcs, cvs, lintian, linda, dh-make, libshlock-perl
+Depends: devscripts (>> 2.7.92.1), dput, rcs, cvs, lintian, linda, dh-make, libshlock-perl, datefudge
 Description: Source management speed-up commands
  Helper commands to handle Bitkeeper or PRCS archives.
  Included are commands to debianize source archives and auto-build RPMs
- (Debian binary packages are much less complicated to work with).
+ and DEBs.
+ .
+ Note: I have switched to Debian. Therefore, the RPM support is
+ likely to be somewhat out of date.

@@ -1,5 +1,24 @@
 #!/usr/bin/python
 
+"""\
+This script is used to combine several .changes files into one.
+
+The usual usage is to create a source .deb, (semi-)autobuild a binary
+for at least one architecture, and then upload all of them together.
+
+Since Debian currently refuses to allow source-only uploads, you need
+to combine the source with at least one binary upload. This tool puts
+all of them together.
+
+As a welcome side effect, if the Changes: list of one is shorter
+(-V "include-since-this-version" option forgotten ...), the result
+will have the longest version, assuming that one is a prefix of the
+other.
+
+All changes files need to be signed by the same person.
+GPG will be asked to re-sign the result.
+"""
+
 from GnuPGInterface import GnuPG
 from sys import argv
 import os

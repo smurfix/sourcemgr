@@ -4,14 +4,13 @@ set -e
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- lies die aktuelle Version aus.
-	Es wird immer das aktuelle Verzeichnis verwendet.
-	Analysierte Dateien:
+Usage: $(basename $0)  -- try to get the current BK archive version.
+	Analyzed files:
 		debian/version
 		debian/changelog
 		rpm.version
 		SCCS/s.ChangeSet
-	... in dieser Reihenfolge.
+	... in that order.
 END
     trap "" 0
     exit 1

@@ -1,3 +1,9 @@
+sourcemgr (1.306) unstable; urgency=low
+
+  * doc update. More needs to be done.
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon, 26 Jan 2004 16:36:56 +0100
+
 sourcemgr (1.305) unstable; urgency=low
 
   * Put configuration in ~/.sourcemgr.cf or /etc/sourcemgr.cf
