@@ -1,5 +1,5 @@
 #!/bin/sh
-export BK_REPOSITORY=bk://bitkeeper.noris.de
+export BK_REPOSITORY=${BK_REPOSITORY:-"bk://bitkeeper.noris.de"}
 
 # 2001-09-24 smurf Kopie aus b.get
 
