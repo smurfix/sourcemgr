@@ -9,7 +9,7 @@ Usage: $(basename $0)  -- checkt neue Version von externem Source ein
        [ -d Paket ]
        [ -v altes-Release ]
        [ -w neues-Release ]
-	   [ -n ] (BK-Daten danach nicht löschen)
+       [ -n ] (BK-Daten danach nicht löschen)
        Verzeichnis-mit-neuem-Source
        Kommentar
 
