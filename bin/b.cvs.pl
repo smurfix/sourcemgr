@@ -290,8 +290,11 @@ sub add_date($;$$$$) {
 sub rev_ok($$) {
 	my($fn,$rev)=@_;
 # Target: 2.2.0.4
-# OK: 1.1 1.2 1.3 1.4  2.0 2.1 2.2 2.2.4.1 2.2.4.2 2.2.4.3
+# OK: 1.1 1.1.1.1 1.1.1.2 1.2 1.3 1.4  2.0 2.1 2.2 2.2.4.1 2.2.4.2 2.2.4.3
 # !OK: 1.2.3.4 2.3 2.3.4.5 2.2.3.1 2.2.5.1 2.2.4.1.4.4 3.1 
+
+# Vorsicht -- 1.1.1.* muss separat rausgefiltert werden, wenn es
+# zeitlich nach 1.2 kommt.
 
 	my @f = split(/\./,$rev);
 	return (0+@f == 2 or (0+@f==4 and $f[0]==1 and $f[1]==1 and $f[2]==1))
@@ -862,6 +865,7 @@ while(@$cset) {
 			foreach my $fn(keys %$f) {
 				$adt{$fn}=$f->{$fn}
 					if $f->{$fn}{rev} !~ /^1\.1\.1\.\d+$/
+						or not defined $cutoff{$fn}
 						or $y->{wann} < $cutoff{$fn};
 			}
 			$last{$autor}=$ldiff=$y->{wann};
