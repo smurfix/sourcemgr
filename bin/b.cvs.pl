@@ -515,9 +515,14 @@ if(-f "$tmppn.data") {
 					chdir($cn);
 				}
 				cvs(undef,"get","-r$mr.$x",$cne);
+
 				chdir($cne) or last;  # no-op when $cne eq "."
 			}
+
 			print STDERR "$CLR $pn: processing $mr.$x\r";
+			my $lines=`find . -name CVS -prune -o -type f -print | wc -l`;
+			last unless (0+$lines);
+
 			my @buf = ();
 			open(LOG,"cvs log |");
 			while(<LOG>) {
