@@ -631,6 +631,7 @@ sub process($$$$) {
 my %last;
 my $x;
 my $done=0;
+my $ddone=0;
 while(@$cset) {
 	$x = $cset->[0];
 	next if $x->{wann} <= $dt_done;
@@ -701,7 +702,8 @@ while(@$cset) {
 } continue {
 	shift @$cset;
 	if($ENV{BKCVS_PUSH} and $done >= $ENV{BKCVS_PUSH}) {
-		print STDERR "Push $done                                          \r";
+		$ddone += $done;
+		print STDERR "Push $ddone                                          \r";
 		bk("push","-q");
 		$done=0;
 	}
