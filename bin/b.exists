@@ -55,7 +55,7 @@ test -z "$vers" -o "$vers" = "-" || dv="-$vers"
 if bk changes -r+ "$BK_REPOSITORY/$what$dv" >/dev/null 2>&1 ; then
 	: # OK
 elif bk changes -r+ "$BK_REPOSITORY/$what2$dv" >/dev/null 2>&1 ; then
-	what=what2
+	what="$what2"
 elif bk changes -r+ "$BK_REPOSITORY/public/$what$dv" >/dev/null 2>&1 ; then
 	what="public/$what"
 elif bk changes -r+ "$BK_REPOSITORY/public/$what2$dv" >/dev/null 2>&1 ; then
