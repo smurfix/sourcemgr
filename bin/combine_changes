@@ -1,0 +1,200 @@
+#!/usr/bin/python
+
+from GnuPGInterface import GnuPG
+from sys import argv
+import os
+
+FORMAT="1.7"
+
+#-----BEGIN PGP SIGNED MESSAGE-----
+#Hash: SHA1
+#
+#Format: 1.7
+#Date: 13 Sep 2003 10:00:35 +0200
+#Source: datefudge
+#Binary: datefudge
+#Architecture: i386
+#Version: 1.12
+#Distribution: unstable
+#Urgency: low
+#Maintainer: Matthias Urlichs <smurf@smurf.noris.de>
+#Changed-By: Matthias Urlichs <smurf@debian.org>
+#Description: 
+# datefudge  - Fake the system date
+#Changes: 
+# datefudge (1.12) unstable; urgency=low
+# .
+#   * Updated maintainer email.
+#   * Use a Lintian override to not-warn about the shared library
+#     (which is not linked against, and therefore doesn't require a shlibs entry)
+#   * Extended the package description
+#   * added COPYING file to source tarball
+#   * Updated Standards-Version to 3.6.1 (no changes)
+#   * Minor build fixes
+#Files: 
+# 34372247322c63cc1b5eb3b0c18da548 6194 devel optional datefudge_1.12_i386.deb
+#-----BEGIN PGP SIGNATURE-----
+#Version: GnuPG v1.2.3 (GNU/Linux)
+#
+#iD8DBQE/YvGo8+hUANcKr/kRApKwAJ9CTRWP/7m445cdY6m15limrpIw1ACgpINC
+#PS3qOUxxJTF+5Sn8ZujYo30=OuZp
+#-----END PGP SIGNATURE-----
+
+keys={}
+files={}
+changes=None
+sig=None
+fullsig=None
+gpg=GnuPG()
+descr={}
+binaries=None
+closes=None
+archs=[]
+
+import tempfile
+
+for fn in argv[1:]:
+	temp = tempfile.TemporaryFile()
+	null=open("/dev/null","w")
+
+	f=open(fn,"r")
+	g=gpg.run(["--decrypt"],create_fhs=["status"],attach_fhs={"stdin":f,"stdout":temp,"stderr":null})
+
+	signed=False
+	chg=""
+	gdata=""
+	for s in g.handles["status"]:
+		gdata+=s
+		s=s.split()
+		if len(s) < 2: raise ValueError,("Bad status",s)
+		if s[0] == "[GNUPG:]":
+			if s[1] == "GOODSIG":
+				if sig is None:
+					fullsig=s
+					sig = s[2]
+				elif sig != s[2]:
+					raise ValueError,("Different sigs",s,fullsig)
+			signed=True
+	if not signed:
+		raise ValueError,("file not signed",fn,gdata)
+
+	g.wait()
+	temp.seek(0)
+	state="header"
+	s_last=None
+	for s in temp:
+		s=s.rstrip()
+		if not s.startswith(" "):
+			if state=="change":
+				if changes is None:
+					changes=chg
+				elif changes != chg:
+					if changes.startswith(chg):
+						pass
+					elif chg.startswith(changes):
+						changes=chg
+					else:
+						raise ValueError,("Changes: differs",fn)
+			state="header"
+		elif state=="header":
+			raise ValueError,("State is Header",s_last,s)
+
+		if state == "header":
+			s_last=s
+			try:
+				s,d=s.split(" ",1)
+			except ValueError:
+				s=s.strip()
+				d=None
+			if s == "Format:":
+				if d != FORMAT:
+					raise ValueError,("Format",d)
+			elif s == "Architecture:":
+				for d in d.split():
+					if d in archs:
+						if d != "all":
+							raise ValueError,("Dup arch",archs,d)
+					else:
+						archs.append(d)
+			elif s == "Maintainer:":
+				if not keys.has_key(s):
+					keys[s]=d
+				elif fn.endswith("_source.changes"):
+					keys[s]=d
+				elif keys[s] != d:
+					raise ValueError,("Different values",s,keys[s],d)
+			elif s == "Binary:":
+				d=d.split()
+				d.sort()
+				if binaries is None:
+					binaries = d
+				elif binaries != d:
+					raise ValueError,("Binaries don't match",binaries,d)
+			elif s == "Closes:":
+				d=d.split()
+				d.sort()
+				if closes is None:
+					closes = d
+				elif closes != d:
+					for dd in d:
+					    if dd not in closes:
+						closes.append(dd)
+
+			elif s == "Files:":
+				state="files"
+			elif s == "Description:":
+				state="descr"
+			elif s == "Changes:":
+				state="change"
+			elif s == "" or s == " " or d == "" or d is None:
+				continue
+			else:
+				if not keys.has_key(s):
+					keys[s]=d
+				elif keys[s] != d:
+					raise ValueError,("Different values",s,keys[s],d)
+		elif state=="files":
+			fl = s.split()
+			if files.has_key(fl[4]):
+				raise ValueError,("File is known",fl)
+			files[fl[4]] = fl
+		elif state=="descr":
+			f=s.split()[0]
+			if not descr.has_key(f):
+				descr[f]=s
+			elif descr[f] != s:
+				raise ValueError,("different Descr:",f,descr[f],s)
+		elif state=="change":
+			chg += s+"\n"
+		else:
+			raise RuntimeError,("bad state",state)
+
+out=open(os.path.join(os.path.dirname(fn),keys["Source:"]+"_"+keys["Version:"]+".changes"),"w")
+
+temp.seek(0)
+
+print >>temp, "Format:",FORMAT
+for s,d in keys.iteritems():
+	print >>temp, s,d
+print >>temp, "Binary:"," ".join(binaries)
+print >>temp, "Architecture:"," ".join(archs)
+if closes:
+	print >>temp, "Closes:"," ".join(closes)
+print >>temp, "Changes:"
+print >>temp, changes,
+print >>temp, "Description:"
+for f in descr.itervalues():
+	print >>temp, f
+print >>temp, "Files:"
+for fl in files.itervalues():
+	print >>temp, " "+" ".join(fl)
+print >>temp,""
+
+temp.seek(0)
+
+g=gpg.run(["--clearsign"],create_fhs=["status"],attach_fhs={"stdin":temp,"stdout":out,"stderr":null})
+for s in g.handles["status"]:
+	print s,
+g.wait()
+
+

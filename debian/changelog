@@ -1,3 +1,9 @@
+sourcemgr (1.300) unstable; urgency=low
+
+  * + combine_changes
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 20 Jan 2004 17:12:11 +0100
+
 sourcemgr (1.299) unstable; urgency=low
 
   * b.debuild: Check all distributions, not just this one
