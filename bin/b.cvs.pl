@@ -371,7 +371,7 @@ sub proc(@) {
 				}
 				next;
 			} else {
-				if($pre) {
+				if($pre and $pre ne "1.1.0.1") { # vendor branch
 					die "Kein Vor-Symbol '$pre' in '$fn'\n" unless $syms{$pre};
 					$tpre{$syms{$pre}[0]}++;
 				}

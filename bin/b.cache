@@ -70,7 +70,7 @@ if test -d "$c" ; then
 
 	echo "$what$dv: Updating cache. Changes:" >&2
 	env PAGER=/bin/cat bk changes -R -nd":I:	:USER:@:DOMAIN:" >&2
-	echo "... end of change list" >&2
+	echo -n -e "... end of change list\r" >&2
 	bk pull -q $BK_REPOSITORY/$what$dv 
 	R=$(bk changes -r+ -d':I:\n' $(cat BitKeeper/log/parent))
 	L=$(bk changes -r+ -d':I:\n')
