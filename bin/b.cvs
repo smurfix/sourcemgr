@@ -111,7 +111,7 @@ test -z "$3"
 if test -n "$user" ; then
 	woher="$user@$1"
 elif test -z "$loc" ; then
-	woher=":pserver:anonymous\@$1"
+	woher=":pserver:anonymous@$1"
 else
 	woher="$1"
 fi

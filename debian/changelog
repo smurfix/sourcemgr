@@ -1,3 +1,11 @@
+sourcemgr (1.266) unstable; urgency=low
+
+  * bin/b.cvs
+       Thinko, this is sh not perl
+  * 
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Sat, 19 Jul 2003 11:31:48 +0200
+
 sourcemgr (1.265) unstable; urgency=low
 
   * b.cvs:
