@@ -27,10 +27,15 @@
 #
 # CVS doesn't have changeset-wide tags; this tool implements the
 # workaround of collecting all of them and remembering which were latest
-# in time. This results in some confusion when the oiginal CVS people
-# import part of somebody else's CVS subtree into their own, but that
-# can't be helped.
-# 
+# in time (for purposes of tagging the whole tree). This results in some
+# confusion when the oiginal CVS people import part of somebody else's
+# CVS subtree into their own, but that can't be helped.
+#
+# Importing tagged sub-branches works, by properly walking along the
+# tree. Note that because of the problem mentioned before, if the tagged
+# branch-off point is too late you must manually undo the "wrong" part
+# of your CVS tree(s).
+#
 # This tool is copyright (C) Matthias Urlichs.
 # It is released under the Gnu Public License, version 2.
 #
@@ -60,7 +65,7 @@ if($ENV{BKCVS_LOCK}) {
 	} continue { sleep 15; }
 }
 
-### Test Revisionsmatching
+### Test Revision Matching
 #my %target=("x"=>"2.2.0.4");
 #my $trev="test";
 #sub rev_ok($$);
@@ -391,8 +396,14 @@ sub proc1($$$$$$$) {
 		 0;
 	return unless rev_ok($fn,$rev);
 	add_date($dt,$fn,$rev,$autor,$cmt,$gone);
+
+	# Branch: tags get the earliest position, everything else gets the latest.
 	foreach my $sym(@$syms) {
-		$symdate{$sym}=$dt if not defined $symdate{$sym} or $symdate{$sym}<$dt;
+		if($sym =~ /^branch:/i) {
+			$symdate{$sym}=$dt if not defined $symdate{$sym} or $symdate{$sym}>$dt;
+		} else {
+			$symdate{$sym}=$dt if not defined $symdate{$sym} or $symdate{$sym}<$dt;
+		}
 	}
 }
 sub proc(@) {
@@ -598,6 +609,7 @@ END
 	}
 }
 chdir($tmppn);
+unlink("BitKeeper/etc/SCCS/x.lmark");
 system("bk prs -anhd:KEY: -r+ ChangeSet | tail -1 > BitKeeper/etc/SCCS/x.lmark");
 
 sub cleanout() {
@@ -865,14 +877,20 @@ if($trev ne "" and $ENV{BK_TARGET_NEW}) { # tag must not exist
 			unless bk("prs","-hd:I:", "-r$pre","ChangeSet");
 	}
 	my $b_rev=bk("prs","-hd:I:", "-rBranch:$trev","ChangeSet");
-	die "No revision number for '$trev' found.\n" unless $b_rev;
-	bk("undo","-sfqa$b_rev");
-	system("bk prs -anhd:KEY: -r+ ChangeSet | tail -1 > BitKeeper/etc/SCCS/x.lmark");
+	my $b_top=bk("prs","-hd:I:", "-r+","ChangeSet");
+	unless($b_rev) {
+		warn "No start revision for branch '$trev' found!\n" unless $b_rev;
+	} else {
+		bk("undo","-sfqa$b_rev");
+		unlink("BitKeeper/etc/SCCS/x.lmark");
+		system("bk prs -anhd:KEY: -r+ ChangeSet | tail -1 > BitKeeper/etc/SCCS/x.lmark");
+	}
 
-	bk("tag",$trev);
+	bk("tag","-r+",$trev) if $b_rev ne $b_top;
 	bk("clone",".","$ENV{BK_REPOSITORY}/$pn");
-} elsif($trev ne "") { # tag must exist
-	die "Tag '$trev' doesn't exists" unless bk("prs","-hd:I:", "-r$trev","ChangeSet");
+	bk("parent","$ENV{BK_REPOSITORY}/$pn");
+} elsif($trev ne "") { # tag should exist
+	warn "Tag '$trev' doesn't exists!\n" unless bk("prs","-hd:I:", "-r$trev","ChangeSet");
 }
 
 my %last;
@@ -948,6 +966,7 @@ while(@$cset) {
 			$done++;
 		}
 	}
+	unlink("BitKeeper/etc/SCCS/x.lmark");
 	system("bk prs -anhd:KEY: -r+ ChangeSet | tail -1 > BitKeeper/etc/SCCS/x.lmark");
 } continue {
 	shift @$cset;
