@@ -18,8 +18,10 @@ test -n "$pn" || exit 1
 export BK_YEAR4=1
 rm -f debian/changelog
 bk prs -h -d':CSETKEY:\n' debian/version | while read cv ; do
-	v=$(bk r2c -r"$cv" debian/version)
-	bk prs -r"$v" -h -d"$pn ($(bk get -q -p -r$cv debian/version | head -1))"' unstable; urgency=low\n\n$each(:C:){  * (:C:)\n}\n -- BK_Importer <:USER:@:HOST:>  :Dd: :DM: :Dy: :T: +0000\n\n' ChangeSet
+	if test -n "$cv" ; then
+		v=$(bk r2c -r"$cv" debian/version)
+		bk prs -r"$v" -h -d"$pn ($(bk get -q -p "-r$cv" debian/version | head -1))"' unstable; urgency=low\n\n$each(:C:){  * (:C:)\n}\n -- BK_Importer <:USER:@:HOST:>  :Dd: :DM: :Dy: :T: +0000\n\n' ChangeSet
+	fi
 done |
 
 perl >debian/changelog -e'
