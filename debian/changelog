@@ -1,3 +1,21 @@
+sourcemgr (1.351) unstable; urgency=low
+
+  * Merge
+
+ -- Matthias Urlichs <smurf@debian.org>  Thu,  3 Jun 2004 17:06:28 +0200
+
+sourcemgr (1.350) unstable; urgency=low
+
+  * b.debuild: reorder Usage command
+
+ -- Matthias Urlichs <smurf@debian.org>  Thu,  3 Jun 2004 17:06:11 +0200
+
+sourcemgr (1.349) unstable; urgency=low
+
+  * debian/control: depend on shlock!
+
+ -- Matthias Urlichs <smurf@debian.org>  Thu,  3 Jun 2004 17:05:18 +0200
+
 sourcemgr (1.348) unstable; urgency=low
 
   * b.debuild:
@@ -113,6 +131,7 @@ sourcemgr (1.331) unstable; urgency=low
 
  -- Matthias Urlichs <smurf@debian.org>  Mon,  8 Mar 2004 02:51:23 +0100
 
+>>>>>>>
 sourcemgr (1.330) unstable; urgency=low
 
   * b.version: also parse "changelog"

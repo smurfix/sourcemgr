@@ -3,15 +3,6 @@
 . /usr/share/sourcemgr/debian
 . /usr/share/sourcemgr/upload_to
 
-set -e
-trap 'test -n "$superset" && kill $SUPERPID; usage; exit 1' 0
-
-for f in gpg ssh ; do
-	if type -p $f-agent-start.sh >/dev/null 2>&1 ; then
-		. $(type -p $f-agent-start.sh)
-	fi
-done
-
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Build Debian source(+binary) packages.
@@ -42,6 +33,15 @@ END
     trap "" 0
     exit 1
 }
+
+set -e
+
+for f in gpg ssh ; do
+	if type -p $f-agent-start.sh >/dev/null 2>&1 ; then
+		. $(type -p $f-agent-start.sh)
+	fi
+done
+trap 'usage; exit 1' 0
 
 dir=
 defvers=- # cannot be empty
