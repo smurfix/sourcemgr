@@ -69,7 +69,7 @@ if test -d "$c" ; then
 	cd "$c.x"
 
 	echo "$what$dv: Updating cache. Changes:" >&2
-	bk changes -L -nd":I:	:USER:@:DOMAIN:" | cat >&2 # sonst less
+	env PAGER=/bin/cat bk changes -L -nd":I:	:USER:@:DOMAIN:" >&2
 	echo "... end of change list" >&2
 	bk pull -q $BK_REPOSITORY/$what$dv 
 else
