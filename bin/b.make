@@ -131,6 +131,9 @@ if test -z "$doinstall" -a "$(whoami)" = "root" ; then
     exit 1
 fi
 
+desc=$(echo $dir | sed -e 's/[_\/]/:/g' -e 's/:*$//')
+what=$(echo $desc | sed -e 's/:/_/g' -e 's/_*$//')
+
 set -e
 
 if test -z "$islocal" ; then
