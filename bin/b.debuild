@@ -202,6 +202,7 @@ DI="$(dpkg-parsechangelog | sed -ne 's/^Distribution:[ 	]*//p')"
 
 N="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
 test -n "$N" || N="$(basename "$dir")"
+N1=$(echo $N | perl -pe 's/^((lib)?.).*/$1/')
 
 test -n "$V"
 if bk prs -r+ -ahnd'$if(:TAG:){$each(:TAG:){:TAG:}}' ChangeSet | fgrep -xqs "DEBIAN-$V"
@@ -251,13 +252,9 @@ if test -n "$E" ; then # non-original package
 	if \
 	   cp ../${N}_$VV.orig.tar.gz "$T/" 2>/dev/null ||
  	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
-		"${DEBIAN_REPOSITORY}/experimental/source/${N}_$VV.orig.tar.gz" ||
- 	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
-		"${DEBIAN_REPOSITORY}/unstable/source/${N}_$VV.orig.tar.gz" ||
- 	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
-		"${DEBIAN_REPOSITORY}/stable/source/${N}_$VV.orig.tar.gz" ||
+		"${DEBIAN_REPOSITORY}/upstream/${N}_$VV.orig.tar.gz" ||
 	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
-		"${DEBIAN_REPOSITORY}/public/${N}_$VV.orig.tar.gz" ||
+		"http://ftp2.de.debian.org/debian/pool/main/${N1}/${N}/${N}_$VV.orig.tar.gz" ||
 	   false
 	then
 		echo + get original source from .. or via HTTP
