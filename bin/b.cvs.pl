@@ -390,7 +390,7 @@ sub proc(@) {
 			next;
 		}
 		if($state == 5 and $x =~ /^date:\s+(\d+)\/(\d+)\/(\d+)\s+(\d+)\:(\d+)\:(\d+)\s*\;\s+author\:\s+(\S+)\;\s+state\:\s+(\S+)\;/) {
-			$skip=$1 if lc($8) eq "dead";
+			# $skip=1 if lc($8) eq "dead";
 			$autor = $7;
 			my($y,$m,$d,$hh,$mm,$ss)=($1,$2,$3,$4,$5,$6);
 			$y-=1900 if $y>=1900; $m--;
