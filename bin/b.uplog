@@ -11,7 +11,7 @@ test -n "$pn" || pn="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
 test -n "$pn" || pn="$(basename "$(pwd)")"
 
 rm -f debian/changelog
-bk changes -d"$pn"' (_>:I:<_) unstable; urgency=low\n\n$each(:C:){  * (:C:)\n}\n -- BK_Importer <:USER:@:HOST:>  :Dd: :DM: :Dy: :T: +0000\n\n' |
+bk changes -e -d"$pn"' (_>:I:<_) unstable; urgency=low\n\n$each(:C:){  * (:C:)\n}\n -- BK_Importer <:USER:@:HOST:>  :Dd: :DM: :Dy: :T: +0000\n\n' |
 
 perl >debian/changelog -e'
 $maxchg=10;
@@ -28,14 +28,18 @@ while(<F>) {
 }
 close(F);
 
+my $F = undef;
+if(-f "SCCS/s.rpm.version") { $F="rpm.version" } 
+if(-f "debian/SCCS/s.version") { $F="debian/version" } 
+
 sub vgrab($) {
 	my($vers)=@_;
-	return "($vers)" if not -f "rpm.version" or not $maxchg;
+	return "($vers)" if not defined $F or not $maxchg;
 	--$maxchg;
-	$rev=`bk c2r -r$vers rpm.version`;
+	$rev=`bk c2r -r$vers "$F"`;
 	return "($vers)" unless $rev;
 	chop $rev;
-	$rev=`bk get -q -p -r$rev rpm.version`;
+	$rev=`bk get -q -p -r$rev "$F"`;
 	return "(0.0)" unless $rev;
 	$rev =~ s/\n.*//s;
 	return "($rev)";
