@@ -50,7 +50,6 @@ make -f Makefile.Linux install
 %dir /usr/src/STATUS/RPM/RPMS
 %dir /usr/src/STATUS/RPM/BUILD
 %dir /usr/src/STATUS/after
-%dir /usr/src/STATUS/bin
 %dir /usr/src/STATUS/checkout
 %dir /usr/src/STATUS/cvsup
 %dir /usr/src/STATUS/dist
