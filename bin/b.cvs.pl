@@ -32,6 +32,8 @@ select(STDERR); $|=1; select(STDOUT);
 use Shell qw(); ## bk cvs
 
 sub init_bk();
+my $rhost="un.known";
+$rhost=$1 if $ENV{CVS_REPOSITORY} =~ /\@(:?cvs\.)([^\:]+)\:/;
 
 my $cn = shift @ARGV;
 my $pn = shift @ARGV;
@@ -58,7 +60,7 @@ sub dateset($;$) {
 	@AU=();
 
 	@DT = ("LD_PRELOAD=$dtf/datefudge.so","DATEFUDGE=".(time-$dt-($$%(1+$diff)))) if $dt;
-	@AU = ("LOGNAME=$au","USER=$au","BK_USER=$au","BK_HOST=un.known") if $au;
+	@AU = ("LOGNAME=$au","USER=$au","BK_USER=$au","BK_HOST=$rhost") if $au;
 }
 
 sub dupsi($$) {
@@ -442,6 +444,7 @@ unless(-d "$tmppn/BitKeeper") {
 	system("bk clone -q $ENV{BK_REPOSITORY}/$pn $tmppn");
 
 	if($?) {
+		print STDERR "Creating new Bitkeeper repository...\n";
 		my $tmpcf = "/tmp/cf.$$";
 		open(CF,">$tmpcf");
 		print CF <<END;
@@ -525,6 +528,15 @@ sub process($$) {
 		foreach my $f(keys %{$inf->{rev}}) {
 			my $rev = $inf->{rev}{$f};
 			push(@{$rev{$rev}}, $f);
+			if($ENV{CVS_REPOSITORY} =~ /\:pserver\:/) {
+				do {
+					$f = dirname($f);
+					mkpath("$f/CVS",1,0755);
+				} while($f ne ".");
+			} else {
+				$f = dirname($f);
+				rmdir("$f/CVS");
+			}
 		}
 		foreach my $rev(keys %rev) {
 			my @f = @{$rev{$rev}};
@@ -671,12 +683,12 @@ foreach my $x(@$cset) {
 			# process($sum->{ende},$sum) if $sum;
 			$sum=undef;
 			process($idate,$last);
+			bk("push") unless $step++%10;
 		} else {
 			$sum={} unless ref $sum;
 			atta($sum,$last);
 		}
 	}
 	$last = $x;
-	bk("push") unless $setpp++%10;
 }
 process($last->{ende}+30,$last) if $last;
