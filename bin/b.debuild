@@ -237,7 +237,7 @@ test -f "$T/$N-$VV"/debian/changelog || mv debian/changelog "$T/$N-$VV"/debian
 
 if test -n "$E" ; then # non-original package
 	if \
-	   cp ../${N}_$VV.orig.tar.gz "$T/" 2>&/dev/null ||
+	   cp ../${N}_$VV.orig.tar.gz "$T/" 2>/dev/null ||
  	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
 		"${web1}${N}_$VV.orig.tar.gz" ||
 	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \

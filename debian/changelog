@@ -1,3 +1,9 @@
+sourcemgr (1.297) unstable; urgency=low
+
+  * b.debuild: typo
+
+ -- Matthias Urlichs <smurf@debian.org>  Sat, 17 Jan 2004 23:53:14 +0100
+
 sourcemgr (1.296) unstable; urgency=low
 
   * debuild: no more --ignore-dirname option
