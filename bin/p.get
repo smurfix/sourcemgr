@@ -6,12 +6,12 @@ Usage: $(basename $0)  -- holt noris-Sourcecode aus dem Archiv
        [ -d dest-directory ]
        [ -v releasename ]
        [ -i (Import, holt nur .prj) ]
-	   [ -n (holt nach /usr/src) ]
+       [ -n (holt nach /usr/src) ]
 END
 exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 vers=noris
 imp=
 mkdir=
@@ -52,8 +52,8 @@ if test -n "$mkdir" ; then
 		echo "??? $dir: Gibt es schon! Up-to-date??"
 	else
 		mkdir -p "$dir"
-		cd "$dir"
 	fi
+	cd "$dir"
 fi
 
 set -xe

@@ -17,6 +17,7 @@ p.merge     Update lokaler Sourcen bei Konflikten beim Checkin
 p.oget      holt Original-Sourcecode aus dem Archiv
 p.patch     Patchen (normalerweise externer) Sourcen
 p.put       Speichern von Änderungen im Archiv
+p.rdist     Verteile an alle betroffenen Rechner
 p.rmcvs     Rekursives Löschen von CVS-spezifischen Subdirectories
 p.update    Update lokaler Sourcen nach externen Änderungen
 END

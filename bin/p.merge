@@ -4,18 +4,18 @@ usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Update lokaler Sourcen bei Konflikten beim Checkin
        [ -d dest-directory ]
-       [ -V releasename ]
+       [ -v releasename ]
        [ -e (edit each file with conflicts immediately) ]
        [ -m (resolve what-to-do manually) ]
 END
 exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 vers=base
 auto=-f
 
-   set -- $(getopt "d:V:hem" $*)
+   set -- $(getopt "d:v:hem" $*)
    if test $? != 0
    then
 	   usage
@@ -28,7 +28,7 @@ auto=-f
 		       usage ;;
 		   -d)
 			   shift; dir="$1"; shift;;
-		   -V)
+		   -v)
 			   shift; vers="$1"; shift;;
 			-m)
 				shift; auto= ;;

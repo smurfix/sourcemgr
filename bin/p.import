@@ -6,16 +6,19 @@ Usage: $(basename $0)  -- update externer Sourcen
        [ -d dest-directory ]
        [ -W origreleasename ]
        [ -V neworigreleasename ] | [ -v releasename ]
+       [ -e (editiere Projektdatei) ]
+       Kurzbeschreibung
 END
 exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 overs=base
 nvers=base
 vers=
+edit=
 
-   set -- $(getopt "d:V:W:hv:" $*)
+   set -- $(getopt "d:V:W:hv:e" $*)
    if test $? != 0
    then
 	   usage
@@ -32,6 +35,8 @@ vers=
 			   shift; overs="$1"; shift;;
 		   -V)
 			   shift; nvers="$1"; shift;;
+		   -e)
+		       edit=y; shift;;
 		   -v)
 			   shift; vers="$1"; shift;;
 		   --)
@@ -56,17 +61,24 @@ fi
 export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 
-set -xe
-
 test -f $what.prj || prcs checkout -r $overs.@ $what $what.prj
 prcs populate -f -d $what
 
-perl -p -i -e '
-   s/\(New-Version-Log \"\"\)/(New-Version-Log "'Import\ $vers'")/ if "'$vers'" ne "";
-   s/^  \((.*)\(\)\)/  ($1() :no-keywords)/;
-' $what.prj
+if test -n "$edit" ; then
+  vi $what.prj
+elif grep -q 'New-Version-Log ""' $what.prj ; then
+	perl -p -i -e '
+		BEGIN { $s="'"$*"'"; if($s ne "") {
+			  print "Kommentar eingeben, ^D druecken..:\n";
+			  $s = join("",<STDIN>);
+			  chop $s;
+	    } $s =~ s/"/'\''/g; }
+	   s/\(New-Version-Log \"\"\)/(New-Version-Log "$s")/;
+  ' $what.prj
+elif jjj
+fi
 
-vi $what.prj
+set -xe
 
-prcs checkin -r $vers.@ $what
+prcs checkin -f -r $vers.@ $what
 

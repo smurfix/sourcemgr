@@ -9,10 +9,11 @@ END
 exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 vers=
+longopt="-l"
 
-   set -- $(getopt "d:v:h" $*)
+   set -- $(getopt "d:v:hq" $*)
    if test $? != 0
    then
 	   usage
@@ -27,6 +28,10 @@ vers=
 			   shift; dir="$1"; shift;;
 		   -v)
 			   shift; vers="-r$1"; shift;;
+		   -q)
+		   	   longopt="" ; shift ;;
+		   --)
+		       shift; break ;;
 	   esac
    done
 
@@ -37,5 +42,5 @@ what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 
 set -xe
 
-prcs info -l $vers $what
+prcs info $longopt $vers $what
 

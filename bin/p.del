@@ -5,12 +5,12 @@ cat >&2 <<END
 Usage: $(basename $0)  -- überschüssige Dateien löschen
        [ -d dest-directory ]
        [ -n (NICHT wirklich löschen) ]
-	   Datei...
+       Datei...
 END
 exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 rm=rm
 
    set -- $(getopt "d:nh" $*)

@@ -60,9 +60,9 @@ while read ver dir rest ; do
 		elif test -f "fail/$desc" ; then 
 			echo "$desc: Hatte einen Fehler!"
 		elif test -z "$doinstall" ; then
-			p.make "$dir"
+			p.make -g "$dir"
 		else
-			p.make -i "$dir"
+			p.make -gi "$dir"
 		fi
 	fi
 done < build

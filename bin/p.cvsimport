@@ -4,23 +4,24 @@ usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Importieren eines CVS-Archivs
        [ -d dest-directory ]
-	   [ -V origreleasename ]
-	   [ -v releasename ]
-	   [ -t CVS-Dateiname ]
-	   [ -u URL ]
-	   [ -g (goto Source and do internal version too) ]
-	   [ Beschreibungstext ]
+       [ -V origreleasename ]
+       [ -v releasename ]
+       [ -t CVS-Dateiname ]
+       [ -u URL ]
+       [ -g (goto Source and do internal version too) ]
+       [ Beschreibungstext ]
 END
 exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 overs=
 vers=noris
 txt="$dir"
 url=
 cfile=
 LV=/tmp/lv.$$
+goto=
 
    set -- $(getopt "gd:t:V:v:hu:" $*)
    if test $? != 0
@@ -74,7 +75,7 @@ cd /tmp/; mkdir x.$$; cd x.$$
 set -e
 
 if test -n "$overs" ; then ov="$overs.@"; else ov="base.@"; fi
-prcs checkout -r $ov $what </dev/tty
+prcs checkout -r $ov $what $what.prj </dev/tty
 perl -p -e '
   s#\(Project-Description \"\"\)#(Project-Description "'"$txt"'")#;
 ' < $what.prj > $what.prx && mv $what.prx $what.prj
@@ -94,7 +95,7 @@ END
 	fi
 ) |
 perl -e '
-while(<>) { push(@lst,$_) if s/.*?\br-([-0-9a-z]*)($|[^-0-9a-z].*)/$1/; }
+while(<>) { push(@lst,$_) if s/.*?\b(r|hj)-([-0-9a-z]*)($|[^-0-9a-z].*)/$2/; }
 print reverse @lst;
 ' | while read sv ; do
 

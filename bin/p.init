@@ -4,19 +4,19 @@ usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Initiales Installieren von externem Source im Archiv
        [ -d dest-directory ]
-	   [ -v releasename ]
-	   [ -V origreleasename ]
-	   [ -e (nur extern) ]
-	   [ -i (nur intern) ]
-	   [ -u URL ]
-	   [ Kurzbeschreibung ]
-	   Wenn die Kurzbeschreibung angegeben ist, wird eine Zeile in
-	      STATUS/build generiert.
+       [ -v releasename ]
+       [ -V origreleasename ]
+       [ -e (nur extern) ]
+       [ -i (nur intern) ]
+       [ -u URL ]
+       [ Kurzbeschreibung ]
+       Wenn die Kurzbeschreibung angegeben ist, wird eine Zeile in
+          STATUS/build generiert.
 END
 exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 vers=noris
 vstr=
 overs=base

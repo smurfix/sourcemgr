@@ -4,14 +4,14 @@ usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Diffs zur letzten Version
        [ -d dest-directory ]
-	   [ -b (suppress differences in blanks) ]
+       [ -b (suppress differences in blanks) ]
        [ -V fromreleasename ]
        [ -v toreleasename ]
 END
 exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 overs="-rnoris.@"
 vers=
 b=

@@ -9,7 +9,7 @@ END
 exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 vers=base
 
    set -- $(getopt "d:V:h" $*)

@@ -4,16 +4,18 @@ usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Initiales Installieren von eigenen Sourcen im Archiv
        [ -d dest-directory ]
-	   [ -v releasename ]
-	   [ kurze Beschreibung ]
+       [ -v releasename ]
+       [ -r Versionsbezeichnung ]
+       einzeilige Beschreibung
 END
 exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 vers=noris
+desc="Neu angelegt."
 
-   set -- $(getopt "d:v:h" $*)
+   set -- $(getopt "d:v:hr:" $*)
    if test $? != 0
    then
 	   usage
@@ -24,21 +26,28 @@ vers=noris
 	   in
 		   -h)
 		       usage ;;
+		   -r)
+			   shift; desc="$1"; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
 			   shift; vers="$1"; shift;;
+	       --)
+		       shift; break ;;
 	   esac
    done
 
 if test -z "$dir"; then usage; fi
+if test -z "$*ir"; then usage; fi
 
 export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 
-set -xe
+set -e
 
+echo + prcs checkout -r$vers $what
 prcs checkout -r$vers $what
+echo + prcs populate $what
 prcs populate $what
 
 cat <<END >>$what.prj
@@ -47,10 +56,15 @@ cat <<END >>$what.prj
 ;;*
 END
 
-vi $what.prj
-
-prcs checkin -f -r$vers $what
+perl -p -i -e '
+	s/^\(Project-Description\s+""\)/(Project-Description "'"$*"'")/;
+	s/^\(New-Version-Log\s+""\)/(New-Version-Log "'"$desc"'")/;
+' $what.prj
 
 if test -n "$*" ; then
 	echo "*	$dir	*	$*	file://" >> /usr/src/STATUS/build
 fi
+
+set -x
+prcs checkin -f -r$vers $what
+

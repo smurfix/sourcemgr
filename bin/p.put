@@ -5,14 +5,17 @@ cat >&2 <<END
 Usage: $(basename $0)  -- Speichern von Änderungen im Archiv
        [ -d dest-directory ]
        [ -v releasename ]
+       [ -e (editiere Projektdatei) ]
+       [ Kommentar ]
 END
 exit 1
 }
 
-dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 vers=
+edit=
 
-   set -- $(getopt "d:v:h" $*)
+   set -- $(getopt "d:v:he" $*)
    if test $? != 0
    then
 	   usage
@@ -23,10 +26,12 @@ vers=
 	   in
 		   -h)
 		       usage ;;
+		   -e)
+		       edit=y; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
-			   shift; vers="-r$1"; shift;;
+			   shift; vers="-r$1.@"; shift;;
 	   esac
    done
 
@@ -35,7 +40,19 @@ if test -z "$dir"; then usage; fi
 export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 
-vi $what.prj
+if test -n "$edit" ; then
+  vi $what.prj
+elif grep -q 'New-Version-Log ""' $what.prj ; then
+	perl -p -i -e '
+		BEGIN { $s="'"$*"'"; if($s ne "") {
+			  print "Kommentar eingeben, ^D druecken..:\n";
+			  $s = join("",<STDIN>);
+			  chop $s;
+	    } $s =~ s/"/'\''/g; }
+	   s/\(New-Version-Log \"\"\)/(New-Version-Log "$s")/;
+  ' $what.prj
+fi
+
 
 set -xe
 

@@ -276,7 +276,6 @@ v-1997-04-09	kernel/automount	ftp://ftp.kernel.org/pub/linux/daemons/autofs/
 v-0-4-8	misc/tex/tetex/lib
 v-0-4-7	misc/tex/tetex/src
 r-0-11-23	x11/lyx	http://la1ad.uio.no/~larsbj/lyx.shtml
-v-1-16	net/misc/radius
 v-2-11	net/www/analog	http://www.statslab.cam.ac.uk/~sret1/analog/
 v-2-3-a-1	net/multicast/sdr
 v-2-4-0 net/ftp/wu-ftpd	ftp://ftp.academ.com/pub/wu-ftpd/private/
@@ -403,3 +402,12 @@ v-1 misc/colm
 *	x11/kde/multimedia	*	KDE Multimedia	ftp://ftp.kde.org/
 *	x11/kde/network	*	KDE Network	ftp://ftp.kde.org/
 *	x11/kde/support	*	KDE Supportlibraries	ftp://ftp.kde.org/
+*	gnu/textutils	*	GNU Textutils	1-11	ftp://ftp.gnu.org
+*	gnu/gcc	*		2-7-2	?
+*	gnu/egcs	*	EGCS	ftp://ftp.cygnus.com
+*	misc/metamail	*	Metamail-Krempel	-
+*	gnu/cygnus	*	Binutils; HJL, mostly	2-7	-
+*	gnu/cygnus	*	gnu/cygnus	2-8-1-0-11	?
+*	gnu/libc	*	GNU libc, 2.1	ftp://ftp.kernel.org/pub/software/libs/glibc/
+*	lib/pam	*	Pluggable Authentication Modules	0.57b	http://linux.kernel.org/pub/linux/libs/pam/
+*	net/misc/radius	*	RADIUS-Server	1-16	-
