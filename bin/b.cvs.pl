@@ -899,3 +899,4 @@ if($ENV{BKCVS_PUSH}) {
 }
 print STDERR "$pn: OK     |\n";
 unlink("$tmppn.data");
+unlink("/var/lock/bcvs-$pn");

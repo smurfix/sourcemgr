@@ -106,7 +106,9 @@ if test -n "$nvers"; then
 elif test -n "$vers" ; then
 	dv="-$vers"
 fi
-if shlock /var/lock/bcvs-$was$dv  ; then : ; else
+
+trap '' 0
+if shlock /var/lock/bcvs-$what$dv  ; then : ; else
 	echo "$was$dv: Locked." >&2
 	exit $nolock
 fi
@@ -126,3 +128,4 @@ test -n $diff && test -z "$BKCVS_DIFF" && export BKCVS_DIFF=$diff
 test -z "$BKCVS_PUSH" && export BKCVS_PUSH=$push
 test -z "$BKCVS_NORENAME" && export BKCVS_NORENAME=$rename
 exec $run "$was" "$what$dv"
+
