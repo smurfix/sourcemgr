@@ -1,3 +1,10 @@
+sourcemgr (1.336) unstable; urgency=low
+
+  * b.debuild: repair tag setting AGAIN
+  * 
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon,  8 Mar 2004 10:19:39 +0100
+
 sourcemgr (1.335) unstable; urgency=low
 
   * b.cvs.pl: cleanup empty-CVS finder

@@ -204,7 +204,7 @@ N="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
 test -n "$N" || N="$(basename "$dir")"
 
 test -n "$V"
-if bk prs -r+ -h -d'$if(:TAG:){$each(:TAG:){:TAG:\\n}}' -h ChangeSet | fgrep -xqs "DEBIAN-$V"
+if bk prs -r+ -ahnd'$if(:TAG:){$each(:TAG:){:TAG:}}' ChangeSet | fgrep -xqs "DEBIAN-$V"
 then : ; else
 	bk tag -r+ DEBIAN-$V
 	test -n "$local" || bk push -q
