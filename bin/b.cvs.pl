@@ -714,7 +714,7 @@ sub process($$$$) {
 						wget ($ENV{BKCVS_WEB}.$f."?rev=".$rev."&content-type=text/plain", $f);
 					}
 				} else {
-					cvs("-q","update","-A","-r",$rev, @ff);
+					cvs((($ENV{CVS_REPOSITORY} =~ m#:/#) ? "-q" : "-Q"),"update","-A","-r",$rev, @ff);
 				}
 				utime($wann,$wann,@ff);
 			}
@@ -753,6 +753,7 @@ sub process($$$$) {
 		# bk(get=>"-qeg",@gone); ## schon erledigt
 		# print STDERR ">>> bk -qeg @gone\n";
 		# print $rename $d->{major}.".".$d->{minor}."\n";
+		bk("get","-egq", @gone);
 		my $tmf="/tmp/bren.$$";
 		if($shells) {
 			print <<END;
@@ -774,57 +775,26 @@ END
 			print RN "\n";
 			foreach my $f(sort { $a cmp $b } @new) { print RN "$f\n"; }
 			close(RN);
-			print "Do renametool's work somehow";
-			system("/bin/sh");
-			# print $rename "\n";
-			confess "No rename" if $? or not -s $tmf;
-		}
 
-		my $cmds="";
-		#my $T = IO::File->new($tmf,"r");
-		#while(<$T>) {
-		#	$cmds .= $_;
-		#}
-		#$T->close();
-		#unlink($tmf);
-
-		@new=(); @gone=();
-		my $ocmt=""; my @onew;
-		foreach my $line(split(/\n/,$cmds)) {
-			if($line =~ /^bk rm (.+)$/) {
-				push(@gone,$1);
-			} elsif($line =~ /^bk new (.+)$/) {
-				push(@new,$1);
-			} elsif($line =~ /^bk mv (.+) (.+)$/) {
-				my $o=$1;
-				my $n=$2;
-				my $cmt1=$adt->{$o}{cmt};
-				my $cmt2=$adt->{$n}{cmt};
-				if(defined $cmt1 and $cmt1 ne "") {
-					$cmt1.=$cmt2 if defined $cmt2 and $cmt2 ne "" and $cmt1 ne $cmt2;
-				} else {
-					$cmt1=$cmt2;
-				}
-				$cmt1="" if defined $scmt and $cmt1 eq $scmt;
-				rename($n,"x.$$");
-				bk("mv",$o,$n);
-				bk("get","-geq",$n);
-				rename("x.$$",$n);
-
-				if($cmt1 ne $ocmt) {
-					$ocmt =~ s/\001//g;
-					bk(ci => '-qG', "-y$ocmt", @onew) if @onew;
-					@onew=();
-					$ocmt="CVS: ".$adt->{$o}{rev}." => ".$adt->{$n}{rev}."\n".$cmt1;
-				}
-				push(@onew,$n);
+			open(REN,"bk -r prs -r+ -ahnd':DPN: :GFILE' |");
+			while(<REN>) {
+				# Files are already named "to", but BK doesn't know that.
+				my($from,$to)=split;
+				next if $from eq $to;
+				rename($to,"BitKeeper/tmp/_XFOO_");
+				mkpath(dirname($from)."/SCCS/",1,0755);
+				rename(dirname($to)."/SCCS/s.".basename($to),dirname($from)."/SCCS/s.".basename($from));
+				bk("mv","$from",$to);
+				bk("edit","-qeg",$to);
+				rename("BitKeeper/tmp/_XFOO_",$to);
 			}
+
+#			print "Do renametool's work somehow";
+#			system("/bin/sh");
+#			# print $rename "\n";
+#			confess "No rename" if $? or not -s $tmf;
 		}
-		$ocmt =~ s/\001//g;
-		bk(ci => '-qG', "-y$ocmt", @onew) if @onew;
-		# bk(undef,"echo after renametool");
-	}
-	if(@new) {
+	} elsif(@new) {
 		my $ocmt=""; my @onew=();
 		foreach my $new(@new) {
 			my $cmt = $adt->{$new}{cmt};
@@ -840,8 +810,7 @@ END
 		}
 		$ocmt =~ s/\001//g;
 		bk(delta => '-i', "-y$ocmt", "-q", @onew) if @onew;
-	}
-	if(@gone) {
+	} elsif(@gone) {
 		bk(rm => @gone);
 	}
 
