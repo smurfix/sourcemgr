@@ -71,6 +71,17 @@ test -d "$tmp"
 set -e
 
 cd "$ddir"
+zeit=$(perl -e '
+ use File::Find;
+ my $mtime=0;
+ find(sub {
+	return unless -f $_;
+	$t=(lstat(_))[9];
+	$mtime=$t if $mtime<$t;
+ }, ".");
+ print $mtime;
+');
+
 ddir="$(pwd)"
 # entferne alte Bitkeeper- und/oder CVS-Dateien
 ( find . -type d \( -name SCCS -o -name CVS \) -prune -print | grep -v "^\./BitKeeper/";
@@ -91,6 +102,9 @@ trap 'rm -rf $done $tmp' 0
 test -f $done
 rm -rf $tmp $done
 
+sec=$(expr $(date '+%s') - $zeit)
+
+LD_PRELOAD=/usr/lib/datefudge.so DATEFUDGE=$(expr $(date '+%s') - $zeit) \
 b.import.pl "$cmt"
 
 bk push -q

@@ -72,8 +72,8 @@ if test -d "$c" ; then
 	env PAGER=/bin/cat bk changes -R -nd":I:	:USER:@:DOMAIN:" >&2
 	echo -n -e "... end of change list\r" >&2
 	bk pull -q $BK_REPOSITORY/$what$dv 
-	R=$(bk changes -r+ -d':I:\n' $(cat BitKeeper/log/parent))
-	L=$(bk changes -r+ -d':I:\n')
+	R=$(bk changes -r+ -d':UTC:\n' $(cat BitKeeper/log/parent))
+	L=$(bk changes -r+ -d':UTC:\n')
 	if test "$L" != "$R" ; then
 		echo "Problem: remote:$R local:$L" >&2
 		exit 1
