@@ -196,7 +196,7 @@ test -z "$pbin" || pdebuild --buildresult "$T" -- --debbuildopts "-nc -b"
 
 cd $T
 test -n "$nosign" || echo y | debsign "${N}_${DV}_source.changes"
-test -n "$nosign" -a -z "$pbin$bin" || echo y | debsign "${N}_${DV}_$A.changes"
+test -n "$nosign" -o -z "$pbin$bin" || echo y | debsign "${N}_${DV}_$A.changes"
 cd $T
 for i in * ; do if test -d $i; then rm -rf $i; fi; done
 echo "Built:"
