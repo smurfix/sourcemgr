@@ -1,3 +1,11 @@
+sourcemgr (1.280) unstable; urgency=low
+
+  * b.debuild:
+       Test debian/exporter for execute
+  * 
+
+ -- Matthias Urlichs <smurf@debian.org>  Fri, 12 Sep 2003 21:05:40 +0200
+
 sourcemgr (1.279) unstable; urgency=low
 
   * disabled *.changelog triggers
