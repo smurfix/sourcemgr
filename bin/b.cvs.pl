@@ -220,15 +220,15 @@ sub atta($$) {
 	# Ein nichtexistierender Eintrag wird auf den anderen gesetzt.
 	# Ein undef-Eintrag hat Vorrang (es gibt bereits einenn Konflikt).
 	# Ungleiche Einträge resultieren in undef.
-	unless(exists $fi->{scmt}) {
-		$fi->{scmt} = $fj->{scmt} if exists $fj->{scmt};
-	} elsif(exists $fj->{scmt} and defined $fi->{scmt} and (not defined $fj->{scmt} or $fi->{scmt} ne $fj->{scmt})) {
-		$fi->{scmt}=undef;
-	}
 	unless(exists $fi->{autor}) {
 		$fi->{autor} = $fj->{autor} if exists $fj->{autor};
 	} elsif(exists $fj->{autor} and defined $fi->{autor} and (not defined $fj->{autor} or $fi->{autor} ne $fj->{autor})) {
 		$fi->{autor}=undef;
+	}
+	unless(exists $fi->{scmt}) {
+		$fi->{scmt} = $fj->{scmt} if exists $fj->{scmt};
+	} elsif(exists $fj->{scmt} and defined $fi->{scmt} and (not defined $fj->{scmt} or $fi->{scmt} ne $fj->{scmt})) {
+		$fi->{scmt}=undef;
 	}
 
 	# Symbol-Liste für diese Revision.
@@ -258,12 +258,14 @@ sub csdiff($$$$) {
 	my($i,$fn,$autor,$cmt)=@_;
 	my $df = $diff;
 	my $fi = $cset->[$i];
-	if(defined $fn and exists $fi->{autor}) {
+	if(defined $autor and exists $fi->{autor}) {
 		unless(defined $fi->{autor}) { # Konflikt
 			$df /= 2;
 		} elsif($fi->{autor} eq $autor) { # OK
 			$df *= 2;
 		}
+	} elsif(not defined $autor) { # Tag
+		$df /= 2;
 	}
 	if(defined $cmt and exists $fi->{scmt}) {
 		unless(defined $fi->{scmt}) { # Konflikt
@@ -359,15 +361,19 @@ END
 		splice(@$cset,$i,0,{"start"=>$wann,"ende"=>$wann});
 	}
 	my $cs = $cset->[$i];
-	if(defined $cs->{autor}) {
-		$cs->{autor} = undef if $cs->{autor} ne $autor;
-	} elsif(not exists $cs->{autor}) {
-		$cs->{autor} = $autor;
+	if(defined $autor) {
+		if(defined $cs->{autor}) {
+			$cs->{autor} = undef if $cs->{autor} ne $autor;
+		} elsif(not exists $cs->{autor}) {
+			$cs->{autor} = $autor;
+		}
 	}
-	if(defined $cs->{scmt}) {
-		$cs->{scmt} = undef if $cs->{scmt} ne $cmt;
-	} elsif(not exists $cs->{scmt}) {
-		$cs->{scmt} = $cmt;
+	if(defined $cmt) {
+		if(defined $cs->{scmt}) {
+			$cs->{scmt} = undef if $cs->{scmt} ne $cmt;
+		} elsif(not exists $cs->{scmt}) {
+			$cs->{scmt} = $cmt;
+		}
 	}
 	if(defined $fn) {
 		$cs->{cmt}{$fn} .= $cmt;
@@ -380,6 +386,7 @@ END
 # Bearbeite den Log-Eintrag EINER Datei
 sub proc1($$$$$$) {
 	my($fn,$dt,$rev,$cmt,$autor,$syms) = @_;
+
 	my $dtx = add_date($dt,$fn,$rev,$autor,$cmt);
 	foreach my $sym(@$syms) {
 		$symdate{$sym}=$dt if not defined $symdate{$sym} or $symdate{$sym}<$dt;
@@ -561,7 +568,7 @@ sub process($) {
 	$m++; $y+=1900; ## zweistellig wenn <2000
 	dateset($inf->{ende},$inf->{autor});
 	my $cvsdate = sprintf "%04d-%02d-%02d %02d:%02d:%02d",$y,$m,$d,$hh,$mm,$ss;
-	print STDERR "Processing: $cvsdate\n";
+	print STDERR " Processing: $cvsdate                        \r";
 
 	# system("(bk sfiles -gU; bk sfiles -x) | p.bk.filter | xargs -0r p.bk.mangler");
 	# Map: Revisionsnummer->Dateiname
@@ -584,6 +591,7 @@ sub process($) {
 		}
 		foreach my $rev(keys %rev) {
 			my @f = @{$rev{$rev}};
+			print STDERR "  Processing: $cvsdate $rev ".(0+@f)."       \r";
 			while(@f) {
 				my $i = undef;
 				$i=50 if @f>60;
@@ -736,4 +744,5 @@ foreach my $x(@$cset) {
 }
 process($last) if $last;
 bk("push","-q") unless $ENV{BKCVS_NOPUSH};
+print STDERR "OK                                                 \n";
 unlink("$tmpcv.data");
