@@ -94,6 +94,7 @@ fi
 
 if test -z "$dir" -a -z "$vset" ; then # from current directory
 	if test $(bk sfiles -xc | wc -l) -gt 0 ; then
+		tarp "" 0
 		echo "Unsaved files." >&2
 		exit 1
 	fi

@@ -1,3 +1,10 @@
+sourcemgr (1.250) unstable; urgency=low
+
+  * b.debuild:
+    Don't usage me when there are unsaved files.
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Wed,  4 Jun 2003 06:33:03 +0200
+
 sourcemgr (1.249) unstable; urgency=low
 
   * Vergiss den Mac-Kram.
