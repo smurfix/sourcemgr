@@ -1,3 +1,11 @@
+sourcemgr (1.268) unstable; urgency=low
+
+  * b.cache
+       umask setzen
+  * 
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Tue, 22 Jul 2003 06:34:31 +0200
+
 sourcemgr (1.267) unstable; urgency=low
 
   * bin/b.cache

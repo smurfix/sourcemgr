@@ -40,6 +40,8 @@ test -z "$1"
 
 trap "" 0
 
+umask 002
+
 mod=p
 if b.exists -v "$vers" $dir > /tmp/tf.$$ ; then : ; else
 	echo >&2 "Problem: '$dir' Version '$vers' nicht bekannt."
