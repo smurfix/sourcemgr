@@ -668,3 +668,5 @@ x	kernel/linux 	*	Master-Kernelsource	2.0.33/2.1.77	ftp.kernel.org
 *	misc/perl/dav	Version 0.04	WebDAV	http://www.webdav.org/
 *	misc/perl/dav	Version 0.04	WebDAV	http://www.webdav.org/
 *	misc/perl/cgi	Version 2.45	CGI-Paket	CPAN
+*	misc/perl/gpg	Version 0.02	GPG-Interface	CPAN
+*	sound/vsound	Version 0.3	Soundgrabber	http://www.zip.com.au/~erikd/vsound/

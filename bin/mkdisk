@@ -390,66 +390,76 @@ END
 	fi
 
 	if test -n "$net" ; then ## Netz
-		while read a ; do
-			if test -f /lib/modules$sys/$ver/$a ; then
+		while read x ; do
+			find /lib/modules$sys/$ver/ -name $x | while read a ; do
 				b=/tmp/$$.$(basename $a)
-				cp -a /lib/modules$sys/$ver/$a $b
+				cp -a $a $b
 				#ls -l $b >&2
 				strip --strip-debug $b || true
 				ls -l $b >&2
 				cp -a $b $disk/modules/$(basename $a)
 				rm $b
-			fi
+			done
 		done <<END
-misc/sunrpc.o
-fs/lockd.o
-fs/nfs.o
-fs/ext2.o
-block/floppy.o
-net/tulip.o
-net/3c59x.o
-net/8390.o
-net/wd.o
-net/ne.o
-net/3c509.o
-net/rtl8139.o
+sunrpc.o
+lockd.o
+nfs.o
+ext2.o
+floppy.o
+tulip.o
+3c59x.o
+8390.o
+wd.o
+ne.o
+3c509.o
+rtl8139.o
 END
-#net/de4x5.o
-#net/smc-ultra.o
-#net/eepro.o
-#net/hp100.o
-#net/tlan.o
-#net/3c503.o
-#net/3c507.o
-#net/smc9194.o
-#net/depca.o
-#net/eexpress.o
-#net/ewrk3.o
+#de4x5.o
+#smc-ultra.o
+#eepro.o
+#hp100.o
+#tlan.o
+#3c503.o
+#3c507.o
+#smc9194.o
+#depca.o
+#eexpress.o
+#ewrk3.o
 
 	else ## kein Netz
 
 #scsi/aha152x.o
-		while read a ; do cp -v /lib/modules$sys/$ver/$a $disk/modules || true; done <<END
-ide/ide-disk.o
-ide/ide-mod.o
-ide/ide-probe.o
-ide/ide-probe-mod.o
-ide/ide-proc.o
-block/ide-disk.o
-block/ide-mod.o
-block/ide-probe.o
-block/ide-probe-mod.o
-block/ide-proc.o
-scsi/aha1542.o
-scsi/aic7xxx.o
-scsi/scsi_mod.o
-scsi/ncr53c8xx.o
-scsi/sd_mod.o
-scsi/sr_mod.o
-fs/ext2.o
-fs/isofs.o
-fs/binfmt_aout.o
-block/floppy.o
+		while read x ; do
+			find /lib/modules$sys/$ver/ -name $x | while read a ; do
+				b=/tmp/$$.$(basename $a)
+				cp -a $a $b
+				#ls -l $b >&2
+				strip --strip-debug $b || true
+				ls -l $b >&2
+				cp -a $b $disk/modules/$(basename $a)
+				rm $b
+			done
+		done <<END
+ide-disk.o
+ide-mod.o
+ide-probe.o
+ide-probe-mod.o
+ide-proc.o
+ide-disk.o
+ide-mod.o
+ide-probe.o
+ide-probe-mod.o
+ide-proc.o
+aha1542.o
+aic7xxx.o
+scsi_mod.o
+ncr53c8xx.o
+sd_mod.o
+sr_mod.o
+ext2.o
+isofs.o
+binfmt_aout.o
+floppy.o
 END
 	fi
 #scsi/53c7,8xx.o
@@ -467,24 +477,31 @@ else
 /dev/console
 /dev/fd0
 END
-	while read a ; do cp -v /lib/modules$sys/$ver/$a $disk/modules || true; done <<END
-fs/ext2.o
-scsi/scsi_mod.o
-scsi/ncr53c8xx.o
-scsi/aha1542.o
-scsi/aha152x.o
-scsi/aic7xxx.o
-scsi/53c7,8xx.o
-scsi/sd_mod.o
-block/floppy.o
-ide/ide-mod.o
-ide/ide-probe.o
-ide/ide-probe-mod.o
-ide/ide-disk.o
-block/ide-mod.o
-block/ide-probe.o
-block/ide-probe-mod.o
-block/ide-disk.o
+	#while read a ; do cp -v /lib/modules$sys/$ver/$a $disk/modules || true; done <<END
+		while read x ; do
+			find /lib/modules$sys/$ver/ -name $x | while read a ; do
+				b=/tmp/$$.$(basename $a)
+				cp -a $a $b
+				#ls -l $b >&2
+				strip --strip-debug $b || true
+				ls -l $b >&2
+				cp -a $b $disk/modules/$(basename $a)
+				rm $b
+			done
+		done <<END
+ext2.o
+scsi_mod.o
+ncr53c8xx.o
+aha1542.o
+aha152x.o
+aic7xxx.o
+53c7,8xx.o
+sd_mod.o
+floppy.o
+ide-mod.o
+ide-probe.o
+ide-probe-mod.o
+ide-disk.o
 END
 fi
 cat <<END >$disk/linuxrc
