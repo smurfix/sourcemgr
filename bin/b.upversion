@@ -53,6 +53,19 @@ test -s "$F" || exit 0
 test -s "SCCS/c.ChangeSet" || exit 0
 if grep -q '^'"$F"'|' "$BK_PENDING" ; then exit 0; fi
 
+FULL_NAME="$DEBFULLNAME"; test -n "$FULL_NAME" || \
+FULL_NAME="$FULLNAME"; test -n "$FULL_NAME" || \
+FULL_NAME="$NAME"; test -n "$FULL_NAME" || \
+{ echo "Fullname nicht bekannt" >&2; exit 1 }
+
+E_MAIL="$DEBEMAIL"; test -n "$E_MAIL" || \
+E_MAIL="$EMAIL"; test -n "$E_MAIL" || \
+E_MAIL="${LOGNAME}@$(cat /etc/mailname)"
+
+test -n "$DISTRIBUTION" || DISTRIBUTION=$(dpkg-parsechangelog 2>/dev/null | sed -ne 's/^Distribution: //p' )
+test -n "$DISTRIBUTION" || DISTRIBUTION="unstable"
+test -n "$URGENCY" || URGENCY="low"
+
 bk edit -qg "$BF"
 (
 	PACKAGE_NAME="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
@@ -65,7 +78,7 @@ END
 	DATE="$(822-date)"
 	cat <<END
 
- -- Matthias Urlichs <smurf@smurf.noris.de>  $DATE
+ -- $FULL_NAME <$E_MAIL>  $DATE
 
 END
 	bk get -qp "$BF" 
