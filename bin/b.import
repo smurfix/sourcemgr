@@ -80,12 +80,6 @@ test -d "$tmp"
 set -e
 
 cd "$ddir"
-ddir="$(pwd)"
-# remove old Bitkeeper- and/or CVS-Dateien
-( find . -type d \( -name SCCS -o -name CVS \) -prune -print | grep -v "^\./BitKeeper/";
-  echo BitKeeper; echo CVSROOT ) | xargs rm -rf
-
-# find the newest file modification time
 zeit=$(perl -e '
  use File::Find;
  my $mtime=0;
@@ -97,6 +91,11 @@ zeit=$(perl -e '
  }, ".");
  print $mtime;
 ');
+
+ddir="$(pwd)"
+# entferne alte Bitkeeper- und/oder CVS-Dateien
+( find . -type d \( -name SCCS -o -name CVS \) -prune -print | grep -v "^\./BitKeeper/";
+  echo BitKeeper; echo CVSROOT ) | xargs rm -rf
 
 done=/tmp/f.done.$$
 trap 'rm -rf $done $tmp' 0
@@ -116,7 +115,7 @@ rm -rf $tmp $done
 sec=$(expr $(date '+%s') - $zeit)
 
 LD_PRELOAD=$DATEFUDGE_LIB DATEFUDGE=$(expr $(date '+%s') - $zeit) \
-/usr/bin/b.import.pl "$cmt"
+b.import.pl "$cmt"
 
 test -z "$tag" || bk tag -r+ "$tag"
 bk push -q
