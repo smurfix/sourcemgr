@@ -15,7 +15,7 @@ Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -v releasename (cvs) ]
        [ -w neuer releasename ]
        [ -e CVS-Fudge-Sekunden (Default 120) ]
-       [ -D (Debug) ] [ -Z (keine Kompression) ]
+       [ -D (Debug) ] [ -Z (keine Kompression) ] [ -b # (Limit) ]
        woher  was
 
 "woher" ist der Name des entfernten Repository.
@@ -38,9 +38,10 @@ diff=
 rename=
 shells=0
 loc=
+bg=
 df=0
 
-   eval set -- "$(getopt "hd:De:lLn:r:sSv:w:Z" "$@")"
+   eval set -- "$(getopt "hb:d:De:lLn:r:sSv:w:Z" "$@")"
    for i
    do
 	   case "$i"
@@ -71,6 +72,8 @@ df=0
 				shift; push=$1 ; shift ;;
 			-l)
 				shift; loc=y ;;
+			-b)
+				shift; bg=$1; shift ;;
 			--)
 				shift; break ;;
 	   esac
@@ -127,5 +130,5 @@ fi
 test -n $diff && test -z "$BKCVS_DIFF" && export BKCVS_DIFF=$diff
 test -z "$BKCVS_PUSH" && export BKCVS_PUSH=$push
 test -z "$BKCVS_NORENAME" && export BKCVS_NORENAME=$rename
+export BKCVS_LOCK=$bg
 exec $run "$was" "$what$dv"
-

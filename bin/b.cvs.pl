@@ -9,6 +9,17 @@ use File::Basename qw(basename dirname);
 use Time::Local;
 use Carp qw(confess);
 use Storable qw(nstore retrieve);
+use File::ShLock;
+
+my $lock;
+if($ENV{BKCVS_LOCK}) {
+	nl: while(1) {
+		$i = 0;
+		while($i++ < $ENV{BKCVS_LOCK}) {
+			last nl if ref ($lock = new File::ShLock("b.cvs.$i"));
+		}
+	} continue { sleep 15; }
+}
 
 ### Test Revisionsmatching
 #my %target=("x"=>"2.2.0.4");
