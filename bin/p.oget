@@ -32,7 +32,7 @@ vers=base
 
 if test -z "$dir"; then usage; fi
 
-export PRCS_REPOSITORY=/archiv/src/prcs
+export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
 
 set -xe

@@ -45,7 +45,7 @@ vers=$(echo $vers | \
 	}
 ' )
 
-export PRCS_REPOSITORY=/archiv/src/prcs
+export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
 
 set -xe
@@ -54,10 +54,11 @@ test -f $what.prj || prcs checkout -r $overs.@ $what $what.prj
 prcs populate -f -d $what
 
 perl -p -i -e '
-   s/\(New-Version-Log \"\"\)/(New-Version-Log "'Import\ $vers'")/;
+   s/\(New-Version-Log \"\"\)/(New-Version-Log "'Import\ $vers'")/ if "'$vers'" ne "";
    s/^  \((.*)\(\)\)/  ($1() :no-keywords)/;
 ' $what.prj
 
 vi $what.prj
+
 prcs checkin -r $vers.@ $what
 

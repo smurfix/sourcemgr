@@ -55,7 +55,7 @@ url="-"
 
 if test -z "$dir"; then usage; fi
 
-export PRCS_REPOSITORY=/archiv/src/prcs
+export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
 
 set -e
@@ -87,7 +87,7 @@ if test -z "$into" ; then
 
 perl -i -n -e '
    s#\(Populate-Ignore\s+\(#(Populate-Ignore ("/CVS/" "^CVS/" "\\\\.rej\$" "\\\\.orig\$" #;
-   s/\(New-Version-Log \"\"\)/(New-Version-Log "'Import\ $sv'")/;
+   s/\(New-Version-Log \"\"\)/(New-Version-Log "'Import\ $sv'")/ if "'"$sv"'" ne "";
    # s/^  \((.*)\(\)\)/  ($1() :no-keywords)/;
    print unless /^;;\*/;
 ' $what.prj
@@ -123,6 +123,7 @@ fi
 prcs populate $what 
 
 vi $what.prj
+
 prcs checkin -f -r$vers.@ $what
 
 fi

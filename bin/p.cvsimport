@@ -66,7 +66,7 @@ if test -n "$goto" ; then
 	fi
 fi
 
-export PRCS_REPOSITORY=/archiv/src/prcs
+export PRCS_REPOSITORY=/archiv/src/prcs PRCS_LOGQUERY=1
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
 
 cd /tmp/; mkdir x.$$; cd x.$$

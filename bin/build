@@ -15,15 +15,22 @@ export PATH=/usr/src/STATUS/bin:$PATH
 ulimit -c 1000000
 what=
 
-set -- `getopt fcip $*`
+r="\n"
+
+set -- `getopt fcipCP $*`
 if test $? != 0
 then
-        echo 'Usage: ...'
+        echo 'Usage: build [ -f(orce) -p(ath) -i(nstall) -c(heckout nothing)'
+        echo '               -C(vs only) -P(rcs only) what...'
         exit 2
 fi
 for i ; do
         case "$i"
         in
+                -C)
+                        cvsonly=1; shift;;
+                -P)
+                        prcsonly=1; shift;;
                 -f)
                         force=1; shift;;
                 -c)
@@ -57,15 +64,16 @@ exec 3>&1
 
 sl="/tmp/slist.$$"
 
-if test -n "$what" ; then
-  echo $what >$sl
+( if test -n "$what" ; then
+  echo $what
 elif test -z "$1" ; then
-  while read a b c ; do echo $b ; done < STATUS/build > $sl
+  while read a b c ; do echo $b ; done < STATUS/build
 else
   for i ; do 
     echo $i
-  done | sed -e 's/\//:/g' -e 's/:*$//' > $sl
-fi 
+  done
+fi
+) | sed -e 's/:/\//g' -e 's/\/*$//' > $sl
 
 set -e
 
@@ -73,10 +81,10 @@ sed -e '/^#/d' -e 's/^\? /HEAD /' < STATUS/build |
 while read ver dir rest ; do # {
 	tag=$(echo $dir | sed -e 's|/|:|g' -e 's|:*$||')
 	dir=$(echo $tag | sed -e 's|:|/|g')
-	if grep "^$tag\$" >/dev/null $sl ; then  # {
+	if grep "^$dir\$" >/dev/null $sl ; then  # {
 		pv="$(echo "$ver" | perl -ne 'if(s/^\*//) { $_="noris" if $_ eq "\n"; print; next; }; print "";')"
 		if test -n "$pv" ; then # {
-			ptag=$(echo $tag | sed -e 's|:|_|')
+			ptag=$(echo $tag | sed -e 's|:|_|g')
 			ver=$pv
 		else # }{
 			ptag=
@@ -89,7 +97,7 @@ while read ver dir rest ; do # {
 				gen.flist <STATUS/legacy/$tag | sort -u > STATUS/out/$tag &
 			fi # }
 		elif test -z "$noupdate" -a -f STATUS/done/$tag ; then # }{
-			echo -en "done.\r                                  \r"
+			echo -en "done.$r                                  \r"
 		elif test -f STATUS/work/$tag ; then # }{
 			echo -n "in progress: "
 			head -1 STATUS/work/$tag 
@@ -102,7 +110,7 @@ while read ver dir rest ; do # {
 			if test ! -f STATUS/done/$tag ; then # {
 				echo "needs to be built."
 			else # }{
-				echo -ne "done.\r                                  \r"
+				echo -ne "done.$r                                  \r"
 			fi # }
 		else # }{
 			if test -f STATUS/to-install/$tag ; then # {
@@ -141,6 +149,9 @@ while read ver dir rest ; do # {
 						# cd $dir; prcs update -r "$pv.@" $ptag
 						# did=$?;
 						did=0
+					elif test -n "$cvsonly" ; then # }{
+						echo "KEIN PRCS";
+						did=1
 					else # }{
 						echo "+++ $dir +++ $out prcs checkout $pv $ptag"
 						if test -n "$ver" ; then ver="-r $ver"; fi
@@ -157,6 +168,9 @@ while read ver dir rest ; do # {
 						# cd $dir; cvs update -r $ver;
 						# did=$?;
 						did=0
+					elif test -n "$prcsonly" ; then # }{
+						echo "KEIN CVS";
+						did=1
 					else # }{
 						echo "+++ $dir +++ $goto cvs checkout $rel $where $what $ver"
 						if test -n "$ver" ; then ver="-r $ver"; fi
@@ -172,7 +186,7 @@ while read ver dir rest ; do # {
 				did=0
 			fi # }
 			cd /usr/src
-			if test $did = 0 ; then # {
+			if test $did = 0 -a -d $dir ; then # {
 				echo "+++ $dir +++ Make $comp"
 				if test -n "$nomake" || make -C $dir -f Makefile.Linux $comp </dev/null ; then # {
 					if test -n "$nomake" ; then # {
