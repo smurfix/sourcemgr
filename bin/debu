@@ -2,11 +2,11 @@
 
 if test "x$1" = "x-i" ; then INST=1; shift; fi
 
-source /usr/local/bin/gpg-agent-start.sh
+if test -f /usr/local/bin/gpg-agent-start.sh ; then
+	source /usr/local/bin/gpg-agent-start.sh
+fi
 
 test ! -d Bitkeeper || b.uplog
-debuild "$@" -eDEB_BUILD_OPTIONS -b -uc -us -L -viI </dev/null 2>&1 | less
-	# +G
 
 mustsetvar () {
     if [ "x$2" = x ]
@@ -26,6 +26,24 @@ sversion=`echo "$version" | perl -pe 's/^\d+://'`
 pva="${package}_${sversion}_${arch}"
 changes="../$pva.changes"
 
+okf=/tmp/okb.$$
+(
+	# set -e  ## TODO
+	echo + build
+	debuild --no-lintian "$@" -eDEB_BUILD_OPTIONS -b -uc -us </dev/null
+		# +G
+	echo + lintian
+	lintian -viI "$changes"
+
+	echo + linda
+	linda -viIt "$changes"
+
+	touch $okf
+) 2>&1 | less
+
+test -f $okf || exit 1
+rm -f $okf
+
 cd `dirname $changes`
 changes=`basename $changes`
 
@@ -44,7 +62,11 @@ print join(" ",@debs)' $changes`"
 
 mv $changes $debs /var/tmp
 cd /var/tmp
-if test -n "$INST" ; then sudo debpkg -i $debs ; fi
+if test -n "$INST" ; then
+	echo + install
+	sudo debpkg -i $debs
+fi
+echo + :files:
 echo /var/tmp/$changes
 echo $debs
 
