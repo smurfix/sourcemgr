@@ -1,4 +1,12 @@
 #!/bin/bash
+if test -f /usr/lib/log-install.so ; then
+	LOGLIB=/usr/lib/log-install.so
+elif test -f /usr/local/lib/log-install.so ; then
+	LOGLIB=/usr/local/lib/log-install.so
+else
+	echo "Preload library (log-install.so) not found!" >&2
+	exit 1
+fi
  
 set -e
 trap 'test -n "$superset" && kill $SUPERPID; usage; exit 1' 0
@@ -262,9 +270,9 @@ if test -z "$doinstall" -o "$doinstall" = "b" ; then # compile
 fi
 if test -n "$doinstall" -a -z "$bad" ; then
 	echo + make -f $MF $install$subtarget
-	#sudo env LD_PRELOAD=/usr/lib/log-install.so LOGFILE=/usr/src/STATUS/work/$desc$submode \
+	#sudo env LD_PRELOAD=$LOGLIB LOGFILE=/usr/src/STATUS/work/$desc$submode \
 	#env LANG=C-JIS make -f $MF $install$subtarget || bad=y
-	sudo env LD_PRELOAD=/usr/lib/log-install.so LOGFILE=/usr/src/STATUS/work/$desc$submode.p \
+	sudo env LD_PRELOAD=$LOGLIB LOGFILE=/usr/src/STATUS/work/$desc$submode.p \
 	make -f $MF $install$subtarget || bad=y
 fi
 
