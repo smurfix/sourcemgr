@@ -55,8 +55,8 @@ if grep -q '^'"$F"'|' "$BK_PENDING" ; then exit 0; fi
 
 FULL_NAME="$DEBFULLNAME"; test -n "$FULL_NAME" || \
 FULL_NAME="$FULLNAME"; test -n "$FULL_NAME" || \
-FULL_NAME="$NAME"; test -n "$FULL_NAME" || \
-{ echo "Fullname nicht bekannt" >&2; exit 1 }
+FULL_NAME="$NAME";
+if test -z "$FULL_NAME" ; then echo "Fullname nicht bekannt" >&2 ; exit 1; fi
 
 E_MAIL="$DEBEMAIL"; test -n "$E_MAIL" || \
 E_MAIL="$EMAIL"; test -n "$E_MAIL" || \

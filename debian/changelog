@@ -1,3 +1,10 @@
+sourcemgr (1.254) unstable; urgency=low
+
+  * b.upversion:
+    repariert
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Fri, 13 Jun 2003 10:21:26 +0200
+
 sourcemgr (1.253) unstable; urgency=low
 
   * debian/control
