@@ -120,7 +120,7 @@ fi
 
 # Now build the source archives
 T="/tmp/ex.$$"
-trap 'echo rm -rf $T' 0 1 2 15
+trap 'rm -rf $T' 0 1 2 15
 E="$(bk prs -rEXTERN -h -d:SHORTKEY: ChangeSet)" || true
 A="$(dpkg-architecture -qDEB_BUILD_ARCH)"
 
