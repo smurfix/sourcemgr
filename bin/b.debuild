@@ -24,7 +24,8 @@ Usage: $(basename $0)  -- Baue Debian-Source-Pakete.
 		[ -b (build a binary) ]  [ -B (with pbuilder) ]
 			[ -i (install binaries afterwards) ]
 		[ -s? (pass to dpkg-*) ]  [ -k (keep tempdir) ]
-		[ -n (ignore lintan errors) ] [ -V VERS -- include changes since VERS ]
+		[ -n (ignore lintan errors) ]  [ -S (don't sign ]
+		[ -V VERS -- include changes since VERS ]
 END
     trap "" 0
     exit 1
@@ -40,9 +41,10 @@ pbin=
 opt_s=
 keep=
 lwarn=
+nosign=
 opt_v=
 
-   eval set -- "$(getopt "bBd:ikns:t:v:h" "$@")"
+   eval set -- "$(getopt "bBd:ikns:St:v:V:h" "$@")"
    if test $? != 0
    then
 	   exit 1
@@ -63,6 +65,8 @@ opt_v=
 		   		shift; keep=y ;;
 		   -B)
 		   		shift; pbin=y ;;
+		   -S)
+		   		shift; nosign=y ;;
 		   -V)
 			   shift; opt_v="-v $1"; shift;;
 		   -s)
@@ -191,8 +195,8 @@ test -z "$bin" || fakeroot dpkg-buildpackage -nc -b -uc -us
 test -z "$pbin" || pdebuild --buildresult "$T" -- --debbuildopts "-nc -b"
 
 cd $T
-echo y | debsign "${N}_${DV}_source.changes"
-test -z "$pbin$bin" || echo y | debsign "${N}_${DV}_$A.changes"
+test -n "$nosign" || echo y | debsign "${N}_${DV}_source.changes"
+test -n "$nosign" -a -z "$pbin$bin" || echo y | debsign "${N}_${DV}_$A.changes"
 cd $T
 for i in * ; do if test -d $i; then rm -rf $i; fi; done
 echo "Built:"
