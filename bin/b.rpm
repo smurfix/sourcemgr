@@ -1,5 +1,5 @@
 #!/bin/bash
-BK_REPOSITORY=bk://bitkeeper.noris.de
+test -n "$BK_REPOSITORY" || export BK_REPOSITORY=bk://bitkeeper.noris.de
 
 if rpm -q fileutils | grep -q noris ; then : ; else
 	echo >&2 "Zum RPM-Bauen braucht es das noris-fileutils-Paket. Sorry."

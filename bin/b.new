@@ -1,5 +1,5 @@
 #!/bin/bash
-BK_REPOSITORY=bk://bitkeeper.noris.de
+test -n "$BK_REPOSITORY" || export BK_REPOSITORY=bk://bitkeeper.noris.de
 
 set -e
 trap 'usage; exit 1' 0
