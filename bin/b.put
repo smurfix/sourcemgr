@@ -50,7 +50,7 @@ if b.exists -v "$vers" -d $dir > /tmp/tf.$$ ; then
 	rm -f /tmp/tf.$$
 	if test -z "$what" ; then echo >&2 "'$dir' nicht gefunden" ; exit 1 ; fi
 
-	test -z "$dv" || dv="-$overs"
+	test -z "$dv" || dv="-$dv"
 
 	if bk pull -n $BK_REPOSITORY/$what$dv 2>&1 | grep -q "Nothing to pull from " ; then
 		echo + bk push $BK_REPOSITORY/$what$dv

@@ -23,7 +23,6 @@ Usage unless @ARGV;
 Usage unless $ENV{BK_REPOSITORY};
 Usage unless $ENV{PRCS_REPOSITORY};
 $ENV{BK_LICENSE}="ACCEPTED";
-$ENV{CLOCK_DRIFT}="1";
 select(STDERR); $|=1; select(STDOUT);
 
 use Shell qw(); ## bk prcs
@@ -55,7 +54,7 @@ sub dateset($;$) {
 	@DT=();
 	@AU=();
 
-	@DT = ("LD_PRELOAD=$dtf/datefudge.so","DATEFUDGE=".(time-$dt)) if $dt;
+	@DT = ("LD_PRELOAD=$dtf/datefudge.so","DATEFUDGE=".(time-$dt-($$%100))) if $dt;
 	@AU = ("LOGNAME=$au","USER=$au") if $au;
 }
 

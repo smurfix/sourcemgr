@@ -6,7 +6,7 @@ if rpm -q rpm | grep -q noris ; then : ; else
 	exit 1
 fi
 if test -f /mach ; then
-	echo >&2 "Geht nur auf Linux. Sorry.
+	echo >&2 "Geht nur auf Linux. Sorry."
 	exit 1
 fi
 
