@@ -1,18 +1,16 @@
 #!/bin/bash
 . /usr/share/sourcemgr/repository
+. /usr/share/sourcemgr/debian
+. /usr/share/sourcemgr/upload_to
 
 set -e
 trap 'test -n "$superset" && kill $SUPERPID; usage; exit 1' 0
 
-if test -f /usr/local/bin/gpg-agent-start.sh ; then
-	source /usr/local/bin/gpg-agent-start.sh
-fi
-if test -f /usr/local/bin/ssh-agent-start.sh ; then
-	source /usr/local/bin/ssh-agent-start.sh
-fi
-if ssh-add -l >/dev/null 2>&1 ; then : ; else
-	ssh-add
-fi
+for f in gpg ssh ; do
+	if type -p $f-agent-start.sh >/dev/null 2>&1 ; then
+		. $(type -p $f-agent-start.sh)
+	fi
+done
 
 usage() {
 cat >&2 <<END
@@ -22,14 +20,23 @@ Usage: $(basename $0)  -- Build Debian source(+binary) packages.
     [ -s? (passed to dpkg-*) ]  [ -k (keep temporary directory) ]
     [ -n (ignore lintan errors) ]  [ -S (don't sign the result) ]
     [ -V VERS -- include changelog since VERS ]
-    [ -w http://where/ever/ -- possible source for .orig.tar.gz file ]
-    [ -W http://where/ever/ -- third source to try (first is '..') ]
+    [ -w http://where/ever/ -- Debian repo with .orig.tar.gz file ]
     [ -t HOST (upload to here: first arg to 'dput') ]
-    [ -T dir (save here; default: parent directory if local, empty if not) ]
-    [ -l ] | [ -d Paket ]  [ -v release ]
+    [ -l (don't push/pull/upload) ] [ -d package ]  [ -v branch ]
+    [ -T dir (save stuff here; default: parent directory if '-l' was given) ]
 
-'-l' says to use the current repository.
-(This is the default if you're not smurf@debian.org. ;-)
+This program prepares a Debian source package and pushes it to a
+repository. It can also build binary archives.
+
+Note that source+binary .changes files are not auto-combined before
+uploading. Use "combine_changes" and upload manually if you're uploading
+to a place (like the main Debian repository...) which can't handle that.
+
+It makes sense to have gpg and/or ssh agents running so that you don't
+have to enter various passphrases multiple times (or at all).
+
+$(basename $0) defaults to using the current repository, but you can
+also tell it to 
 
 END
     trap "" 0
@@ -37,7 +44,7 @@ END
 }
 
 dir=
-defvers=noris
+defvers=- # cannot be empty
 vers=
 dest=
 destdir=
@@ -50,16 +57,6 @@ lwarn=
 nosign=
 opt_v=
 local=
-web=http://smurf.noris.de/code/debian/
-
-if test "$DEBEMAIL" = "smurf@debian.org" ; then
-	ddestdir=""
-	ddest="local"
-else
-	local=y
-	ddestdir="$(pwd)/.."
-	ddest=""
-fi
 
 eval set -- "$(getopt "bBd:iklns:St:T:v:V:w:W:h" "$@")"
 if test $? != 0
@@ -75,7 +72,7 @@ do
 		-n)
 			shift; lwarn=y ;;
 		-l)
-			shift; local=y; ddest=""; ddestdir="$(pwd)/.." ;;
+			shift; local=y; UPLOAD_TO=""; ddestdir="$(pwd)/.." ;;
 		-i)
 			shift; inst=y ;;
 		-b)
@@ -93,7 +90,7 @@ do
 		-V)
 			shift; opt_v="-v$1"; shift;;
 		-w)
-			shift; web="$1"; shift;;
+			shift; DEBIAN_REPOSITORY="$1"; shift;;
 		-s)
 			shift; opt_s="-s$1"; shift;;
 		-d)
@@ -123,7 +120,7 @@ if test -z "$local" ; then
 	fi
 fi
 
-test -n "$dest" || dest="$ddest"
+test -n "$dest" || dest="$UPLOAD_TO"
 test -n "$destdir" || destdir="$ddestdir"
 
 if test -z "$dir" -a -z "$vset" ; then # from current directory
@@ -172,16 +169,24 @@ if test -z "$local" ; then
 fi
 trap '' 0
 
-## no longer needed, as we just called 'b.cache'
 ## Make sure we're in the BK root
 if ! test -d BitKeeper ; then
 	echo "You do not seem to be in a BitKeeper repository." >&2
 	exit 1
 fi
+
 ## Make sure there are no outstanding changes
-#test "$(bk sfiles -xcg | wc -l)" -eq 0
-## Make sure the remote repository doesn't have more than we do
-#test "$(bk changes -d':I:\n' -R | wc -l)" -eq 0
+if test "$(bk sfiles -xcg | wc -l)" -eq 0 ; then
+	echo "You have unsaved changes. (bk -xgc)  Aborting." >&2
+	exit 1
+fi
+
+## Make sure the remote repository doesn't have stuff that we don't
+#if test -z "$local" ; then
+#	if test "$(bk changes -d':I:\n' -R | wc -l)" -eq 0 ; then
+#		echo "The remote repository has more changes." >&2
+#	fi
+#fi
 
 # Tag this release with the current version and push it
 if ! test -w debian/control && ! bk get -q debian/control ; then
@@ -237,13 +242,13 @@ if test -n "$E" ; then # non-original package
 	if \
 	   cp ../${N}_$VV.orig.tar.gz "$T/" 2>/dev/null ||
  	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
-		"${web}/experimental/source/${N}_$VV.orig.tar.gz" ||
+		"${DEBIAN_REPOSITORY}/experimental/source/${N}_$VV.orig.tar.gz" ||
  	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
-		"${web}/unstable/source/${N}_$VV.orig.tar.gz" ||
+		"${DEBIAN_REPOSITORY}/unstable/source/${N}_$VV.orig.tar.gz" ||
  	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
-		"${web}/stable/source/${N}_$VV.orig.tar.gz" ||
+		"${DEBIAN_REPOSITORY}/stable/source/${N}_$VV.orig.tar.gz" ||
 	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
-		"${web}/public/${N}_$VV.orig.tar.gz" ||
+		"${DEBIAN_REPOSITORY}/public/${N}_$VV.orig.tar.gz" ||
 	   false
 	then
 		echo + get original source from .. or via HTTP

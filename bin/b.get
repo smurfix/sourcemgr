@@ -6,19 +6,28 @@ trap 'usage; exit 1' 0
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- holt Sourcecode aus dem Archiv
-       [ -v releasename ]
-       [ -w neureleasename, legt eine Kopie an ]
-       [ -d Paket | -g (nimmt Pfad+Verzeichnis) ]
-       [ -n (checkt Sourcen nicht aus) ]
-       [ -N (kopiert Kopie nicht zurueck) ]
-       [ neuesVerzeichnis ]
-	Verzeichnisname ist der Paketname, wenn nicht angegeben.
+Usage: $(basename $0)  -- fetch source code from the master archive
+       [ -v branch ]
+       [ -w new_branch, creates a copy [ -N (don't copy to master) ]]
+       [ -d package | -g (use path) ]
+       [ -n (tell bitkeeper not to checkout the source) ]
+       [ dirname ]
+
+This program gets a tree from the master repository.
+
+The most common use of this script is
+# cd /usr/local/src/some
+# b.get -g -v test where
+# #or: b.get -d some/where -v test where
+# cd where
+# work ...
+
+This clones package "some_where-test" from the master into directory "where".
 END
 }
 
-vers=noris
-nvers=gibts/nicht
+vers=-
+nvers=not/given
 dir=
 optp=
 gpath=
@@ -66,15 +75,15 @@ trap '' 0
 
 mod=p
 if b.exists -v "$vers" $dir > /tmp/tf.$$ ; then : ; else
-	echo >&2 "Problem: '$dir' Version '$vers' nicht bekannt."
+	echo >&2 "Problem: '$dir' branch '$vers' not found."
 	exit 1
 fi
 read what dv < /tmp/tf.$$
 rm -f /tmp/tf.$$
 
-if test -z "$what" ; then echo >&2 "'$dir' nicht gefunden" ; exit 1 ; fi
+if test -z "$what" ; then echo >&2 "'$dir' not found" ; exit 1 ; fi
 test -z "$dv" || dv="-$dv"
-test -z "$nvers" -o "$nvers" = "gibts/nicht" || ndv="-$nvers"
+test -z "$nvers" -o "$nvers" = "not/given" || ndv="-$nvers"
 
 if test -z "$1" ; then
 	dir="$what$dv"
@@ -83,11 +92,11 @@ else
 fi
 
 if test -e "$dir" ; then
-	echo >&2 "$dir: Das Verzeichnis '$dir' gibt es schon... geht nicht"
+	echo >&2 "$dir: The directory '$dir' already exists."
 	exit 1
 fi
 
-### $opt_p -- geht momentan nicht
+### $opt_p -- doesn't work
 cache="$(b.cache -d "$what" -v "$vers")"
 if bk lclone -q "$cache" "$ddir"; then : ; else
 	rm -rf "$ddir"
@@ -95,12 +104,12 @@ if bk lclone -q "$cache" "$ddir"; then : ; else
 fi
 
 cd "$ddir"
-if test "$nvers" != "gibts/nicht" ; then
+if test "$nvers" != "not/given" ; then
 	echo -n -e "$dir: copy source back    |\r"
 	test -n "$noback" || bk clone -q . $BK_REPOSITORY/$what$ndv
 	bk parent $BK_REPOSITORY/$what$ndv
 	dv="$ndv"
 fi
 bk parent $BK_REPOSITORY/$what$dv
-echo "Archiv '$what$dv' nach '$ddir' kopiert."
+echo "Cloned package '$what$dv' to '$ddir'."
 

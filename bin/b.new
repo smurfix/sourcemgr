@@ -6,11 +6,13 @@ trap 'usage; exit 1' 0
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- generiert ein neues BK-Archiv
-         -d Paket
-	   [ -v Version ]
-	   [ -s (Single-User) ]
-	     Beschreibung
+Usage: $(basename $0)  -- create a new archive.
+         -d package
+	   [ -v version ]
+	   [ -s (single user) ]
+	     short description
+
+Create a new empty package, upload to master repo.
 END
 }
 
@@ -43,7 +45,7 @@ set -e
 test -n "$*"
 test -n "$dir"
 
-test -z "$vers" || dv="-$vers"
+test -z "$vers" -o "$vers" = "-" || dv="-$vers"
 
 desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
 if test -f "/usr/src/STATUS/checkout/$desc" ; then
@@ -75,13 +77,13 @@ END
 fi
 cat <<END >>$tmpcf
 security:   none
-contact:    $USER
-email:		$USER@noris.de
-Company:    noris network AG
-Street:     Kilianstraße 142
-City:       Nürnberg
-Postal:     90491
-Country:    Germany
+contact:    $FULLNAME
+email:		$EMAIL
+Company:    -
+Street:     -
+City:       -
+Postal:     -
+Country:    -
 
 checkout:get
 END
@@ -99,8 +101,8 @@ b.upversion
 END
 chmod +x BitKeeper/triggers/pre-commit.upversion
 bk new BitKeeper/triggers/pre-commit.upversion
-bk commit -y"Debian changelog auto-update"
+bk commit -y"version number / changelog auto-update"
 
 bk clone -q . $BK_REPOSITORY/$what$dv
-echo "Archiv '$what' angelegt."
+echo "Package '$what' created."
 exit 0

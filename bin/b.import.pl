@@ -32,6 +32,11 @@ $ENV{CLOCK_DRIFT}="1";
 $|=1;
 
 use Shell qw(); ## bk prcs
+system("xhost >/dev/null 2>&1");
+if($?) {
+	print STDERR "No X connection?\n\n";
+	Usage;
+}
 
 sub bk {
 	my @cmd = @_;

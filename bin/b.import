@@ -7,20 +7,22 @@ trap 'usage; exit 1' 0
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- checkt neue Version von externem Source ein
-       [ -d Paket ] [ -t TAG ]
-       [ -v altes-Release ] [ -w neues-Release ]
-       [ -n ] (BK-Daten danach nicht löschen)
-       Verzeichnis-mit-neuem-Source
-       Kommentar
+Usage: $(basename $0)  -- import a new version from an external tree
+       [ -d package ] [ -t TAG ]
+       [ -v oldbranch ] [ -w newbranch ]
+       [ -n (keep Bitkeeper metadata) ]
+       directory
+       comment
 
-importiert einen Dateibaum als "neue Version".
+This script incrementally imports an external tree (e.g., an unpacked
+tarball). It calls "bk rename" if there are both new and removed files,
+so you can track upstream's rename operations.
 
 END
 }
 
-vers=extern
-nvers=gibts/nicht
+vers=-
+nvers=not/given
 dir=
 ext=
 parent=0
@@ -64,7 +66,7 @@ shift
 cmt="$*"
 test -n "$cmt"
 
-if test "$nvers" = "gibts/nicht" ; then
+if test "$nvers" = "not/given" ; then
 	b.get -n -v "$vers" -d "$dir" $tmp
 else
 	b.get -n -v "$vers" -w "$nvers" -d "$dir" $tmp

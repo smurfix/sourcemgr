@@ -6,14 +6,14 @@ trap 'usage; exit 1' 0
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- holt Sourcecode aus dem Archiv lokale Cache
-       [ -v releasename ]
+Usage: $(basename $0)  -- update the local cache and return its link
        [ -d Paket ]
+       [ -v branch ]
        [ -n (do not update) ]
 END
 }
 
-vers=noris
+vers=-
 dir=
 no_update=
 
@@ -44,13 +44,13 @@ umask 002
 
 mod=p
 if b.exists -v "$vers" $dir > /tmp/tf.$$ ; then : ; else
-	echo >&2 "Problem: '$dir' Version '$vers' nicht bekannt."
+	echo >&2 "Problem: '$dir' branch '$vers' unknown."
 	exit 1
 fi
 read what dv < /tmp/tf.$$
 rm -f /tmp/tf.$$
 
-if test -z "$what" ; then echo >&2 "'$dir' nicht gefunden" ; exit 1 ; fi
+if test -z "$what" ; then echo >&2 "'$dir' not found." ; exit 1 ; fi
 test -z "$dv" || dv="-$dv"
 
 dir="$what$dv"

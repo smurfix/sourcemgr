@@ -9,5 +9,5 @@ if test "$1" = "purge" ; then
 
 	# Kill settings
 	rm -f /etc/sourcemgr.cf
-done
+fi
 

@@ -6,15 +6,19 @@ trap 'usage; exit 1' 0
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- holt Updates aus dem Archiv
-       [ -d Paket ]
-       [ -v releasename ]
+Usage: $(basename $0)  -- fetch upstream changes
+       [ -d package ]
+       [ -v branch ]
+
+This tool is just a wrapper for "bk pull" -- except that it uses a
+local cache if possible, understands the local naming convention, and
+actually has a name that the users of other source management systems
+can relate to. ;-)
 END
 }
 
-vers=noris
+vers=-
 dir=
-vset=
 
    eval set -- "$(getopt "d:nv:w:h" "$@")"
    for i
@@ -38,19 +42,19 @@ b.name "$dir" >/tmp/bn.$$
 read dir overs </tmp/bn.$$
 rm -f /tmp/bn.$$
 if test -n "$overs" -a -z "$vset" ; then vers="$overs"; fi
-if test -n "$vers" ; then vset="-v $vers"; else vset=""; fi
+test -n "$vers" || vers="-"
 
 mod=p
 if b.exists -v "$vers" -d $dir > /tmp/tf.$$ ; then : ; else
-	echo >&2 "Problem: '$dir' Version '$vers' nicht bekannt."
+	echo >&2 "Problem: '$dir' branch '$vers' unknown."
 	exit 1
 fi
 read what dv < /tmp/tf.$$
 rm -f /tmp/tf.$$
 
-if test -z "$what" ; then echo >&2 "'$dir' nicht gefunden" ; exit 1 ; fi
+if test -z "$what" ; then echo >&2 "'$dir' not found" ; exit 1 ; fi
 test -z "$dv" || dv="-$vers"
 
 echo + bk pull $BK_REPOSITORY/$what$dv
-bk pull $(b.cache -d "$dir" $vset)
+bk pull $(b.cache -d "$dir" -v "$vers")
 test -d RESYNC && bk resolve

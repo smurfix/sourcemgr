@@ -1,15 +1,16 @@
 #!/bin/bash
 
+# somewhat obsolete, as it only uses "rpm.version". Beware.
+
 set -e
 trap 'usage; exit 1' 0
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- Info über die aktuelle Revisionsnr, für Doku
-		(nix)        => Info zur aktuellsten Version im Archiv
-		                (Versionsnummer, Timestamp, vollständiger Key)
-		Timestamp    => Versionsnummer
-		Versionsnr   => Timestamp
+Usage: $(basename $0)  -- Report "real" revision
+		[ version ]
+
+
 END
 }
 
@@ -32,9 +33,9 @@ fr() {
 	for r in $nr ; do
 		if test -f rpm.version -o -f SCCS/s.rpm.version ; then
 			if test -n "$1" -a "$n" != "+" ; then
-				nr="	noris:$1"
+				nr="	v:$1"
 			else
-				nr="	noris:$(head -1 rpm.version)"
+				nr="	v:$(head -1 rpm.version)"
 			fi
 		fi
 		bk prs -ah '-d:I:	:UTC:'"$nr"'\n:KEY:\n' -r$r ChangeSet
@@ -48,7 +49,7 @@ else
 	20*)
 		rev=$(bk findkey -t$1 ChangeSet || true)
 		if test -z "$rev" ; then
-			echo nicht gefunden >&2
+			echo not found >&2
 			exit 1
 		fi
 		rev=$(echo $rev | sed -e 's/.*|//')

@@ -6,13 +6,17 @@ trap 'usage; exit 1' 0
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- schreibt Updates in das Archiv
-       [ -d Paket ]
-       [ -v releasename ]
+Usage: $(basename $0)  -- Send updates to the master
+       [ -d package ]
+       [ -v branch ]
+
+This is "bk push", except that it always uses the BK_REPOSITORY.
+It also reports remote changes in a somewhat more nice way.
+It also sends the whole repository if the remove doesn't have it yet.
 END
 }
 
-vers=noris
+vers=-
 dir=
 vset=
 
@@ -46,18 +50,18 @@ what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 if b.exists -v "$vers" -d $dir > /tmp/tf.$$ ; then 
 	read what dv < /tmp/tf.$$
 	rm -f /tmp/tf.$$
-	if test -z "$what" ; then echo >&2 "'$dir' nicht gefunden" ; exit 1 ; fi
+	if test -z "$what" ; then echo >&2 "'$dir' not found" ; exit 1 ; fi
 
-	test -z "$dv" || dv="-$dv"
+	test -z "$vers" -o "$vers" = "-" || dv="-$vers"
 
 	if bk pull -n $BK_REPOSITORY/$what$dv 2>&1 | grep -q "Would receive" ; then
 		cat >&2 <<END
 Problem:
-Das Archiv "$what$dv" hat Änderungen, die du noch nicht hast.
+The repository "$what$dv" has changes which you don't have.
 
-Mögliche Abhilfen:
-- Erst b.merge aufrufen
-- In einen anderen (neuen?) Zweig speichern (Option '-v')
+You can:
+- use b.merge first
+- upload a new branch (use the "-v branch" option)
 END
 	else
 		echo + bk push $BK_REPOSITORY/$what$dv
@@ -67,8 +71,9 @@ END
 		##bk push -q . $(b.cache -d "$what" -v $vers -n)
 	fi
 else
-	test -z "$vers" || dv="-$vers"
-	echo Version "$vers" gibt es noch nicht -- wird neu angelegt.
+	dv=
+	test -z "$vers" -o "$vers" = "-" || dv="-$vers"
+	echo "Branch '$vers' doesn't exist -- it will be created."
 	echo + bk clone . $BK_REPOSITORY/$what$dv
 	bk clone -q . $BK_REPOSITORY/$what$dv
 fi

@@ -1,5 +1,5 @@
 #
-ä shell snippet to set BK_REPOSITORY
+# shell snippet to set BK_REPOSITORY
 
 if test -z "$BK_REPOSITORY" -a -f $HOME/.sourcemgr.cf ; then
 	BK_REPOSITORY=$(/usr/share/sourcemgr/getvar $HOME/.sourcemgr.cf BK_REPOSITORY)

@@ -1,0 +1,2 @@
+perl:Depends=perl
+python:Depends=python (>= 2.3), python (<< 3)

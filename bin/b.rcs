@@ -9,22 +9,20 @@ trap 'usage; exit 1' 0
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
-       [ -d Paket ]
-       [ -n # (Intermediate-Push alle # Importe; Default 100; 0=garnicht) ]
-       [ -k # (ignoriere CVS-Fehler) ]
-       [ -L (kein Fehler wenn Lock nicht geht) ]
-       [ -r Fork (im CVS) ] [ -t TAG des Resultats ]
-	   [ -s (shell instead of renametool) ] [ -S (kein Renametool) ]
-       [ -v releasename (rcs) ]
-       [ -w neuer releasename ]
-       [ -e CVS-Fudge-Sekunden (Default 120) ]
-       [ -q (quiet!) ]
-       [ -D (Debug) ] [ -Z (keine Kompression) ] [ -b # (Limit) ]
+Usage: $(basename $0)  -- update Bitkeeper from RCS
+       [ -d package ] [ -v branch ] [ -w new_branch ]
+       [ -n # (do a "bk push" every # imports; defaults to 100; 0=don't) ]
+       [ -k (ignore CVS errors) ]
+       [ -L (ignore lock) ]
+       [ -r branch (CVS) ]  [ -t Tag the result ]
+       [ -s (subshell instead of renametool) ] [ -S (no renametool) ]
+       [ -e RCS fudge seconds (default:120) ]
+       [ -q (quiet!) ] [ -W http://XXX/ (/viewcvs?rev+text/plain) UNTESTED ]
+       [ -D (debug) ] [ -Z (no compression) ] [ -b # (try lock that often) ]
        [ -x SKIPSUBDIR,... ] [ -X (lokal) ]
-       wo
+       where
 
-"wo" ist der Pfad zum RCS-Repository.
+"where" is the path to the RCS repository.
 END
 }
 

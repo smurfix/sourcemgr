@@ -1,6 +1,11 @@
 #!/bin/sh
 
-### debianize a package.
+if test "$1" = "-h" ; then
+	cat <<_END
+Usage: $0 -- debianize a repository
+_END
+	exit 0
+fi
 
 if ! test -d BitKeeper ; then
 	echo "ERROR: Run from BK root directory" >&2
@@ -23,6 +28,16 @@ chmod +x BitKeeper/triggers/post-commit.changelog
 bk new BitKeeper/triggers/post-commit.changelog
 fi
 
+if test ! -f BitKeeper/triggers/SCCS/s.pre-commit.changelog ; then
+cat <<'END' >BitKeeper/triggers/pre-commit.changelog
+#!/bin/sh
+
+b.upversion
+END
+chmod +x BitKeeper/triggers/pre-commit.changelog
+bk new BitKeeper/triggers/pre-commit.changelog
+fi
+
 #if test ! -f BitKeeper/triggers/SCCS/s.post-incoming.changelog ; then
 #cat <<'END' >BitKeeper/triggers/post-incoming.changelog
 ##!/bin/sh
@@ -33,38 +48,30 @@ fi
 #bk new BitKeeper/triggers/post-incoming.changelog
 #fi
 #
-if test -d debian ; then 
-	: 
-	# bk mv debian/changelog debian/changelog.old
-else
-D="$(basename "$(pwd)")"-"$(bk prs -ah '-d:I:' -r+ ChangeSet)"
+if test ! -d debian ; then 
+	D="$(basename "$(pwd)")"-"$(bk prs -ah '-d:I:' -r+ ChangeSet)"
 
-mkdir $D
+	mkdir $D
 cd $D
-echo "" | dh_make -s -n -c gpl
-cd ..
-mv $D/debian .
-rm -rf $D
-rmdir $D.orig
-perl -pi -e 's/\bdh_installdocs$/dh_installdocs -n/' debian/rules
-DN="$(bk prs -ah -d':USER:@:DOMAIN:\n' -r+ ChangeSet)"
-perl -pi -e 's/\@unknown\b/\@'"$DN"'/g' debian/*
-rm -f debian/*.ex debian/ex.* debian/README.Debian
+	echo "" | dh_make -s -n -c gpl
+	cd ..
+	mv $D/debian .
+	rm -rf $D
+	rmdir $D.orig
+	perl -pi -e 's/\bdh_installdocs$/dh_installdocs -n/' debian/rules
+	DN="$(bk prs -ah -d':USER:@:DOMAIN:\n' -r+ ChangeSet)"
+	perl -pi -e 's/\@unknown\b/\@'"$DN"'/g' debian/*
+	rm -f debian/*.ex debian/ex.* debian/README.Debian
 fi
 
 b.uplog
-#cat <<_ >debian/users
-#smurf@noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
-#smurf@smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
-#smurf@play.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
-#smurf@rz0.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
-#smurf@smurf-o-linux.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
-#smurf@linux.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
-#smurf@linux.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
-#_
-#bk new debian/users
 
-bk ignore "*-stamp" debian/files "debian/tmp/*"
+if bk get -p BitKeeper/etc/ignore | grep -qs debian/files ; then : ; else
+	bk ignore "*-stamp" debian/files "debian/tmp/*"
+fi
+
 bk chmod 755 debian/rules
-echo 4 > debian/compat
+if test ! -f debian/compat -a ! -f debian/SCCS/s.compat; then
+	echo 4 > debian/compat
+fi
 

@@ -1,5 +1,40 @@
 #!/usr/bin/perl -w
 
+#
+# This is the core of CVS import. The basics of operation is,
+# roughly, as follows:
+# - Do separate CVS imports for the whole to-be-imported tree,
+#   versions N.1, N.1.1.1 and N.1.2.1, for successive N starting at 1
+#   until there are no more files. There's no known other way to get the
+#   names of all files, including deleted ones.
+# - Do "cvs log" on each import. Sort by date.
+# - Figure out where to start and what to import, based on stored
+#   changeset comments and tags.
+# - Aggregate, based on timestamp difference between check-ins, equality
+#   of check-in comment, and author.
+# - Pop up renametool (if warranted) to reproduce file/directory renames.
+# - Generate changesets. Tag them with whatever CVS was tagged.
+# - Auto-push every 100 changes (or whatever) in case something goes
+#   seriously wrong.
+# - Optionally tag the final changeset and push it.
+# 
+# This tool supports importing CVS branches, though this is not well
+# tested. It obviously supports incremental uploads.
+#
+# It does NOT support any kind of operation which does not involve
+# the first steps of creating an empty BK repository and starting with
+# the very earliest CVS check-ins.
+#
+# CVS doesn't have changeset-wide tags; this tool implements the
+# workaround of collecting all of them and remembering which were latest
+# in time. This results in some confusion when the oiginal CVS people
+# import part of somebody else's CVS subtree into their own, but that
+# can't be helped.
+# 
+# This tool is copyright (C) Matthias Urlichs.
+# It is released under the Gnu Public License, version 2.
+#
+
 use strict;
 use warnings;
 no warnings 'uninitialized';
@@ -56,7 +91,7 @@ $ENV{BK_LICENSE}="ACCEPTED";
 select(STDERR); $|=1; select(STDOUT);
 
 use Shell qw(); ## bk cvs
-system("xterm -e true");
+system("xhost >/dev/null 2>&1");
 if($?) {
 	print STDERR "No X connection?\n\n";
 	Usage;
@@ -71,8 +106,13 @@ my $pn = shift @ARGV;
 my $trev = $ENV{BK_TARGET_REV};
 $trev="" unless defined $trev;
 my %target;
-my %tpre; # Vorlaeufer-Versionsname
-my %cutoff; # Datum, ab dem Vendor-Versionen nicht mehr aktiv sind
+my %tpre; # previous version name
+my %cutoff; # date where the vendor version branch ends
+   # The vendor branch is an "interesting" idea. Basically, it must be
+   # handled like the real thing until a version 1.2 shows up. 1.1.1.x
+   # versions after that are supposed to be merged onto the trunk.
+   # This is incidentally the reason why I need to scan revisions 1.1,
+   # 1.1.1.1 _and_ 1.1.2.1.
 
 $pn =~ s#[/:]#_#g;
 my %excl;
@@ -340,7 +380,7 @@ sub rev_ok($$) {
 	return 0+@f == 1;
 }
 
-# Bearbeite den Log-Eintrag EINER Datei
+# Process one CVS log entry
 sub proc1($$$$$$$) {
 	my($fn,$dt,$rev,$cmt,$autor,$syms,$gone) = @_;
 
@@ -366,6 +406,8 @@ sub proc(@) {
 	my %syms;
 	my $pre;
 	my $gone;
+	# It is helpful to have the output of "cvs log FILE" handy if you
+	# want to understand the next bits.
 	foreach my $x(@_) {
 		if($state == 0 and $x =~ s/^Working file:\s+(\S+)\s*$/$1/) {
 			$fn = $x;
@@ -526,13 +568,13 @@ description: $pn
 
 logging:    changesets\@openlogging.org
 security:   none
-contact:    Matthias Urlichs
-email:		smurf\@noris.de
-Company:    noris network AG
-Street:     Kilianstraße 142
-City:       Nürnberg
-Postal:     90491
-Country:    Germany
+contact:    $ENV{FULLNAME}
+email:		$ENV{EMAIL}
+Company:    -
+Street:     -
+City:       -
+Postal:     -
+Country:    -
 
 checkout:get
 END
@@ -722,7 +764,9 @@ END
 			$shells--;
 		} else {
 			print STDERR "$CLR $pn: *** rename ***\r" if $verbose;
-			open(RN,"|env @AU @DT bk renametool -p > $tmf");
+			#open(RN,"|env @AU @DT bk renametool -p > $tmf");
+			# private patch. Doesn't work any more. :-(
+			open(RN,"|env @AU @DT bk renametool");
 			foreach my $f(sort { $a cmp $b } @gone) { print RN "$f\n"; }
 			print RN "\n";
 			foreach my $f(sort { $a cmp $b } @new) { print RN "$f\n"; }
@@ -732,12 +776,12 @@ END
 		}
 
 		my $cmds="";
-		my $T = IO::File->new($tmf,"r");
-		while(<$T>) {
-			$cmds .= $_;
-		}
-		$T->close();
-		unlink($tmf);
+		#my $T = IO::File->new($tmf,"r");
+		#while(<$T>) {
+		#	$cmds .= $_;
+		#}
+		#$T->close();
+		#unlink($tmf);
 
 		@new=(); @gone=();
 		my $ocmt=""; my @onew;
@@ -837,17 +881,17 @@ END
 }
 
 if($trev ne "" and $ENV{BK_TARGET_NEW}) { # tag must not exist
-	# Rollback bis hinter das Zieldatum
+	# Rollback beyond the target date
 	die "Tag '$trev' exists" if bk("prs","-hd:I:", "-r$trev","ChangeSet");
 
 	$dt_done=$symdate{$trev};
-	die "kein Datum für '$trev'\n" unless $dt_done;
+	die "no date for '$trev'\n" unless $dt_done;
 	foreach my $pre(keys %tpre) {
 		die "Kein Vorläufer-Branch '$pre' für '$trev' gefunden\n"
 			unless bk("prs","-hd:I:", "-r$pre","ChangeSet");
 	}
 	my $b_rev=bk("prs","-hd:I:", "-rBranch:$trev","ChangeSet");
-	die "Keine Revisionsnummer für '$trev' gefunden.\n" unless $b_rev;
+	die "No revision number for '$trev' found.\n" unless $b_rev;
 	bk("undo","-sfqa$b_rev");
 
 	bk("tag",$trev);
@@ -874,34 +918,32 @@ while(@$cset) {
 		my $scmt;
 		my $ldiff=$x->{wann};
 
-		# Wir suchen nun Blöcke, die nur von einem Autor stammen,
-		# entweder denselben Kommentar haben oder ausreichend eng
-		# zusammen sind, und nicht durch Änderungen anderer Autoren oder
-		# durch Symbole unterbrochen sind.
+		# Here we collate the next few changes. They need to be from the
+		# same author, not touch files twice, either have the same
+		# comment or are within a few minutes of each other.
+		# A tag also marks the end of a changeset, obviously.
 		my $i=0;
 		sk_add: while($i < @$cset) {
 			my $y=$cset->[$i];
 			my $f=$y->{autor}{$autor};
 
-			# Änderung dieses Autors ?
+			# Different author -> different changeset
 			last sk_add unless $f;
 
-			# Doppelte Änderung?
+			# A file was changed already -> belongs in new changeset
 			foreach my $fn(keys %$f) {
 				last sk_add if $adf{$fn}++;
 			}
 
-			# anderer Kommentar?
+			# comments are the same? If so, increase grace time
 			$scmt = scmt($f,$scmt);
-
 			if (not defined $scmt or $scmt eq "") {
 				last sk_add if $y->{wann} - $ldiff > $diff;
 			} else {
 				last sk_add if $y->{wann} - $ldiff > 10*$diff;
 			}
 
-
-			# JETZT aber: Sammle Änderungen.
+			# NOW, finally, collect changes.
 			foreach my $fn(keys %$f) {
 				$adt{$fn}=$f->{$fn}
 					if $f->{$fn}{rev} !~ /^1\.1\.1\.\d+$/

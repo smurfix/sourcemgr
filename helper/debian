@@ -1,0 +1,17 @@
+#
+ä shell snippet to set DEBIAN_REPOSITORY
+
+if test -z "$DEBIAN_REPOSITORY" -a -f $HOME/.sourcemgr.cf ; then
+	DEBIAN_REPOSITORY=$(/usr/share/sourcemgr/getvar $HOME/.sourcemgr.cf DEBIAN_REPOSITORY)
+fi
+if test -z "$DEBIAN_REPOSITORY" ; then
+	DEBIAN_REPOSITORY=$(/usr/share/sourcemgr/getvar /etc/sourcemgr.cf DEBIAN_REPOSITORY)
+fi
+if test -z "$DEBIAN_REPOSITORY" ; then
+	cat <<_END >&2
+$0: Error: You need to set the DEBIAN_REPOSITORY variable.
+    Do this either as an environment variable,
+        in ~/.sourcemgr.cf, or /etc/sourcemgr.cf
+_END
+	exit 1
+fi

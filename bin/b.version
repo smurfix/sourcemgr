@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This script reports the current "stable" version number.
+
 set -e
 
 usage() {

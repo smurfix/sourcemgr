@@ -1,5 +1,8 @@
 #!/usr/bin/perl -w
 
+# this is a somewhat mangled clone of b.cvs.pl.
+# The two really need to be merged ...
+
 use strict;
 use warnings;
 no warnings 'uninitialized';
@@ -37,7 +40,7 @@ if($ENV{BKCVS_LOCK}) {
 #}
 
 my $debug=0;
-my $diff=$ENV{BKCVS_DIFF}||300; # Zeitraum für "gleichzeitige" Änderungen im CVS
+my $diff=$ENV{BKCVS_DIFF}||300; # Aggregate changes?
 my $shells=$ENV{BKCVS_SHELLS}||0;
 
 sub Usage() {
@@ -55,11 +58,11 @@ $ENV{BK_LICENSE}="ACCEPTED";
 select(STDERR); $|=1; select(STDOUT);
 
 use Shell qw(); ## bk cvs/rcs
-#system("xterm -e true");
-#if($?) {
-#	print STDERR "No X connection?\n\n";
-#	Usage;
-#}
+system("xhost >/dev/null 2>&1");
+if($?) {
+	print STDERR "No X connection?\n\n";
+	Usage;
+}
 
 sub init_bk();
 my $rhost="un.known";
@@ -69,8 +72,8 @@ my $pn = shift @ARGV;
 my $trev = $ENV{BK_TARGET_REV};
 $trev="" unless defined $trev;
 my %target;
-my %tpre; # Vorlaeufer-Versionsname
-my %cutoff; # Datum, ab dem Vendor-Versionen nicht mehr aktiv sind
+my %tpre; # parent version name
+my %cutoff; # cutoff date for vendor branches
 
 $pn =~ s#[/:]#_#g;
 my %excl;
@@ -421,18 +424,18 @@ unless(-d "$tmppn/BitKeeper") {
 		print CF <<END;
 description:	$pn
 
-single_user:smurf
-single_host:smurf.noris.de
+single_user:$USER
+single_host:$(hostname)
 security:none
 logging:none
 
-contact:    Matthias Urlichs
-email:      smurf\@noris.de
-Company:    noris network AG
-Street:     Kilianstraße 142
-City:       Nürnberg
-Postal:     90491
-Country:    Germany
+contact:    $FULLNAME
+email:      EMAIL
+Company:    -
+Street:     -
+City:       -
+Postal:     -
+Country:    -
 
 checkout:get
 END
@@ -568,7 +571,8 @@ END
 			$shells--;
 		} else {
 			print STDERR " $pn: *** rename ***\r" if $verbose;
-			open(RN,"|env @AU @DT bk renametool -p > $tmf");
+			#open(RN,"|env @AU @DT bk renametool -p > $tmf");
+			open(RN,"|env @AU @DT bk renametool");
 			foreach my $f(sort { $a cmp $b } @gone) { print RN "$f\n"; }
 			print RN "\n";
 			foreach my $f(sort { $a cmp $b } @new) { print RN "$f\n"; }
@@ -578,12 +582,12 @@ END
 		}
 
 		my $cmds="";
-		my $T = IO::File->new($tmf,"r");
-		while(<$T>) {
-			$cmds .= $_;
-		}
-		$T->close();
-		unlink($tmf);
+		#my $T = IO::File->new($tmf,"r");
+		#while(<$T>) {
+		#	$cmds .= $_;
+		#}
+		#$T->close();
+		#unlink($tmf);
 
 		@new=(); @gone=();
 		my $ocmt=""; my @onew;
@@ -720,10 +724,7 @@ while(@$cset) {
 		my $scmt;
 		my $ldiff=$x->{wann};
 
-		# Wir suchen nun Blöcke, die nur von einem Autor stammen,
-		# entweder denselben Kommentar haben oder ausreichend eng
-		# zusammen sind, und nicht durch Änderungen anderer Autoren oder
-		# durch Symbole unterbrochen sind.
+		# *sigh* see exactly the same comment in b.cvs.pl.
 		my $i=0;
 		sk_add: while($i < @$cset) {
 			my $y=$cset->[$i];

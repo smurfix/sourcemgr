@@ -1,3 +1,10 @@
+sourcemgr (1.307) unstable; urgency=low
+
+  * major translation, minor bugfix
+  * intend to replace empty/defalt branch with "-"
+
+ -- Matthias Urlichs <smurf@debian.org>  Wed, 28 Jan 2004 13:05:00 +0100
+
 sourcemgr (1.306) unstable; urgency=low
 
   * doc update. More needs to be done.

@@ -5,9 +5,9 @@ set -e
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- Update aus allen Upstream-Repositories.
-	Es wird immer das aktuelle Verzeichnis verwendet.
-	Die Upstream-Liste steht in BitKeeper/log/parents.
+Usage: $(basename $0)  -- Pull from more than one "parent"
+	This is like "bk pull" except that it examines BitKeeper/etc/parents
+	(not the plural), pulls from all of these, and auto-calls "bk resolve".
 END
     trap "" 0
     exit 1
@@ -26,6 +26,7 @@ exec 9<&0
 while read a ; do
 	bk pull "$a" <&9 || true
 	if test -d RESYNC ; then
+		echo Resolving merge from "$a"
 		bk resolve <&9
 	fi
 	if test -d RESYNC ; then

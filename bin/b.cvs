@@ -8,23 +8,20 @@ trap 'usage; exit 1' 0
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
-       [ -d Paket ]
-       [ -l (kein PSERVER) ]
-       [ -n # (Intermediate-Push alle # Importe; Default 100; 0=garnicht) ]
-       [ -k (ignoriere CVS-Fehler) ]
-       [ -L (kein Fehler wenn Lock nicht geht) ]
-       [ -r Fork (im CVS) ] [ -u USER (ssh statt anonCVS) ]
-       [ -s (shell instead of renametool) ] [ -S (kein Renametool) ]
-       [ -v releasename (cvs) ]  [ -t Tag ]
-       [ -w neuer releasename ]
-       [ -e CVS-Fudge-Sekunden (Default 120) ]
-       [ -q (quiet!) ] [ -W http://XXX/ (/viewcvs?rev+text/plain) ]
-       [ -D (Debug) ] [ -Z (keine Kompression) ] [ -b # (Limit) ]
-       woher  was
+Usage: $(basename $0)  -- update Bitkeeper from Remote CVS
+       [ -d Paket ] [ -v branch (cvs) ] [ -w new branch ]
+       [ -l (local archive: don't prefix PSERVER) ]
+       [ -n # (do a "bk push" every # imports; defaults to 100; 0=don't) ]
+       [ -k (ignore CVS errors) ] [ -L (ignore lock) ]
+       [ -r branch (CVS) ] [ -u USER (using ssh instead of anonCVS) ]
+	   [ -t Tag the result ] [ -e CVS fudge seconds (default:120) ]
+       [ -s (subshell instead of renametool) ] [ -S (no renametool) ]
+       [ -q (quiet!) ] [ -W http://XXX/ (/viewcvs?rev+text/plain) UNTESTED ]
+       [ -D (debug) ] [ -Z (no compression) ] [ -b # (try pushing that often) ]
+       whence  what
 
-"woher" ist der Name des entfernten Repository.
-"was" ist der Name des Archivs dort.
+"whence" is the name of the CVS repository ("anoncvs@foo.example.com:/cvsrepo/")
+"what" is the archive name ("some_repo")
 END
 }
 

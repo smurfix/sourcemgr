@@ -6,16 +6,19 @@ trap 'usage; exit 1' 0
 
 usage() {
 cat >&2 <<END
-Usage: $(basename $0)  -- Test ob das Verzeichnis existiert
-       [ -v releasename ]
-       [[-d]Paket ]
-       Rückmeldung: Paketname Version
-           Quellarchiv unter $Paketname-$Version
-           (Version kann leer sein)
+Usage: $(basename $0)  -- Test whether a master archive exists
+       [ -v  branch ]
+       [[-d] package ]
+       Reply: package branch
+           Checks whether the source at $package-$branch exists
+           (the branch can be empty)
+
+This script tests whether a given package+branch archive exists in the
+master archive.
 END
 }
 
-vers=noris
+vers=-
 dir=
 
    eval set -- "$(getopt "d:v:h" "$@")"
@@ -40,24 +43,16 @@ if test -z "$dir" ; then
 else
 	test -n "$mkdir" || test -z "$1"
 fi
+if test "$vers" = "-" ; then vers="" ; fi
 
 desc=$(echo $dir | sed -e 's/\//:/g' -e 's/:*$//')
-
-if test -f "/usr/src/STATUS/checkout/$desc" ; then
-    desc=$(sed  -e 's/[ 	].*//' "/usr/src/STATUS/checkout/$desc")
-    what=$(echo $desc | sed -e 's/[:\/]/_/g' -e 's/_*$//')
-else
-    what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
-fi
+what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 
 trap '' 0
 
-test -z "$vers" || dv="-$vers"
+test -z "$vers" -o "$vers" = "-" || dv="-$vers"
 if bk changes -r+ "$BK_REPOSITORY/$what$dv" >/dev/null 2>&1 ; then
 	dv=$vers
-elif test "$vers" = "noris" && \
-	bk changes -r+ "$BK_REPOSITORY/$what" >/dev/null 2>&1 ; then
-	dv=
 else
 	exit 1
 fi
