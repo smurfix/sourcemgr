@@ -7,9 +7,8 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- create a new archive.
-         -d package
-	   [ -v version ]
-	   [ -s (single user) ]
+         -d package  [ -v version ]
+	   [ -s (single user) ]  [ -p (store in public archive) ]
 	     short description
 
 Create a new empty package, upload to master repo.
@@ -19,14 +18,17 @@ END
 dir=
 vers=
 single=
+pub=
 
-   eval set -- "$(getopt "d:sv:h" "$@")"
+   eval set -- "$(getopt "d:psv:h" "$@")"
    for i
    do
 	   case "$i"
 	   in
 		   -h)
 		       exit 1 ;;
+		   -p)
+		   	   shift; pub="public/" ;;
 		   -s)
 		   	   shift; single=y ;;
 		   -d)
@@ -103,6 +105,6 @@ chmod +x BitKeeper/triggers/pre-commit.upversion
 bk new BitKeeper/triggers/pre-commit.upversion
 bk commit -y"version number / changelog auto-update"
 
-bk clone -q . $BK_REPOSITORY/$what$dv
+bk clone -q . $BK_REPOSITORY/$pub$what$dv
 echo "Package '$what' created."
 exit 0

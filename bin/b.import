@@ -9,7 +9,7 @@ usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- import a new version from an external tree
        [ -d package ] [ -t TAG ]
-       [ -v oldbranch ] [ -w newbranch ]
+       [ -v oldbranch ] [ -w newbranch [ -p (copy to publlic archive) ] ]
        [ -n (keep Bitkeeper metadata) ]
        directory
        comment
@@ -28,8 +28,9 @@ ext=
 parent=0
 nodelete=
 tag=
+p=
 
-   eval set -- "$(getopt "d:nt:v:w:h" "$@")"
+   eval set -- "$(getopt "d:npt:v:w:h" "$@")"
    for i
    do
 	   case "$i"
@@ -46,6 +47,8 @@ tag=
 			   shift; nvers="$1"; shift;;
 		   -n)
 		       shift; nodelete=y ;;
+		   -p)
+		       shift; p="-p" ;;
 			--)
 				shift; break ;;
 	   esac
@@ -69,7 +72,7 @@ test -n "$cmt"
 if test "$nvers" = "not/given" ; then
 	b.get -n -v "$vers" -d "$dir" $tmp
 else
-	b.get -n -v "$vers" -w "$nvers" -d "$dir" $tmp
+	b.get -n -v "$vers" -w "$nvers" $p -d "$dir" $tmp
 fi
 
 test -d "$tmp"

@@ -7,8 +7,7 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- fetch upstream changes
-       [ -d package ]
-       [ -v branch ]
+       [ -d package ] [ -v branch ]
 
 This tool is just a wrapper for "bk pull" -- except that it uses a
 local cache if possible, understands the local naming convention, and
@@ -20,7 +19,7 @@ END
 vers=-
 dir=
 
-   eval set -- "$(getopt "d:nv:w:h" "$@")"
+   eval set -- "$(getopt "d:v:h" "$@")"
    for i
    do
 	   case "$i"

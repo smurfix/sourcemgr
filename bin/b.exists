@@ -52,10 +52,12 @@ trap '' 0
 
 test -z "$vers" -o "$vers" = "-" || dv="-$vers"
 if bk changes -r+ "$BK_REPOSITORY/$what$dv" >/dev/null 2>&1 ; then
-	dv=$vers
+	: # OK
+elif bk changes -r+ "$BK_REPOSITORY/public/$what$dv" >/dev/null 2>&1 ; then
+	what="public/$what"
 else
 	exit 1
 fi
 
-echo $what $dv
+echo $what $vers
 

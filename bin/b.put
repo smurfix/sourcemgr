@@ -7,8 +7,8 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Send updates to the master
-       [ -d package ]
-       [ -v branch ]
+       [ -d package ] [ -v branch ]
+	   [ -p (wenn neu: speichere nach /public/) ]
 
 This is "bk push", except that it always uses the BK_REPOSITORY.
 It also reports remote changes in a somewhat more nice way.
@@ -19,8 +19,9 @@ END
 vers=-
 dir=
 vset=
+pub=
 
-   eval set -- "$(getopt "d:nv:w:h" "$@")"
+   eval set -- "$(getopt "d:pv:h" "$@")"
    for i
    do
 	   case "$i"
@@ -31,6 +32,8 @@ vset=
 			   shift; dir="$1"; shift;;
 		   -v)
 			   shift; vers="$1"; vset=1; shift;;
+		   -p)
+			   shift; pub="public/" ;;
 			--)
 				shift; break ;;
 	   esac
@@ -74,7 +77,7 @@ else
 	dv=
 	test -z "$vers" -o "$vers" = "-" || dv="-$vers"
 	echo "Branch '$vers' doesn't exist -- it will be created."
-	echo + bk clone . $BK_REPOSITORY/$what$dv
-	bk clone -q . $BK_REPOSITORY/$what$dv
+	echo + bk clone . $BK_REPOSITORY/$pub$what$dv
+	bk clone -q . $BK_REPOSITORY/$pub$what$dv
 fi
 

@@ -1,3 +1,10 @@
+sourcemgr (1.315) unstable; urgency=low
+
+  * Neue Option "-p" bei allen Befehlen, die ein neues Archiv anlegen:
+  * das Archiv wird im Master unter /public/ abgelegt.
+
+ -- Matthias Urlichs <smurf@debian.org>  Sat, 31 Jan 2004 15:17:05 +0100
+
 sourcemgr (1.314) unstable; urgency=low
 
   * b.debuild: Handle EXTERN tag vs. externalized version number better

@@ -8,7 +8,9 @@ usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- fetch source code from the master archive
        [ -v branch ]
-       [ -w new_branch, creates a copy [ -N (don't copy to master) ]]
+       [ -w new_branch, creates a copy ]
+	     [ -N (don't copy to master) ]
+	     [ -p (copy to public archive) ]
        [ -d package | -g (use path) ]
        [ -n (tell bitkeeper not to checkout the source) ]
        [ dirname ]
@@ -32,8 +34,9 @@ dir=
 optp=
 gpath=
 noback=
+pub=
 
-   eval set -- "$(getopt "d:gnNv:w:h" "$@")"
+   eval set -- "$(getopt "d:gnNpv:w:h" "$@")"
    for i
    do
 	   case "$i"
@@ -46,6 +49,8 @@ noback=
 		   		gpath="$(pwd | sed -ne 's,.*/src/,,p')" ; shift ;;
 		   -n)
 		       shift; optp=-P ;;
+		   -p)
+		       shift; pub="public/" ;;
 		   -N)
 		       shift; noback=1 ;;
 		   -v)
@@ -106,7 +111,7 @@ fi
 cd "$ddir"
 if test "$nvers" != "not/given" ; then
 	echo -n -e "$dir: copy source back    |\r"
-	test -n "$noback" || bk clone -q . $BK_REPOSITORY/$what$ndv
+	test -n "$noback" || bk clone -q . $BK_REPOSITORY/$pub$what$ndv
 	bk parent $BK_REPOSITORY/$what$ndv
 	dv="$ndv"
 fi

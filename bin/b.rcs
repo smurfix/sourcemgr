@@ -10,7 +10,7 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- update Bitkeeper from RCS
-       [ -d package ] [ -v branch ] [ -w new_branch ]
+       [ -d package ] [ -v branch ] [ -w new_branch [ -p (public)] ]
        [ -n # (do a "bk push" every # imports; defaults to 100; 0=don't) ]
        [ -k (ignore CVS errors) ]
        [ -L (ignore lock) ]
@@ -38,6 +38,7 @@ nvers=
 ignore=
 verbose=1
 nolock=1
+p=
 run="$0.pl"
 comp=-z3
 diff=
@@ -47,7 +48,7 @@ bg=
 df=0
 tag=
 
-   eval set -- "$(getopt "hb:d:De:kLn:qr:sSt:v:w:x:XZ" "$@")"
+   eval set -- "$(getopt "hb:d:De:kLn:pqr:sSt:v:w:x:XZ" "$@")"
    for i
    do
 	   case "$i"
@@ -62,6 +63,8 @@ tag=
 		   	   shift; rename=1 ;;
 		   -D)
 			   shift; run="perl -d $(type -p "$0.pl")" ;;
+		   -p)
+		       shift; p="-p" ;;
 		   -L)
 		       shift; nolock=0 ;;
 		   -t)
@@ -109,9 +112,9 @@ what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
 trap 'usage; exit 1' 0
 
 if test -n "$nvers"; then
-	wset="-N -w $nvers"
+	wset="-N $p -w $nvers"
 	dv="-$nvers"
-elif test -n "$vers" ; then
+elif test -n "$vers" -a "$vers" != "-"; then
 	dv="-$vers"
 fi
 
