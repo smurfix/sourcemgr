@@ -1,3 +1,11 @@
+sourcemgr (1.283) unstable; urgency=low
+
+  * debian/control:
+       faked the Standards-Version: to 3.6.1
+           (which is obviously total nonsense).
+
+ -- Matthias Urlichs <smurf@debian.org>  Sat, 13 Sep 2003 12:36:56 +0200
+
 sourcemgr (1.282) unstable; urgency=low
 
   * Delete: debian/version
