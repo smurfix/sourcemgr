@@ -71,8 +71,10 @@ while(<STDIN>) {
 		s/^\t//;
 		$cmt .= "$_\n";
 	} elsif($state==12 and /^$/) {
-		$state=13;
-	} elsif($state==13 and /^Affected files/) {
+		$cmt .= "$_\n";
+		$state=12;
+	} elsif($state==12 and /^Affected files/) {
+		chop $cmt;
 		$state=2;
 	} elsif($state==2 and /^$/) {
 		$state=3;
