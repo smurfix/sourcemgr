@@ -59,12 +59,19 @@ description: $*
 END
 
 if test -n "$single" ; then
-	echo single_user:$USER >>$tmpcf
-	echo single_host:$(hostname) >>$tmpcf
+
+	cat <<END >>$tmpcf
+logging:none
+single_user:$USER
+single_host:$(hostname)
+END
+
 else
+
 	cat <<END >>$tmpcf
 logging:    changesets@openlogging.org
 END
+
 fi
 cat <<END >>$tmpcf
 security:   none
