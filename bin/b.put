@@ -39,26 +39,33 @@ trap '' 0
 b.name "$dir" >/tmp/bn.$$
 read dir overs </tmp/bn.$$
 rm -f /tmp/bn.$$
-if test -n "$overs" -a test -z "$vset" ; then vers="$overs"; fi
 
-mod=p
+what=$(echo $dir | sed -e 's/\//_/g' -e 's/_*$//')
+
 if b.exists -v "$vers" -d $dir > /tmp/tf.$$ ; then 
 	read what dv < /tmp/tf.$$
 	rm -f /tmp/tf.$$
 	if test -z "$what" ; then echo >&2 "'$dir' nicht gefunden" ; exit 1 ; fi
-	test -z "$dv" || dv="-$vers"
 
-	echo + bk pull $BK_REPOSITORY/$what$dv
-	bk pull $BK_REPOSITORY/$what$dv
+	test -z "$dv" || dv="-$overs"
+	if bk superset $BK_REPOSITORY/$what$dv ; then
+		echo + bk push $BK_REPOSITORY/$what$dv
+		bk push $BK_REPOSITORY/$what$dv
+	else
+		cat >&2 <<END
+Problem: Das Archiv $what$dv hat Änderungen, die du noch nicht hast.
 
-	echo + bk push $BK_REPOSITORY/$what$dv
-	bk push $BK_REPOSITORY/$what$dv
+Mögliche Abhilfen:
+- Erst b.merge aufrufen
+- Mit einer anderen (neuen?) Version speichern
+END
+	fi
 
 else
 	test -n "$vset" || vers=""
 	test -z "$vers" || dv="-$vers"
 	echo + bk clone . $BK_REPOSITORY/$what$dv
-	bk clone . $BK_REPOSITORY/$what$dv
+	bk clone -q . $BK_REPOSITORY/$what$dv
 	exit 1
 fi
 

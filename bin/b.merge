@@ -40,7 +40,7 @@ trap '' 0
 b.name "$dir" >/tmp/bn.$$
 read dir overs </tmp/bn.$$
 rm -f /tmp/bn.$$
-if test -n "$overs" -a test -z "$vset" ; then vers="$overs"; fi
+if test -n "$overs" -a -z "$vset" ; then vers="$overs"; fi
 
 mod=p
 if b.exists -v "$vers" -d $dir > /tmp/tf.$$ ; then : ; else
