@@ -177,8 +177,9 @@ sub bkfiles($) {
 		 m#^Attic/# or
 		 m#^\.cvsignore$# or
 		 m#/\.cvsignore$# or
-		 m#/CVS/# or
+		 m#\.prj$# or
 		 m#^CVS/# or
+		 m#/CVS/# or
 		 m#^CVSROOT/# or
 		 m#/CVSROOT/#)
 		? undef
@@ -421,10 +422,10 @@ sub cleanout() {
 	open(REV,"bk prs -anh -r+ -d ':COMMENTS:\n' ChangeSet |");
 	while(<REV>) {
 		chomp;
-		if(/^C CVS\:\s*(\d+)-(\d+)-(\d+)\s+(\d+)\:(\d+)\:(\d+)\s*$/) {
+		if(/^C CVS\:\s*(\d+)-(\d+)-(\d+)(?:\s+(\d+)\:(\d+)\:(\d+))?\s*$/) {
 			my ($y,$m,$d,$hh,$mm,$ss)=($1,$2,$3,$4,$5,$6);
 			$y -= 1900 if $y >= 1900; $m--;
-			my $dt = timelocal($ss,$mm,$hh,$d,$m,$y);
+			my $dt = timelocal($ss+0,$mm+0,$hh+0,$d,$m,$y);
 			$dt_done = $dt if $dt_done < $dt;
 		}
 	}
@@ -478,7 +479,7 @@ sub process($$$$) {
 		}
 		foreach my $rev(keys %rev) {
 			my @f = @{$rev{$rev}};
-			print STDERR "  Processing $len: $cvsdate $rev ".(0+@f)."       \r";
+			print STDERR "  Processing $len: $cvsdate $rev @f\n";
 			while(@f) {
 				my $i = undef;
 				$i=50 if @f>60;
@@ -514,7 +515,8 @@ sub process($$$$) {
 		print "Checking if '$n' is a resurrected file...\n";
 		rename($n,"x.$$");
 		system("env",@DT,@AU,"bk","unrm","$n");
-		if(-f $n) {
+		if(-f $n or not $?) {
+			unlink($n);
 			bk("get","-egq",$n);
 		} else {
 			push(@new,$n);
@@ -544,8 +546,6 @@ sub process($$$$) {
 		$T->close();
 		unlink($tmf);
 
-		nstore($cset,"$tmpcv.data");
-	
 		@new=(); @gone=();
 		my $ocmt=""; my @onew;
 		foreach my $line(split(/\n/,$cmds)) {
@@ -569,6 +569,7 @@ sub process($$$$) {
 				rename("x.$$",$n);
 
 				if($cmt1 ne $ocmt) {
+					$ocmt =~ s/\001//g;
 					bk(ci => '-qG', "-y$ocmt", @onew) if @onew;
 					@onew=();
 					$ocmt=$cmt1;
@@ -576,6 +577,7 @@ sub process($$$$) {
 				push(@onew,$n);
 			}
 		}
+		$ocmt =~ s/\001//g;
 		bk(ci => '-qG', "-y$ocmt", @onew) if @onew;
 		# bk(undef,"echo after renametool");
 	}
@@ -585,12 +587,14 @@ sub process($$$$) {
 			my $cmt = $adt->{$new}{cmt};
 			$cmt = "CVS: $cvsdate" if $cmt eq "" or (defined $scmt and $cmt eq $scmt);
 			if($cmt ne $ocmt) {
+				$ocmt =~ s/\001//g;
 				bk(delta => '-i', "-y$ocmt", "-q", @onew) if @onew;
 				@onew=();
 				$ocmt=$cmt;
 			}
 			push(@onew,$new);
 		}
+		$ocmt =~ s/\001//g;
 		bk(delta => '-i', "-y$ocmt", "-q", @onew) if @onew;
 	}
 	if(@gone) {
@@ -604,17 +608,20 @@ sub process($$$$) {
 		$cmt = "CVS: $cvsdate" if $cmt eq "" or (defined $scmt and $cmt eq $scmt);
 
 		if($cmt ne $ocmt) {
+			$ocmt =~ s/\001//g;
 			bk(ci => '-qG', "-y$ocmt", @onew) if @onew;
 			@onew=();
 			$ocmt=$cmt;
 		}
 		push(@onew,$f);
 	}
+	$ocmt =~ s/\001//g;
 	bk(ci => '-qG', "-y$ocmt", @onew) if @onew;
 
 	$scmt = "CVS: $cvsdate".((defined $scmt) ? "\n$scmt" : "");
 	# $scmt =~ s/\'/\"/g;
 	open(FP,"|-") or do {
+		$scmt =~ s/\001//g;
 		exec("env", @DT,@AU, "bk", "cset", "-q", "-y$scmt");
 		exit(99);
 	};
@@ -632,6 +639,8 @@ my %last;
 my $x;
 my $done=0;
 my $ddone=0;
+$DB::single=1; $DB::single=1 if 0;
+
 while(@$cset) {
 	$x = $cset->[0];
 	next if $x->{wann} <= $dt_done;

@@ -14,7 +14,6 @@ Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -v releasename (cvs / extern) ]
        [ -w releasename (cvs) ]
        [ -e CVS-Fudge-Sekunden (Default 120) ]
-       [ -E Abstand-zwischen-Push (Default 10) ]
        [ -V (verbose) ]
        [ -D (Debug) ] [ -Z (keine Kompression) ]
        woher  was
@@ -36,12 +35,11 @@ parent=
 run="$0.pl"
 quiet=-q
 comp=-z3
-each=10
 diff=
 loc=
 df=0
 
-   eval set -- "$(getopt "Vd:v:r:hDZln:p:e:E:" "$@")"
+   eval set -- "$(getopt "Vd:v:r:hDZln:p:e:" "$@")"
    for i
    do
 	   case "$i"
@@ -58,8 +56,6 @@ df=0
 			   shift; parent="$1"; shift;;
 		   -e)
 			   shift; diff="$1"; shift;;
-		   -E)
-			   shift; each="$1"; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
@@ -103,8 +99,7 @@ dest=/var/cache/cvs/bk/"$dir-$vers"
 export BK_REPOSITORY=bk://bitkeeper.noris.de
 export CVS_REPOSITORY="$woher"
 export BKCVS_COMP=$comp
-export BKCVS_EACH=$each
-test -d /var/cache/cvs/bk/$was || b.get -d $dir -v $vers $was || true
+test -d /var/cache/cvs/bk/$was || b.get -d $dir -v $vers /var/cache/cvs/bk/$was || true
 test -n $diff && test -z "$BKCVS_DIFF" && export BKCVS_DIFF=$diff
 test -z "$BKCVS_PUSH" && export BKCVS_PUSH=$push
 exec $run "$was" "$dir-$vers"
