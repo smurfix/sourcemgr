@@ -13,6 +13,7 @@ Vendor: noris network GmbH
 Prefix: /usr
 Requires: rpm-noris
 Requires: prcs-noris
+Requires: bitkeeper-noris
 Requires: sudo
 Requires: shlock
 
