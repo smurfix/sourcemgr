@@ -270,7 +270,7 @@ if test -n "$E" ; then # non-original package
 			mv XyZ/* .
 			rm -rf XyZ
 		 fi
-		 rm -f *.sig || true
+		 rm -f *.sig *.sig.asc || true
 		 for f in *.tar.gz ; do tar xfz "$f"; done
 		 rm -f *.tar.gz
 		 if test $(ls | wc -l) -lt 2 ; then

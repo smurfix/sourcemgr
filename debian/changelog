@@ -1,3 +1,9 @@
+sourcemgr (1.362) unstable; urgency=low
+
+  * bin/b.debuild: .sig += .sig.asc
+
+ -- Matthias Urlichs <smurf@debian.org>  Fri, 16 Jul 2004 01:31:46 +0200
+
 sourcemgr (1.361) unstable; urgency=low
 
   * b.debuild: don't tilt directories if -k
