@@ -37,8 +37,14 @@ if test -f debian/SCCS/s.changelog ; then
 	tmp=$(tempfile)
 	bk get -pq debian/changelog > $tmp
 	chg=$tmp
-else
+elif test -f debian/changelog ; then
 	chg="debian/changelog"
+elif test -f SCCS/s.changelog ; then
+	tmp=$(tempfile)
+	bk get -pq changelog > $tmp
+	chg=$tmp
+elif test -f changelog ; then
+	chg="changelog"
 fi
 
 if test -f $chg -a -x /usr/bin/dpkg-parsechangelog ; then
