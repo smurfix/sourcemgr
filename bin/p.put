@@ -12,7 +12,7 @@ exit 1
 dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
 vers=
 
-   set -- $(getopt "d:v:" $*)
+   set -- $(getopt "d:v:h" $*)
    if test $? != 0
    then
 	   usage
@@ -21,6 +21,8 @@ vers=
    do
 	   case "$i"
 	   in
+		   -h)
+		       usage ;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
@@ -32,6 +34,7 @@ if test -z "$dir"; then usage; fi
 
 export PRCS_REPOSITORY=/archiv/src/prcs
 what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
+vi $what.prj
 
 set -x
 

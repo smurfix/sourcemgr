@@ -10,7 +10,7 @@ exit 1
 
 dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
 
-   set -- $(getopt "d:v:" $*)
+   set -- $(getopt "d:h" $*)
    if test $? != 0
    then
 	   usage
@@ -19,6 +19,8 @@ dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
    do
 	   case "$i"
 	   in
+		   -h)
+		   	   usage ;;
 		   -d)
 			   shift; dir="$1"; shift;;
 	   esac

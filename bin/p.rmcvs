@@ -7,4 +7,20 @@ END
 exit 1
 }
 
+   set -- $(getopt "h" $*)
+   if test $? != 0
+   then
+	   usage
+   fi
+   for i
+   do
+	   case "$i"
+	   in
+		   -h)
+		   	   usage ;;
+		   --)
+			   shift; break ;;
+	   esac
+   done
+
 exec find . -type d -name CVS -print0 | xargs -0 rm -rf

@@ -6,6 +6,8 @@ Usage: $(basename $0)  -- Initiales Installieren von externem Source im Archiv
        [ -d dest-directory ]
 	   [ -v releasename ]
 	   [ -V origreleasename ]
+	   [ -e (nur extern) ]
+	   [ -i (nur intern) ]
 END
 exit 1
 }
@@ -13,8 +15,10 @@ exit 1
 dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
 vers=noris
 overs=base
+exto=
+into=
 
-   set -- $(getopt "d:v:V:" $*)
+   set -- $(getopt "d:v:V:eih" $*)
    if test $? != 0
    then
 	   usage
@@ -23,12 +27,18 @@ overs=base
    do
 	   case "$i"
 	   in
+		   -h)
+		       usage ;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
 			   shift; vers="$1"; shift;;
 		   -V)
 			   shift; overs="$1"; shift;;
+		   -e)
+		       shift; into=x ;;
+		   -i)
+		       shift; exto=x ;;
 	   esac
    done
 
@@ -39,8 +49,13 @@ what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
 
 set -x
 
+if test -z "$exto" ; then
+
 prcs checkout -r $overs $what
 prcs populate $what
+
+perl -p -i -e 's/\(\)\)/() :no-keywords)/; ' $what.prj
+
 cat <<END >>$what.prj
 ;;*
 ;;* Externe Version. 
@@ -49,6 +64,10 @@ cat <<END >>$what.prj
 END
 vi $what.prj
 prcs checkin -f -r$overs $what
+
+fi
+
+if test -z "$into" ; then
 
 perl -n -i -e 'print unless /^;;\*/;' $what.prj
 
@@ -80,4 +99,6 @@ prcs populate $what Makefile.Linux
 
 vi $what.prj
 prcs checkin -f -r$vers $what
+
+fi
 
