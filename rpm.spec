@@ -22,15 +22,15 @@ Requires: rpm
  Zustand unserer Sourcen, Binaries zum Bauen derselben
 
 %prep
-%setup -n sourcemgr -T -c
+%setup -n pop_sourcemgr -T -c
 cd ..
-rm -rf sourcemgr
-if test -d tmp.sourcemgr ; then
-    mv -f tmp.sourcemgr sourcemgr
+rm -rf pop_sourcemgr
+if test -d tmp.pop_sourcemgr ; then
+    mv -f tmp.pop_sourcemgr pop_sourcemgr
 else
-    b.get -v noris -d sourcemgr sourcemgr
+    b.get -v noris -d pop_sourcemgr pop_sourcemgr
 fi
-cd sourcemgr
+cd pop_sourcemgr
 bk -r get -q
 
 %build
