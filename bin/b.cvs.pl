@@ -48,7 +48,7 @@ use File::Find qw(find);
 use File::Basename qw(basename dirname);
 use Time::Local;
 use Carp qw(confess);
-use Storable qw(nstore retrieve);
+#use Storable qw(nstore retrieve);
 use File::ShLock;
 
 $SIG{'PIPE'}="IGNORE";
@@ -737,6 +737,7 @@ sub proc(@) {
 	my %entry;
 	my %syms;
 	my $re = "$cvs->{'repo'}/$cvs->{'subdir'}";
+#	my $only_1_1 = 1;
 
 	# It is helpful to have the output of "cvs log FILE" handy if you
 	# want to understand the next bits.
@@ -785,7 +786,7 @@ sub proc(@) {
 				}
 				next;
 			} else {
-				if($pre and $pre ne "1.1.0.1") { # vendor branch
+				if($pre and $pre !~ /1\.1\.0\.\d+$/) { # vendor branch(es)
 					die "Kein Vor-Symbol '$pre' in '$fn'\n" unless $syms{$pre};
 					$tpre{$syms{$pre}[0]}++;
 				}
@@ -801,6 +802,7 @@ sub proc(@) {
 		if($state == 4 and $x =~ /^revision\s+([\d\.]+)(?:$|\s+)/) {
 			$rev=$1;
 			$state=5;
+#			$only_1_1=0 if $rev ne "1.1" and $rev !~ /^1\.1\./;
 			next;
 		}
 		if($state == 5 and $x =~ /^date:\s+(\d+)\/(\d+)\/(\d+)\s+(\d+)\:(\d+)\:(\d+)\s*\;\s+author\:\s+(\S+)\;\s+state\:\s+(\S+)\;/) {
@@ -830,12 +832,13 @@ sub proc(@) {
 			next;
 		}
 	}
+#	$target->{$fn}="1.1" if $only_1_1 and not defined $target->{$fn};
 	$entry{$rev} = proc1($fn,$dt,$rev,$cmt,$autor,$gone) if $dt;
 
 	while(my($rev,$syms)=each %syms) {
 		foreach my $sym(@$syms) {
 			unless(rev_ok($fn,$rev)) {
-#				print STDERR "Ouch $sym|$rev|$target->{$fn}|$fn\n";
+				# print STDERR "Ouch $sym|$rev|$target->{$fn}|$fn\n";
 				$dead_sym{$sym}++;
 				next;
 			}
@@ -906,7 +909,7 @@ my $tmppn="/var/cache/cvs/bk/$pn";
 	proc(@buf) if @buf;
 
 	reduce_sym();
-	nstore([$cset,$target],"$tmppn.data");
+#	nstore([$cset,$target],"$tmppn.data");
 #}
 chdir("/");
 

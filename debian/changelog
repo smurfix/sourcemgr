@@ -1,3 +1,9 @@
+sourcemgr (1.373) unstable; urgency=low
+
+  * minor cleanups
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon, 11 Oct 2004 17:36:42 +0200
+
 sourcemgr (1.372) unstable; urgency=low
 
   * Be quiet if b.put needs to clone something
