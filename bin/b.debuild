@@ -22,7 +22,7 @@ Usage: $(basename $0)  -- Build Debian source(+binary) packages.
     [ -V VERS -- include changelog since VERS ]
     [ -w http://where/ever/ -- Debian repo with .orig.tar.gz file ]
     [ -t HOST (upload to here: first arg to 'dput') ]
-    [ -l (don't push/pull/upload) ] [ -d package ]  [ -v branch ]
+    [ -l (don't push/pull) ] [ -d package ]  [ -v branch ]
     [ -T dir (save stuff here; default: parent directory if '-l' was given) ]
 
 This program prepares a Debian source package and pushes it to a

@@ -46,9 +46,9 @@ trap '' 0
 if test -n "$dir" ; then echo "$dir" | sed -e 's#\?.*##' -e 's#[:_]#/#g' -e 's#-\([^/]*\)$# \1#'; exit 0 ; fi
 
 set +e
-bkr="$(bk parent 2>/dev/null)"
+bkr="$(bk parent -p 2>/dev/null)"
 if test -n "$bkr" && echo "$bkr" | fgrep -q :// && ! echo "$bkr" | fgrep -q "file://" ; then
-	bkr="$(echo "$bkr" | sed -e 's#.* is ##' -e 's#.*://[^/]*/##' -e 's#-\([^/]*\)$# \1#')"
+	bkr="$(echo "$bkr" | sed -e 's#.*://[^/]*/##' -e 's#^public/##' -e 's#-\([^/]*\)$# \1#')"
 	echo "$bkr"
 	exit 0
 else
