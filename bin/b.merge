@@ -1,0 +1,58 @@
+#!/bin/sh
+export BK_REPOSITORY=bk://bitkeeper.noris.de
+
+# 2001-09-24 smurf Kopie aus b.get
+
+set -e
+trap 'usage; exit 1' 0
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- holt Updates aus dem Archiv
+       [ -d Paket ]
+       [ -v releasename ]
+END
+}
+
+vers=noris
+nvers=gibts/nicht
+dir=
+vset=
+
+   eval set -- "$(getopt "d:nv:w:h" "$@")"
+   for i
+   do
+	   case "$i"
+	   in
+		   -h)
+		       exit 1 ;;
+		   -d)
+			   shift; dir="$1"; shift;;
+		   -v)
+			   shift; vers="$1"; vset=1; shift;;
+			--)
+				shift; break ;;
+	   esac
+   done
+
+trap '' 0
+
+b.name "$dir" >/tmp/bn.$$
+read dir overs </tmp/bn.$$
+rm -f /tmp/bn.$$
+if test -n "$overs" -a test -z "$vset" ; then vers="$overs"; fi
+
+mod=p
+if b.exists -v "$vers" -d $dir > /tmp/tf.$$ ; then : ; else
+	echo >&2 "Problem: '$dir' Version '$vers' nicht bekannt."
+	exit 1
+fi
+read what dv < /tmp/tf.$$
+rm -f /tmp/tf.$$
+
+if test -z "$what" ; then echo >&2 "'$dir' nicht gefunden" ; exit 1 ; fi
+test -z "$dv" || dv="-$vers"
+
+echo + bk pull $BK_REPOSITORY/$what$dv
+bk pull $BK_REPOSITORY/$what$dv
+
