@@ -604,3 +604,10 @@ x	kernel/linux 	*	Master-Kernelsource	2.0.33/2.1.77	ftp.kernel.org
 *	misc/mac/mcvert	Verion 2.16	UnBinhexer	Info-Mac
 *	kernel/scsiinfo	Version 1.4	SCSI-Info	TSX/alpha/scsi
 *	lib/www	keine Versionsinfo	WWW-Reflib	-
+*	x11/gnome/xchat	Version 0.9.7	Chatprogramm	xchat.linuxpower.org
+*	smurf/tracker	*	smurf:tracker	nix://gibts
+*	gnu/plotutils	Version 1.3	GNU-Plotutils	gnu
+*	x11/gnome/emusic	Version DR-0.9	Musikspieler	http://www.icom.net/~smelecat/emp3/downloads.html
+*	net/mail/drac	Version 1.9	POP3-nach-SMTP	ftp://ftp.cc.umanitoba.ca/src/drac.tar.Z
+*	lib/tcl/itcl	Version 3.0a1	incrTCL	ftp://ftp.tcltk.com/pub/itcl/
+*	lib/tcl/itcl	Version 3.0a1	incrTCL	ftp://ftp.tcltk.com/pub/itcl/

@@ -201,28 +201,28 @@ if test -z "$islocal" ; then
 	if test -s "STATUS/fail/$desc$submode" ; then
 		echo '# RESTART (fail)'
 		echo '# RESTART (fail)' >> STATUS/work/$desc$submode
-		sed -e '/^#-#-#/d' -e 's/^/#-/' < STATUS/fail/$desc$submode >> STATUS/work/$desc$submode 
+		sed -e '/^#-#/d' -e 's/^/#-/' < STATUS/fail/$desc$submode >> STATUS/work/$desc$submode 
 		echo '# RESTART (fail)' $(hostname) $$ >> STATUS/work/$desc$submode
 		rm -f STATUS/fail/$desc$submode
 	fi
 	if test -s "STATUS/to-install/$desc$submode" ; then
 		echo '# RESTART (to-install)'
 		echo '# RESTART (to-install)' >> STATUS/work/$desc$submode
-		sed -e '/^#-#-#/d' -e 's/^/#-/' < STATUS/to-install/$desc$submode >> STATUS/work/$desc$submode 
+		sed -e '/^#-#/d' -e 's/^/#-/' < STATUS/to-install/$desc$submode >> STATUS/work/$desc$submode 
 		echo '# RESTART (to-install)' $(hostname) $$ >> STATUS/work/$desc$submode
 		rm -f STATUS/to-install/$desc$submode
 	fi
 	if test -s "STATUS/done/$desc$submode" ; then
 		echo '# RESTART (done)'
 		echo '# RESTART (done)' >> STATUS/work/$desc$submode
-		sed -e '/^#-#-#/d' -e 's/^/#-/' < STATUS/done/$desc$submode >> STATUS/work/$desc$submode 
+		sed -e '/^#-#/d' -e 's/^/#-/' < STATUS/done/$desc$submode >> STATUS/work/$desc$submode 
 		echo '# RESTART (done)' $(hostname) $$ >> STATUS/work/$desc$submode
 		rm -f STATUS/done/$desc$submode
 	fi
 	if test -s STATUS/work/$desc$submode.new ; then
 		echo '# RESTART (Abbruch)'
 		echo '# RESTART (Abbruch)' >> STATUS/work/$desc$submode
-		sed -e '/^#-#-#/d' -e 's/^/#-/' < STATUS/work/$desc$submode.new >> STATUS/work/$desc$submode 
+		sed -e '/^#-#/d' -e 's/^/#-/' < STATUS/work/$desc$submode.new >> STATUS/work/$desc$submode 
 		echo '# RESTART (Abbruch)' $(hostname) $$ >> STATUS/work/$desc$submode
 		rm -f STATUS/work/$desc$submode.new
 	fi
@@ -269,12 +269,12 @@ fi
 
 if test -z "$doinstall" -o "$doinstall" = "b" ; then # compile
 	echo + make -f $MF $compile$subtarget
-	make -f $MF $compile$subtarget || bad=y
+	env LANG=C-JIS make -f $MF $compile$subtarget || bad=y
 fi
 if test -n "$doinstall" -a -z "$bad" ; then
 	echo + make -f $MF $install$subtarget
 	sudo env LD_PRELOAD=/usr/lib/log-install.so LOGFILE=/usr/src/STATUS/work/$desc$submode \
-	make -f $MF $install$subtarget || bad=y
+	env LANG=C-JIS make -f $MF $install$subtarget || bad=y
 fi
 
 if test -z "$islocal" ; then
