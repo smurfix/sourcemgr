@@ -769,6 +769,8 @@ END
 	$ocmt =~ s/\001//g;
 	bk(ci => '-qG', "-y$ocmt", @onew) if @onew;
 
+	bk("clean","-q","ChangeSet");
+
 	$scmt = "CVS: $cvsdate".((defined $scmt) ? "\n$scmt" : "");
 	# $scmt =~ s/\'/\"/g;
 	open(FP,"|-") or do {
