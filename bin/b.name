@@ -45,7 +45,7 @@ if test -n "$dir" ; then echo "$dir" | sed -e 's#\?.*##' -e 's#[:_]#/#g' -e 's#-
 
 set +e
 bkr="$(bk parent 2>/dev/null)"
-if test -n "$bkr" && echo "$bkr" | fgrep -q :// ; then
+if test -n "$bkr" && echo "$bkr" | fgrep -q :// && ! echo "$bkr" | fgrep -q "file://" ; then
 	bkr="$(echo "$bkr" | sed -e 's#.* is ##' -e 's#.*://[^/]*/##' -e 's#-\([^/]*\)$# \1#')"
 	echo "$bkr"
 	exit 0
