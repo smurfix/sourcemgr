@@ -796,6 +796,18 @@ while(@$cset) {
 		$done=0;
 	}
 }
+if ($ENV{BKCVS_TAG}) {
+	my $do_tag=$ENV{BKCVS_TAG};
+	foreach my $tag (bk('prs', '-r+', '-d$if(:TAG:){$each(:TAG:){:TAG:\n}}', '-h', 'ChangeSet')) {
+		if ($tag eq $do_tag) {
+			$do_tag=undef;
+			last;
+		}
+	}
+	if($do_tag) {
+		bk("tag","-r+",$do_tag);
+	}
+}
 if($ENV{BKCVS_PUSH}) {
 	print STDERR " $pn: Push LAST        |\r" if $verbose;
 	bk("push","-q");

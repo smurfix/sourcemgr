@@ -12,7 +12,7 @@ Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -n # (Intermediate-Push alle # Importe; Default 100; 0=garnicht) ]
        [ -k # (ignoriere CVS-Fehler) ]
        [ -L (kein Fehler wenn Lock nicht geht) ]
-       [ -r Fork (im CVS) ]
+       [ -r Fork (im CVS) ] [ -t TAG des Resultats ]
 	   [ -s (shell instead of renametool) ] [ -S (kein Renametool) ]
        [ -v releasename (rcs) ]
        [ -w neuer releasename ]
@@ -45,8 +45,9 @@ rename=
 shells=0
 bg=
 df=0
+tag=
 
-   eval set -- "$(getopt "hb:d:De:kLn:qr:sSv:w:x:XZ" "$@")"
+   eval set -- "$(getopt "hb:d:De:kLn:qr:sSt:v:w:x:XZ" "$@")"
    for i
    do
 	   case "$i"
@@ -63,6 +64,8 @@ df=0
 			   shift; run="perl -d $(type -p "$0.pl")" ;;
 		   -L)
 		       shift; nolock=0 ;;
+		   -t)
+			   shift; tag="$1"; shift;;
 		   -e)
 			   shift; diff="$1"; shift;;
 		   -k)
@@ -134,5 +137,6 @@ test -n "$verbose" && export BK_VERBOSE=1
 test -n "$ignore" && export BKCVS_IGNORE_ERROR=1
 export BKCVS_LOCK=$bg
 export BKCVS_SKIP=$skip
+test -n "$tag" && export BKCVS_TAG=$tag
 test -n "$locdir" && export BKCVS_LOCAL=1
 exec $run "$wo" "$what$dv"
