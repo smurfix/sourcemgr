@@ -387,8 +387,6 @@ if(-f "$tmpcv/$cn.data") {
 				last;
 			}
 			closedir(D);
-			my $fl = `/bin/ls`;
-			$done++ if $
 		}
 		last unless $done;
 	} continue {
