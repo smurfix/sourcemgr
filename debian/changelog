@@ -1,3 +1,11 @@
+sourcemgr (1.326) unstable; urgency=low
+
+  * bin/b.cvs.pl
+       TEMP: call shell after renametool run
+  * 
+
+ -- Matthias Urlichs <smurf@debian.org>  Sat, 28 Feb 2004 14:53:04 +0100
+
 sourcemgr (1.325) unstable; urgency=low
 
   * b.upversion: don't complain if no debian/changelog doesn't exist

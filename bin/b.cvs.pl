@@ -772,6 +772,8 @@ END
 			print RN "\n";
 			foreach my $f(sort { $a cmp $b } @new) { print RN "$f\n"; }
 			close(RN);
+			print "Do renametool's work somehow"
+			system("/bin/sh");
 			# print $rename "\n";
 			confess "No rename" if $? or not -s $tmf;
 		}
