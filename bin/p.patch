@@ -7,7 +7,7 @@ Usage: $(basename $0)  -- Patchen externer Sourcen
        [ -W origreleasename ]
        [ -V neworigreleasename ] | [ -v releasename ]
        [ -pX (Argument für patch) ]
-       neueVersionsnummer
+       [ neueVersionsnummer ]
 END
 exit 1
 }
@@ -63,11 +63,10 @@ patch $patchdepth -E -l
 prcs populate -f -d $what
 
 perl -p -i -e '
-   s/\(New-Version-Log \"\"\)/(New-Version-Log "'"Version $*"'")/ if "'$vers'" ne "";
+   BEGIN { $s="'"$*"'"; $s = "Version $s" if $s ne ""; $s =~ s/"/'\''/g; }
+   s/\(New-Version-Log \"\"\)/(New-Version-Log "$s")/ if $s ne "";
    s/^  \((.*)\(\)\)/  ($1() :no-keywords)/;
 ' $what.prj
-
-vi $what.prj
 
 echo prcs checkin -r $vers.@ $what </dev/tty
 

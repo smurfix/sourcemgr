@@ -5,6 +5,7 @@ cat >&2 <<END
 Usage: $(basename $0)  -- Statusinfo eines Archivs
        [ -d dest-directory ]
        [ -v releasename ]
+       [ -q (quick status: release+date header) ]
 END
 exit 1
 }

@@ -65,6 +65,6 @@ if test -n "$*" ; then
 	echo "*	$dir	*	$*	file://" >> /usr/src/STATUS/build
 fi
 
-set -x
-prcs checkin -r$vers $what </dev/tty
+## ist neu, also tu nix
+# prcs checkin -r$vers $what </dev/tty
 

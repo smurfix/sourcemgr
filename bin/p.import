@@ -67,13 +67,10 @@ prcs populate -f -d $what
 if test -n "$edit" ; then
   vi $what.prj
 elif grep -q 'New-Version-Log ""' $what.prj ; then
+  if test -n "$*" ; then
 	perl -p -i -e '
-		BEGIN { $s="'"$*"'"; if($s ne "") {
-			  print "Kommentar eingeben, ^D druecken..:\n";
-			  $s = join("",<STDIN>);
-			  chop $s;
-	    } $s =~ s/"/'\''/g; }
-	   s/\(New-Version-Log \"\"\)/(New-Version-Log "$s")/;
+		BEGIN { $s="'"$*"'"; $s =~ s/"/'\''/g; }
+	    s/\(New-Version-Log \"\"\)/(New-Version-Log "$s")/;
   ' $what.prj
 elif jjj
 fi

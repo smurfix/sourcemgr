@@ -6,15 +6,20 @@ if test ! -s /fd/STATUS ; then
 	echo "keine Statusdatei gefunden, lege sie an."
 
 	echo -n "System (pci): "; read who; if test -z "$who"; then who="pci"; fi
-	echo -n "Quelle (192.109.102.36): "; read master; if test -z "$master"; then master="192.109.102.36"; fi
 	echo -n "Ziel (193.141.54.134): "; read slave; if test -z "$slave"; then slave="193.141.54.134"; fi
-	echo -n "Netz (193.141.54.128): "; read netz; if test -z "$netz"; then netz="193.141.54.128"; fi
-	echo -n "Netmask (255.255.255.224): "; read mask; if test -z "$mask"; then mask="255.255.255.224"; fi
-	echo -n "Broadcast (193.141.54.159): "; read broad; if test -z "$broad"; then broad="193.141.54.159"; fi
-	echo -n "Defaultrouter (193.141.54.143): "; read def; if test -z "$def"; then def="193.141.54.143"; fi
+	echo -n "Netzbits (26): "; read netbits; if test -z "$netbits"; then netbits=26; fi
+	set -- $(/sbin/ipwhat $slave $netbits)
+	# 255.255.255.192 10.20.30.0 10.20.30.63 10.20.30.1 
+	mask=$1
+	netz=$2
+	broad=$3
+	defdef=$4
+
+	echo -n "Defaultrouter ($defdef): "; read def; if test -z "$def"; then def="$defdef"; fi
+	echo -n "Quelle ($defdef): "; read master; if test -z "$master"; then master="$defdef"; fi
 	echo -n "Hostname (install.noris.de): "; read name; if test -z "$name"; then name="install.noris.de"; fi
 
-	echo "### " >/fd/STATUS 
+	echo "### KONFIGDATEN" >/fd/STATUS 
 
 	echo "export who=$who" >>/fd/STATUS
 	echo "export master=$master" >>/fd/STATUS

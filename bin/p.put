@@ -32,6 +32,8 @@ edit=
 			   shift; dir="$1"; shift;;
 		   -v)
 			   shift; vers="-r$1.@"; shift;;
+		   --)
+		   	   shift; break ;;
 	   esac
    done
 
@@ -44,15 +46,10 @@ if test -n "$edit" ; then
   vi $what.prj
 elif grep -q 'New-Version-Log ""' $what.prj ; then
 	perl -p -i -e '
-		BEGIN { $s="'"$*"'"; if($s ne "") {
-			  print "Kommentar eingeben, ^D druecken..:\n";
-			  $s = join("",<STDIN>);
-			  chop $s;
-	    } $s =~ s/"/'\''/g; }
+		BEGIN { $s="'"$*"'"; $s =~ s/"/'\''/g; }
 	   s/\(New-Version-Log \"\"\)/(New-Version-Log "$s")/;
   ' $what.prj
 fi
-
 
 set -xe
 

@@ -23,6 +23,8 @@ dir=$(/bin/pwd|sed -ne 's/^.*[\./]src\///p')
 		   	   usage ;;
 		   -d)
 			   shift; dir="$1"; shift;;
+		   --)
+		       shift; break ;;
 	   esac
    done
 

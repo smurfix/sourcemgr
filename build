@@ -81,7 +81,6 @@ v-1-6 gnu/time
 v-1-06-1 gnu/uucp
 #-1-5 gnu/vh
 v-1-5 kernel/bdflush
-v-1-06 kernel/e2fs
 v-01 kernel/freeramdisk
 v-2-9 kernel/hdparm
 v-0-91 kernel/kbd
@@ -94,8 +93,6 @@ v-1-3-69 kernel/modules
 v-3-8-1 kernel/mrouted
 v-0-4 kernel/mt
 v-1-3-50-b-6-f kernel/net-tools
-v-0-10 kernel/netkit-a
-v-0-08 kernel/netkit-b
 v-0-99-a kernel/procps
 v-12 kernel/psmisc
 v-1-10 kernel/rocket-pci
@@ -378,9 +375,8 @@ v-1 misc/colm
 *	misc/perl/snmp	*	SNMP-Zugriff von Perl aus	1-6	CPAN:/net/snmp
 *	net/meta/ucspi	*	TCP-Listener	0-72	-
 *	misc/perl/tk	*	TkPerl	402-000	CPAN:/net/snmp
-*	kernel/netkit-b	*	Diverse Netzwerkprogramme	0-09	-
 *	kernel/netkit-a	*	Diverse Netzwerkprogramme A	0-10	-
-*	kernel/isdn	noris	U-ISDN-Krempel	19	-
+*	kernel/netkit-b	*	Diverse Netzwerkprogramme B	0-09	-
 *	kernel/isdn	noris	U-ISDN-Krempel	45	-
 *	misc/prcs	*	Project Revision Control System	ftp://ftp.xcf.berkeley.edu/pub/prcs/
 *	misc/xdelta	*	Binäres Deltagenerierungs- und -archivierungsprogramm	ftp://ftp.xcf.berkeley.edu/pub/jmacd/
@@ -411,3 +407,7 @@ v-1 misc/colm
 *	gnu/libc	*	GNU libc, 2.1	ftp://ftp.kernel.org/pub/software/libs/glibc/
 *	lib/pam	*	Pluggable Authentication Modules	0.57b	http://linux.kernel.org/pub/linux/libs/pam/
 *	net/misc/radius	*	RADIUS-Server	1-16	-
+*	net/misc/ipwhat	*	Ip-Adressgeneriereung beim Booten	-	-
+*	kernel/net-tools	*	Basis-Netzwerktools	1-3-50-b-6-f	xxx
+*	kernel/e2fs	*	Ext2 Utilities	1-10	-
+*	pop/config	*	Unser Standardkonfigurationsunsinn	-	-

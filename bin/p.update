@@ -27,6 +27,8 @@ overs=base
 			   shift; dir="$1"; shift;;
 		   -V)
 			   shift; overs="$1"; shift;;
+		   --)
+		       shift; break ;;
 	   esac
    done
 

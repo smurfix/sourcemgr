@@ -193,7 +193,7 @@ perl -p -e '
 ' < $what.prj > $what.prx && mv $what.prx $what.prj
 
 vi $what.prj </dev/tty
-prcs checkin -r$vers $what </dev/tty
+prcs checkin -f -r$vers $what
 redo $dir
 
 fi

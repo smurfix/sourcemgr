@@ -46,6 +46,7 @@ misc:vim
 net:backup:amanda-client
 net:debug:tcpdump
 net:debug:traceroute
+net:misc:ipwhat
 security:ssh
 server:plp
 server:rdist
@@ -57,3 +58,4 @@ misc:syslog
 net:debug:ping
 misc:klog.console
 lib:libc5
+misc:bzip2

@@ -27,6 +27,8 @@ vers=base
 			   shift; dir="$1"; shift;;
 		   -V)
 			   shift; vers="$1"; shift;;
+		   --)
+		       shift; break ;;
 	   esac
    done
 
