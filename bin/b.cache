@@ -104,6 +104,9 @@ else
 	rm -rf "$c" "$c.x"
 	bk clone -q $BK_REPOSITORY/$what$dv "$c.x"
 fi
+cd "$c.x" 
+bk -r clean -q
+cd ..
 mv "$c.x" "$c"
 echo "$c"
 

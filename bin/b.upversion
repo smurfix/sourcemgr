@@ -17,7 +17,7 @@ if ! test -f $F ; then BF=debian/version; F=debian/SCCS/s.version; fi
 if test -f $F ; then
 	OV="$(bk get -qp "$BF" | head -1)"
 else
-	BF=debian/changelog; F=debian/SCCS/s.changelog; fi
+	BF=debian/changelog; F=debian/SCCS/s.changelog
 	test -f $BF || bk get -q $BF
 	OV="$(dpkg-parsechangelog | sed -ne 's/^Version: *//p')"
 fi
