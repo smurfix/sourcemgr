@@ -1,3 +1,11 @@
+sourcemgr (1.272) unstable; urgency=low
+
+  * b.put:
+       Call b.cache with -d and -v
+  * 
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Wed, 10 Sep 2003 04:30:46 +0200
+
 sourcemgr (1.271) unstable; urgency=low
 
   * b.cache:
