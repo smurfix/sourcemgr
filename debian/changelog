@@ -1,3 +1,11 @@
+sourcemgr (1.258) unstable; urgency=low
+
+  * bin/b.cvs
+       Username; SSH statt anon-CVS
+  * 
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Tue,  8 Jul 2003 08:24:20 +0200
+
 sourcemgr (1.257) unstable; urgency=low
 
   * bin/b.debuild
