@@ -82,9 +82,18 @@ foreach my $arg(@ARGV) {
 	$excl{$arg}++;
 }
 
+sub isotime ($) {
+    my($time) = @_;
+    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($time);
+	$mon += 1; $year += 1900;
+
+    return sprintf("%04d-%02d-%02d %02d:%02d:%02d",
+		$year,$mon,$mday,$hour,$min,$sec);
+}
+
 my $cne=$cn;
 
-my @DT; my @AU; my $mdate;
+my $adate; my @AU;
 
 sub dateset($;$) {
 	my($dt,$au) = @_;
@@ -92,6 +101,7 @@ sub dateset($;$) {
 	@AU=();
 
 	@AU = ("LOGNAME=$au","USER=$au","BK_USER=$au","BK_HOST=$rhost") if $au;
+	$adt=isotime $dt;
 	### TODO: set date
 }
 
@@ -192,16 +202,6 @@ sub bkfiles($) {
 		? undef
 		: ( chmod((0600|0777&((stat $_)[2])),$_) or 1 );
 	} bk(sfiles=>"-U$f");
-}
-
-sub pdate($) {
-	my($d) = @_;
-#	2001/03/21 09:08:43
-	return undef unless m#(\d{2,4})/(\d\d)/(\d\d)\s(\d\d):(\d\d)#;
-	my $y=$1; $y-=1900 if $y>1900;
-	my $date = timelocal(0,$5,$4,$3,$2-1,$y);
-	$mdate = $date if not $mdate or $mdate > $date;
-	$date;
 }
 
 my %symdate;
@@ -669,7 +669,7 @@ END
 	# $scmt =~ s/\'/\"/g;
 	open(FP,"|-") or do {
 		$scmt =~ s/\001//g;
-		exec("env", @DT,@AU, "bk", "commit", "-q","-y$scmt", "-");
+		exec("env", @DT,@AU, "bk", "commit", "-q","-yAT $adate\n$scmt", "-");
 		exit(99);
 	};
 	open(P,"bk sfiles -pC |");
