@@ -303,7 +303,8 @@ seek($rename,0,0);
 	local $/ = "";
 	while(<$rename>) {
 		my($what,$cmds) = split(/\n/,$_,2);
-		my($maj,$min)=split(/\./,$what,2);
+		die "Rev version bad: '$what'\n" unless $what =~ /(\S+)\.(\d+)$/;
+		my($maj,$min)=($1,$2);
 		$cmds =~ s/^bk mv (.+) (.+)$/mv -f $2 $1; bk get -qeg $1; bk mv $1 $2/mg;
 		$node{$maj}[$min]{"rename"} = $cmds;
 	}
