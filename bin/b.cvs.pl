@@ -50,7 +50,7 @@ foreach my $arg(@ARGV) {
 
 my $cne=$cn;
 if($cn eq ".") {
-	$cn=$pn; $cn =~ s#.*_##;
+	$cn=$pn; $cn =~ s#.*_##; $cn =~ s#\-.*##;
 }
 
 my @DT; my @AU; my $mdate;
@@ -356,9 +356,12 @@ if(-f "$tmpcv/$cn.data") {
 				chdir($cn) or die "no chdir $cn: $!";
 				cvs(undef,"update","-d","-r$mr.$x");
 			} else {
-				chdir($cn) if $cne eq ".";
+				if($cne eq ".") {
+					mkdir($cn);
+					chdir($cn);
+				}
 				cvs(undef,"get","-r$mr.$x",$cne);
-				chdir($cne) or last;
+				chdir($cne) or last;  # no-op when $cne eq "."
 			}
 			print STDERR "processing $mr.$x ...\n";
 			my @buf = ();
