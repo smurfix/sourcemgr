@@ -237,6 +237,7 @@ VV="$(echo "$V" | sed -e 's/^[0-9][0-9]*://')"
 
 DV="$(echo "$DV" | sed -e 's/^[0-9][0-9]*://')"
 
+rm -f BitKeeper/etc/SCCS/x.id_cache
 bk export -T -w -tplain -r+ . "$T/$N-$VV"
 
 # If there's a "debian/exporter" script, run it.
@@ -263,6 +264,7 @@ if test -n "$E" ; then # non-original package
 	else
 		echo + create new original source archive
 		rm -f "$T/${N}_$VV.orig.tar.gz"
+		rm -f BitKeeper/etc/SCCS/x.id_cache
 		bk export -T -w -tplain -rEXTERN . "$T/$N-$VV.orig"
 		if test -x "$T/$N-$VV"/debian/exporter ; then
 			"$T/$N-$VV"/debian/exporter "$T/$N-$VV.orig" "EXTERN"
