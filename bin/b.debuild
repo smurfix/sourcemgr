@@ -172,6 +172,7 @@ if test -n "$E" ; then # non-original package
 	if wget -O "$T/${N}_$VV.orig.tar.gz" \
 		"http://smurf.noris.de/code/debian/public/${N}_$VV.orig.tar.gz"
 	then : ; else
+		rm -f "$T/${N}_$VV.orig.tar.gz"
 		bk export -T -w -tplain -rEXTERN . "$T/$N-$VV.orig"
 	fi
 fi
