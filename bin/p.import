@@ -1,0 +1,42 @@
+#!/bin/sh
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- update externer Sourcen
+       [ -d dest-directory ]
+       [ -V origreleasename ]
+END
+exit 1
+}
+
+dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+vers=base
+
+   set -- $(getopt "d:V:" $*)
+   if test $? != 0
+   then
+	   usage
+   fi
+   for i
+   do
+	   case "$i"
+	   in
+		   -d)
+			   shift; dir="$1"; shift;;
+		   -V)
+			   shift; vers="$1"; shift;;
+	   esac
+   done
+
+if test -z "$dir"; then usage; fi
+
+export PRCS_REPOSITORY=/archiv/src/prcs
+what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
+
+set -x
+
+prcs checkout -r $vers.@ $what $what.prj
+prcs populate -d $what
+vi $what.prj
+prcs checkin $what
+

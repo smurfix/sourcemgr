@@ -1,0 +1,27 @@
+#!/bin/sh
+export who=${who:-smurf}
+export master=${master:-193.141.166.3:/home/smurf}
+
+set -e 
+
+PATH=/cd/usr/src/STATUS/bin:/bin:/sbin:/usr/sbin:/cd/bin:/cd/sbin:/cd/usr/bin:/cd/usr/sbin
+
+cd /mnt
+
+if test -f /tmp/fstab.$$ ; then cat /tmp/fstab.$$ >>etc/fstab; fi
+
+mkdir -p cd proc dev
+rm -f mnt; ln -s . mnt
+chroot /mnt /bin/mount $master /cd
+chroot /mnt /bin/mount /proc
+touch var/run/utmp
+touch var/run/lastlog
+touch var/log/wtmp
+ln -sf /proc/mounts var/run/mtab
+
+ln -sf ../boot/lilo.conf etc/lilo.conf
+cp /etc/ld.so.conf /mnt/etc/
+cp /sbin/ldconfig /mnt/sbin/
+mkfifo dev/initctl || true
+
+exec chroot /mnt /cd/usr/src/STATUS/bin/doinstall.4

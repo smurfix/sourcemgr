@@ -1,0 +1,6 @@
+router
+kernel:linux-adaptec
+kernel:isdn-adaptec
+net:appletalk:netatalk
+net:windows:samba
+users

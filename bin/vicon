@@ -1,0 +1,3 @@
+#!/bin/sh
+
+vi $(find . -type f \( -name \*.orig -o -print \) | xargs grep -l '<<<<<' )

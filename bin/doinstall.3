@@ -1,0 +1,20 @@
+#!/bin/sh
+export who=${who:-smurf}
+export master=${master:-193.141.166.3:/home/smurf}
+
+set +e 
+
+PATH=/cd/usr/src/STATUS/bin:/bin:/sbin:/usr/sbin:/cd/bin:/cd/sbin:/cd/usr/bin:/cd/usr/sbin
+
+cd /mnt/usr
+mkdir share share/man share/info share/doc
+ln -s share/man man
+ln -s share/doc doc
+ln -s share/info info
+
+set -e
+
+cd /cd/usr/src
+copyover /mnt /cd < STATUS/hosts/install.smurf.noris.de
+
+exec /cd/usr/src/STATUS/bin/doinstall.3a

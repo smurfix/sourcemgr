@@ -1,0 +1,59 @@
+#!/bin/sh
+
+export who=${who:-smurf}
+export master=${master:-193.141.166.3:/home/smurf}
+
+PATH=/cd/usr/src/STATUS/bin:/bin:/sbin:/usr/sbin:/cd/bin:/cd/sbin:/cd/usr/bin:/cd/usr/sbin
+
+loadkeys /cd/usr/lib/kbd/keytables/de-latin1-nodeadkeys.map 
+insmod /cd/lib/modules-$who/$(uname -r)/scsi/scsi_mod.o
+insmod /cd/lib/modules-$who/$(uname -r)/scsi/sd_mod.o
+insmod /cd/lib/modules-$who/$(uname -r)/scsi/ncr*.o
+# war mal der 'andere' Treiber, aber der tut besser
+insmod /cd/lib/modules-$who/$(uname -r)/scsi/aic7xxx.o
+insmod /cd/lib/modules-$who/$(uname -r)/scsi/aha1542.o
+
+swapoff -a
+echo "/ == sda1   !!!"
+fdisk
+
+echo -n "Swap <sda2>: "; read swap; swap=${swap:-sda2}
+echo "Swap nach /dev/$swap"
+
+/sbin/update
+mkswap /dev/$swap
+swapon /dev/$swap
+
+test -d /sbin/fs/ || ln -s /cd/sbin/fs /sbin/
+mkfs -t ext2 /dev/sda1
+mount -t ext2 /dev/sda1 /mnt
+
+mkdir -p /mnt/proc /mnt/var /mnt/var/tmp /mnt/var/run /mnt/cd
+ln -s /proc/mounts /mnt/var/run/mtab
+ln -s var/tmp /mnt/tmp
+mkdir -p /var/tmp /usr/bin; ln -sf /cd/usr/bin/perl /usr/bin; ln -sf var/tmp /tmp
+
+echo -n "Mountpoints nach (ab sda3; '-' überspringt)...: "
+read a
+
+mkdir /mnt/etc
+cat >/mnt/etc/fstab <<EOF
+/dev/sda1       /                         ext2            defaults   1   1
+/dev/$swap       swap                      swap            defaults   0   0
+none            /proc                     proc            defaults   0   0
+EOF
+pp=3; for i in $a ; do
+	if test "x$i" != "x-" ; then
+		mkdir -p /mnt/$i
+		mkfs -t ext2 /dev/sda$pp
+		mount -t ext2 /dev/sda$pp /mnt/$i
+		echo "/dev/sda$pp       /$i                         ext2            defaults   2   2" >>/tmp/fstab.$$
+	fi
+	pp=$(expr $pp + 1)
+done
+mkdir -p /mnt/var/run /mnt/var/adm/packages /mnt/var/tmp /mnt/var/log/root
+ln -sf /proc/mounts /mnt/var/run/mtab
+mkdir -p /mnt/lib/modules-$who; ln -s modules-$who /mnt/lib/modules
+mkdir -p /mnt/boot-$who; ln -s boot-$who /mnt/boot
+
+exec /cd/usr/src/STATUS/bin/doinstall.3

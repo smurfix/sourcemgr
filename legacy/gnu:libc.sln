@@ -1,0 +1,9 @@
+NEW /usr/lib/libdl.so
+NEW /usr/lib/libdl.so.2
+NEW /usr/lib/libnss_db.so
+NEW /usr/lib/libnss_db.so.1
+NEW /usr/lib/libnss_dns.so
+NEW /usr/lib/libnss_dns.so.1
+NEW /usr/lib/libnss_files.so
+NEW /usr/lib/libnss_files.so.1
+NEW /lib/libc.so.6

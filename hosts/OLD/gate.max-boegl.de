@@ -1,0 +1,11 @@
+kernel:lilo
+webserver
+net:www:squid
+base
+kernel:linux-pci
+net:windows:samba
+net:mail:zmailer
+server:xntp
+users
+devel
+router

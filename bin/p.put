@@ -1,0 +1,39 @@
+#!/bin/sh
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- Speichern von Änderungen im Archiv
+       [ -d dest-directory ]
+       [ -v releasename ]
+END
+exit 1
+}
+
+dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+vers=
+
+   set -- $(getopt "d:v:" $*)
+   if test $? != 0
+   then
+	   usage
+   fi
+   for i
+   do
+	   case "$i"
+	   in
+		   -d)
+			   shift; dir="$1"; shift;;
+		   -v)
+			   shift; vers="-r$1"; shift;;
+	   esac
+   done
+
+if test -z "$dir"; then usage; fi
+
+export PRCS_REPOSITORY=/archiv/src/prcs
+what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
+
+set -x
+
+exec prcs checkin -f $vers $what
+

@@ -1,0 +1,3 @@
+/sbin/mkconfig
+/sbin/init.d/scripts/cron stop
+/sbin/init.d/scripts/cron start

@@ -1,0 +1,45 @@
+#!/bin/sh
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- holt noris-Sourcecode aus dem Archiv
+       [ -d dest-directory ]
+       [ -v releasename ]
+       [ -i (Import, holt nur .prj) ]
+END
+exit 1
+}
+
+dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+vers=noris
+imp=
+
+   set -- $(getopt "d:v:i" $*)
+   if test $? != 0
+   then
+	   usage
+   fi
+   for i
+   do
+	   case "$i"
+	   in
+		   -d)
+			   shift; dir="$1"; shift;;
+		   -i)
+			   shift; imp=y ;;
+		   -v)
+			   shift; vers="$1"; shift;;
+	   esac
+   done
+
+if test -z "$dir"; then usage; fi
+
+export PRCS_REPOSITORY=/archiv/src/prcs
+what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
+
+if test -n "$imp" ; then imp="$what.prj"; fi
+
+set -x
+
+prcs checkout -r$vers $what $imp
+

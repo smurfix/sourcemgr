@@ -1,0 +1,342 @@
+* kernel/base
+v-0-6-4 lib/ssleay
+? net/www/squid	Cacheserver
+#-4-01 editor/nedit	GUI-Editor
+v-2-12 gnu/autoconf	Software automagisch konfigurieren
+v-1-0 gnu/automake
+#v-1-14-7 gnu/bash	Bourne Again SHell # => bash2
+v-1-02 gnu/bc	Rechner
+#v-2-7-0-3 gnu/bfd	BFD-Library => cygnus
+v-1-0-10 lib/gsm	Soundkompression
+#v-2-7-0-3 gnu/binutils	as, ld und Konsorten
+v-1-25 gnu/bison	Parsergenerator
+v-2-3 kernel/ipfwadm
+#-2-02 gnu/calc -- emacs
+v-1-3-0 gnu/cfengine
+v-4-2-4 gnu/compress
+v-2-1a gnu/cperf	Perfect Hash-Tabellenbauer
+v-2-4-1 gnu/cpio	CoPy In and Out, kann auch tar und andere Formate
+#-3-0 gnu/crefine
+v-1-8-1 gnu/cvs	Concurrent Versioning System
+v-0-2 gnu/dc	Rechner, Postfixnotation
+#-1-2 gnu/dejagnu
+v-2-7 gnu/diffutils	diff und Konsorten
+#-3-2-4 gnu/dld	dynamischer Linker -- im libc bereits enthalten
+#-1-1 gnu/doschk
+#-1-2-1 gnu/ecc
+v-0-2 gnu/ed	Batch-/Zeileneditor
+#-X gnu/elvis	Editor
+#-19-28 gnu/emacs	Lisp-System mit Editor (oder umgekehrt?)
+#-3-24-0 gnu/expect
+#-1993-04-28 gnu/f2c	Fortan-nach-C-Translator
+v-3-19 gnu/file	Dateitypen rausfinden
+v-3-16 gnu/fileutils	cp/rm/ls
+v-4-1 gnu/findutils	find/xargs
+#-1-37 gnu/finger	-- kein Linuxsupport...
+v-2-5-2 gnu/flex	!r-2-5-3 Lexikalischer Analyzer
+v-0-6 gnu/fontutils	Zeichensatzbearbeitung
+v-3-0-0 gnu/gawk	awk-Klon
+v-2-7-2-1 gnu/gcc	C-Compiler
+v-4-16 gnu/gdb	Debugger, Legacy for now
+v-1-7-3 gnu/gdbm	Indexbibliothek
+v-0-10-24 gnu/gettext	Sprachunterstützung
+v-3-53 gnu/ghostscript	Postscript-Klon
+v-1-5 gnu/ghostview	Postscript-Viewer
+v-4-3-11 gnu/git	Gnu Interactive Tools
+v-2-0-2 gnu/gmp	?(ssh) r-2-0-2 Miltiprecision-Mathematik
+#-3-2 gnu/gnats	Bugtracker, wir haben ein eigenes Ticketsystem...
+#-2-0 gnu/gnews	-- Emacs
+v-3-5 gnu/gnuplot	Bildchen...
+#-3-11 gnu/gnus
+#-2-3-1 gnu/gpc
+#-0-2 gnu/gptx
+#-0-17 gnu/graphics
+v-2-0 gnu/grep
+v-1-09 gnu/groff
+v-1-2-4 gnu/gzip
+#-1-3 gnu/hello
+#-3-2 gnu/id-utils
+v-1-9-1 gnu/indent
+#-1-1 gnu/inetutils
+#-0-50 gnu/iostream
+v-4-0 gnu/ispell
+v-321 gnu/less
+v-1996-12-28 gnu/libc
+#v-2-8-0-b4 gnu/libgpp	libg++, warte auf GCC 2.8
+#v-2-7-2-5 gnu/libg++	libg++, alt
+v-1-4 gnu/m4
+v-3-74-3 gnu/make
+#-1-0 gnu/man
+v-2-3-10 gnu/man-db
+#-0-06 gnu/ms
+v-3-7 gnu/mtools
+v-5-2 misc/fdutils
+#-3-0 gnu/nihcl
+#-3-5 gnu/obst
+#-1-6 gnu/oleo
+#-0-27 gnu/para
+v-2-1 gnu/patch
+v-5-004 gnu/perl
+v-400-201 misc/perl/tk
+v-5-05 misc/perl/libwww
+#-2-0 gnu/plot
+#-2-7 gnu/pseudo	Pseudoscheme (Scheme unter Common Lisp
+#-0-3 gnu/ptx
+v-5-7 gnu/rcs
+v-2-0 gnu/readline
+v-3-4 gnu/recode
+v-7-6 lib/tcl/tcl
+v-4-2 lib/tcl/tk
+#-0-12 gnu/regex	in libc enthalten
+#-1-0 gnu/rx	nicht in libc enthalten, aber tut nicht
+v-3-7-2 gnu/screen
+v-2-0-5 gnu/sed	r-3-0	3.0 ist nicht verwendbar
+v-1-15 gnu/sh-utils
+#-1-1-1 gnu/smalltalk
+#-2-3 gnu/superopt
+v-1-11-11 gnu/tar
+#-1-2 gnu/termcap	stattdessen: ncurses -- zwei dieser Teile sind Overkill!
+# gnu/texi2roff	-- keine Versionsnummer
+v-3-7 gnu/texinfo
+v-1-11 gnu/textutils
+#-2-1 gnu/tile-forth
+v-1-6 gnu/time
+# gnu/tput
+v-1-06-1 gnu/uucp
+v-1-0 gnu/uuencode
+#-1-5 gnu/vh
+v-0-5 gnu/wdiff
+v-1-5 kernel/bdflush
+v-1-06 kernel/e2fs
+v-01 kernel/freeramdisk
+v-2-9 kernel/hdparm
+v-0-91 kernel/kbd
+#-19 kernel/lilo # aus, wegen Problemen...
+v-2-0-30 kernel/linux-pci 
+v-0-6 kernel/hfs-pci
+r-43 kernel/isdn-pci
+v-2-2 kernel/makedev
+v-0-99--09-15 kernel/mgetty
+v-1-3-69 kernel/modules
+v-3-8-1 kernel/mrouted
+v-0-4 kernel/mt
+v-1-3-50-b-6-f kernel/net-tools
+v-0-10 kernel/netkit-a
+v-0-08 kernel/netkit-b
+v-0-99-a kernel/procps
+v-12 kernel/psmisc
+v-1-10 kernel/rocket-pci
+v-1-10 kernel/rocket-adaptec
+v-1-10 kernel/rocket-test
+v-1-3 kernel/sysklogd
+v-2-69 kernel/sysvinit
+v-1-85 lib/db
+v-0-62 lib/dialog
+v-2-0-5 lib/efence
+v-6-a lib/jpeg
+? lib/libc5
+v-1-99-e-295 lib/ncurses	Termcap/info/curses-Superset
+v-0-1-19 lib/objc
+v-0-89-c lib/png	Portable Network Graphics
+v-3-3-1 lib/shadow
+v-3-4-035 lib/tiff
+v-1-0-4 lib/zlib	komprimierte Dateien lesen
+v-1-4-1 misc/archie
+v-2-9-b misc/at
+v-0-3 misc/bin86
+s-1 misc/bind-inaddr	Bind() auf via BIND_INADDR=xxx spezifizierte Adresse
+v-1-17 misc/buffer
+v-3-0-1 misc/cron
+v-1-0 misc/fillup
+s-1 misc/install-log	Installationen etc. mitprotokollieren
+v-01 misc/klog.console
+v-0-9-3 misc/mingetty
+v-3-0-11 misc/strace
+v-6-06 misc/tcsh
+#v-96-e misc/timezone ## in glibc
+v-5-12 misc/unzip
+v-2-5 misc/util-linux
+v-4-2 misc/vim
+v-01 misc/yacc
+v-2-01 misc/zip
+v-2-3-0 net/backup/amanda/client
+v-2-3-0 net/backup/amanda/server
+v-3-0 net/debug/tcpdump	-- Cleanup notwendig!
+v-4-4 net/debug/traceroute
+#v-4-9-5-6b net/dns/bind => bind8
+v-2-3-0 net/ftp/ncftp
+v-2-4-25 net/mail/elm
+v-8-7-6 net/mail/sendmail
+v-2-99-47-1 net/mail/zmailer r-2-99-47-1
+v-1-00 net/mail/qmail ftp://koobera.math.uic.edu/pub/software 
+v-0-51	net/mail/serialmail
+v-1-5-1 net/news/inn
+v-3-3-2 net/news/nntplink
+v-0-4 net/news/gup
+#?? net/news/gup
+v-2-2-b-23 net/rpc/nfsd
+v-0-9 net/rpc/rpc
+v-1-2-b-7 net/www/apache
+? net/www/lynx
+v-2-6-3 security/pgp
+# security/satan
+v-1-2-14 security/ssh http://www.cs.hut.fi/ssh/ r-1-2-16
+# security/tamu/drawbridge
+# security/tamu/tiger
+? server/hylafax
+v-3-4-13 server/plp
+v-6-1-3 server/rdist
+v-3-5-f server/xntp
+# x11/gimp	Bildbearbeitung hoch zehn
+v-0-75-a x11/lesstif	Ich hasse Motif.
+v-212	x11/xmt	ftp.ora.com/pub/examples/xbook/Xmt
+? x11/xfree386/xc
+v-3-10-a	x11/xv	ftp.cis.upenn.edu/pub/xv
+v-2-0-30 kernel/linux-adaptec
+v-2-0-30 kernel/linux-at
+v-2-0-30 kernel/linux-test
+v-2-1-6 kernel/linux-2_1
+v-0-6 kernel/hfs-adaptec
+v-0-6 kernel/hfs-test
+v-0-6 kernel/hfs-2_1
+r-44 kernel/isdn-adaptec
+r-44 kernel/isdn-test
+r-44 kernel/isdn-2_1
+v-2-0-43 x11/fvwm ftp://ftp.hpc.uh.edu/pub/fvwm/version-2/
+v-3-4-i x11/xpm ftp://koala.inria.fr/pub/xpm/
+v-1-10	x11/xpanic ?
+v-2-1	x11/xminesweep ?
+v-0	x11/xvidtune	?
+v-2-0-10 x11/xarchie /mirror/lxserver/ftp.x.org/contrib/utilities/
+v-u	net/misc/sup	?	Sauger für mit SUP verteilte Sourven
+v-1996-10-23	emulators/wine	Wine Is No Emulator ;-)
+? net/appletalk/netatalk
+v-1-9-16-9 net/windows/samba
+v-3-6 net/news/trn
+r-2 misc/trans
+v-4-0-b-2 net/multicast/vat Audio hoch Mbone
+#v-0-50	net/meta/tcpcontrol TCP-Krempel
+v-0-72	net/meta/ucspi TCP-Listener etc.
+v-1-93	net/mail/majordomo
+v-3-6-a-2	net/route/gated
+v-0	net/mail/pop3d ?ftp.ucdavis.edu:/pub/pop3d.tar
+v-4-0	misc/glimpse
+v-0-9-8	net/news/knews
+r-0 x11/xpinguin SuSE-Paket
+r-3-0-1 x11/x3270 SuSE-Paket
+r-4-1 x11/xabacus SuSE-Paket
+r-3-0 x11/xball SuSE-Paket
+r-1-2 x11/xbanner SuSE-Paket
+r-2-11 x11/xbarcode SuSE-Paket
+r-0-2 x11/xbench SuSE-Paket
+r- x11/xbmbrowser5.1 SuSE-Paket
+r- x11/xbomb SuSE-Paket
+r- x11/xmines SuSE-Paket
+r-2-3 x11/xcb SuSE-Paket
+r-04oct91 x11/xcolors SuSE-Paket
+r-1-1 x11/xdemineur SuSE-Paket
+r- x11/xdf SuSE-Paket
+r-1-0 x11/xearth SuSE-Paket
+r-1-12 x11/xform SuSE-Paket
+r-0-96 x11/xgammon SuSE-Paket
+r-29aug91 x11/xgas SuSE-Paket
+r-2-41 x11/xgrabsc SuSE-Paket
+r-1-7d x11/xgrasp SuSE-Paket
+r-1-3 x11/xgroups SuSE-Paket
+r-1-01-01 x11/xinfo SuSE-Paket
+r-1-6 x11/xjewel SuSE-Paket
+r-1-7 x11/xless SuSE-Paket
+r-2-3 x11/xlyap SuSE-Paket
+r-1-6 x11/xmail SuSE-Paket
+r-2-0 x11/xmemory SuSE-Paket
+r-1-0-3+ x11/xmine SuSE-Paket
+r- x11/xminesweep3.0 SuSE-Paket
+r-0-75 x11/xmitsumi SuSE-Paket
+r-2-1 x11/xmix SuSE-Paket
+r-1-4-1 x11/xosview SuSE-Paket
+r-0-5 x11/xpdf SuSE-Paket
+r-28sep91 x11/xprompt SuSE-Paket
+r-17nov89 x11/xrobots SuSE-Paket
+r-1-2 x11/xrolodex SuSE-Paket
+r-0-16 x11/xscheme SuSE-Paket
+r-1-1 x11/xsession SuSE-Paket
+r-1-2p03 x11/xshogi SuSE-Paket
+r-1-40 x11/xsnow SuSE-Paket
+r-1-01 x11/xsok SuSE-Paket
+r-30nov92 x11/xsol SuSE-Paket
+r-02may92 x11/xspline SuSE-Paket
+r-1-2 x11/xsysinfo SuSE-Paket
+r- x11/Xtacy SuSE-Paket
+r-1-03 x11/xtail SuSE-Paket
+r-1-4 x11/xtar SuSE-Paket
+r-2-0 x11/xtartan SuSE-Paket
+r-1-0-2 x11/xteddy SuSE-Paket
+r-2-6 x11/xtetris SuSE-Paket
+r- x11/xtexit SuSE-Paket
+r-1-3-1 x11/xtoolplaces SuSE-Paket
+r-0-3 x11/xtoolwait SuSE-Paket
+r-1-1a x11/xtron SuSE-Paket
+r-1-00 x11/XVhelp SuSE-Paket
+r-1-0 x11/xvier SuSE-Paket
+r- x11/xwb_2.1 SuSE-Paket
+r-2-20 x11/xwpick SuSE-Paket
+r-1-12 x11/xxgdb SuSE-Paket
+r-1-1 x11/xzap SuSE-Paket
+r-1-0 x11/xzet SuSE-Paket
+r- x11/xzx SuSE-Paket
+r- x11/xanim27052 SuSE-Paket
+r-1-3 x11/Xaw3d SuSE-Paket
+r-2-0 x11/XBlast SuSE-Paket
+r-3-4-pl0 x11/xboard SuSE-Paket
+r-0-95a x11/xcdroast SuSE-Paket
+r-1-3-2 x11/xfm SuSE-Paket
+r-2-0-4 x11/llnlxftp SuSE-Paket
+r-2-29 x11/xkeycaps SuSE-Paket
+r-1-16 x11/xli SuSE-Paket
+r-2-4-5 x11/xpaint SuSE-Paket
+r-beta-09feb95 x11/xplot SuSE-Paket
+r-5-0-1 x11/xpuzzles SuSE-Paket
+r-2-3 x11/xspread SuSE-Paket
+r-2-3-2 x11/xvnews SuSE-Paket
+r-5-0 x11/xvtdl SuSE-Paket
+v-491 misc/aps
+v-1-8 kernel/isapnptools
+v-3-5-a-20 net/mud/tinyfugue
+v-1	misc/syslog Kleines Programm zum Absetzen von Syslognachrichten
+v-2-9-roof net/irc/ircii
+v-1-04	misc/perl/libnet	CPAN
+v-1-2   lib/gd				ftp://www.mkstats.com/
+v-1-00	misc/perl/gd		ftp://www.mkstats.com/
+v-2-2	misc/perl/mkstats	ftp://www.mkstats.com/
+#v-4-4 net/debug/traceroute
+v-1996-12-30	net/debug/trace	ftp://ftp.nikhef.nl/pub/network
+v-1996-12-30	net/debug/ping	ftp://ftp.nikhef.nl/pub/network
+v-1997-02-03	net/debug/host	ftp://ftp.nikhef.nl/pub/network
+v-1996-11-13	net/debug/vrfy	ftp://ftp.nikhef.nl/pub/network
+v-8-1-t3b net/dns/bind8	 ftp://ftp.isc.org/isc/bind/src/testing/bind-{src,doc}.tar.gz
+v-0-2	net/mail/qmapop	bert-send-apop@mc.bio.uva.nl
+v-4-11	lib/gc	http://reality.sgi.com/employees/boehm_mti/gc_source
+v-1-9-1	lib/ld.so
+v-0		net/meta/midentd	???
+? x11/xfree386/contrib
+v-3-1-3	lib/snmp	ftp.ece.ucdavis.edu:/pub/snmp
+v-1-6	misc/perl/snmp	CPAN
+v-1997-04-09	kernel/automount	ftp://ftp.kernel.org/pub/linux/daemons/autofs/
+v-0-4-8	misc/tex/tetex/lib
+v-0-4-7	misc/tex/tetex/src
+r-0-11-23	x11/lyx	http://la1ad.uio.no/~larsbj/lyx.shtml
+v-1-16	net/misc/radius
+v-2-11	net/www/analog	http://www.statslab.cam.ac.uk/~sret1/analog/
+v-2-3-a-1	net/multicast/sdr
+v-2-4-0 net/ftp/wu-ftpd	ftp://ftp.academ.com/pub/wu-ftpd/private/
+v-3-20-19-g	database/mysql
+v-2-0-b-7	database/msql
+v-1-1701	misc/perl/msql	CPAN
+v-2-3-0 kernel/pppd ftp://cs.anu.edu.au/pub/software/ppp/
+v-3-11-p-4	net/mail/procmail ftp://ftp.informatik.rwth-aachen.de/pub/packages/procmail/
+v-0-10	misc/perl/dns
+v-1-6-3 misc/rsync ftp://samba.anu.edu.au/pub/rsync
+v-var	gnu/cygnus
+v-2-01	gnu/bash2
+v-3-5-8 gnu/gv
+v-1 misc/colm

@@ -1,0 +1,29 @@
+#!/bin/sh
+
+dest=$1
+src=$2
+pack=$dest/var/adm/packages
+set -ex
+test -d $pack
+sk=/tmp/skipped.$$
+rm -f $sk
+
+while read a ; do
+	if test -f $pack/$a ; then
+		: echo "$a: bereits installiert"
+	elif test -f STATUS/out/$a ; then
+		sed -e "s|^/*||" < STATUS/out/$a | (cd $src; cpio -pamdv $dest ) | sed -e "s|^$dest|/|" > $pack/$a
+	elif test -f STATUS/hosts/$a ; then
+		STATUS/bin/copyover $dest $src < STATUS/hosts/$a
+	else
+		echo $a: nicht gefunden
+		echo $a >> $sk
+	fi
+done
+
+if test -f $sk ; then
+	cat $sk
+	rm $sk
+	# exit 1
+fi
+exit 0

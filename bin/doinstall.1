@@ -1,0 +1,23 @@
+#!/bin/sh
+export who=${1:-${who:-pci}}
+export master=${master:-"193.141.54.132:/"}
+
+if test ! -d /cd/bin ; then
+set -e
+echo "Installiere Krempel für $who von $master"
+
+echo -n "Ethernet-Treiber: "
+read foo
+set -x
+
+if test -n "$foo" ; then insmod /modules/$foo; fi
+ifconfig eth0 193.141.54.134 netmask 255.255.255.224
+route add -net 193.141.54.128 netmask 255.255.255.224
+route add default gw 193.141.54.133
+mount $master /cd
+echo -n "Running ldconfig..."
+ldconfig -X >/dev/null 2>&1
+echo done.
+fi
+
+exec /cd/usr/src/STATUS/bin/doinstall.2

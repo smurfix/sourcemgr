@@ -1,0 +1,2 @@
+cd /etc; cat modules.conf.in modules.conf.local > modules.conf || cp modules.conf.in modules.conf
+/sbin/depmod -av

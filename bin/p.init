@@ -1,0 +1,83 @@
+#!/bin/sh
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- Initiales Installieren von externem Source im Archiv
+       [ -d dest-directory ]
+	   [ -v releasename ]
+	   [ -V origreleasename ]
+END
+exit 1
+}
+
+dir=$(/bin/pwd|sed -ne 's/^.*\.src\///p')
+vers=noris
+overs=base
+
+   set -- $(getopt "d:v:V:" $*)
+   if test $? != 0
+   then
+	   usage
+   fi
+   for i
+   do
+	   case "$i"
+	   in
+		   -d)
+			   shift; dir="$1"; shift;;
+		   -v)
+			   shift; vers="$1"; shift;;
+		   -V)
+			   shift; overs="$1"; shift;;
+	   esac
+   done
+
+if test -z "$dir"; then usage; fi
+
+export PRCS_REPOSITORY=/archiv/src/prcs
+what=$(echo $dir | sed -e 's/\//_/g' -e 's/:*$//')
+
+set -x
+
+prcs checkout -r $overs $what
+prcs populate $what
+cat <<END >>$what.prj
+;;*
+;;* Externe Version. 
+;;* Hier keine internen Modifiaktionen ablegen!
+;;*
+END
+vi $what.prj
+prcs checkin -f -r$overs $what
+
+perl -n -i -e 'print unless /^;;\*/;' $what.prj
+
+cat <<END >>$what.prj
+;;*
+;;* Interne Version. 
+;;*
+END
+
+cat <<'END' >Makefile.Linux
+#!/usr/bin/make -f
+
+flags=
+
+Makefile:
+	./configure --prefix=/usr --enable-shared --with-shared
+
+compile: Makefile
+	$(MAKE) $(flags)
+
+install: Makefile
+	$(MAKE) install $(flags)
+
+clean: Makefile
+	$(MAKE) clean $(flags)
+
+END
+prcs populate $what Makefile.Linux
+
+vi $what.prj
+prcs checkin -f -r$vers $what
+

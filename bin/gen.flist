@@ -1,0 +1,88 @@
+#!/usr/bin/perl
+
+my($dir) = '?';
+
+sub dodir(\$) {
+	my($f) = @_;
+
+	$$f =~ s/^/$dir\// if $$f !~ /^\//;
+	# $$f .= "/." if -d "$$f/.";
+}
+
+%files=();
+while(<>) {
+	chop;
+	last if /\*CUTOFF\*/;
+	s/^# CHECKDIR /DIR /;
+	s/^# EQUALCP /LNK /;
+	next if /^#/;
+	1 while s/\/\//\//;
+	1 while s/\/\.\//\//;
+	# 1 while s/\/[^/]+\/\..\//\//;
+	($key,$val,$val2) = split(/\s/,$_,3);
+	if($key =~ /^\// and $val eq "") {
+		$val = $key;
+		$key = "NEW";
+	}
+	if($key eq "CWD") {
+		$dir = $val;
+		next;
+	}
+	if($key eq "OLD") {
+		dodir($val1);
+		$files{$val1}++;
+		next;
+	}
+#	if($key eq "STN" or $key eq "STL" or $key eq "ACC") {
+#		dodir($val);
+#		$files{$val}++;
+#		next;
+#	}
+	if($key eq "NEW" or $key eq "NW?" or $key eq "DIR") {
+		dodir($val);
+		$files{$val}++;
+		next;
+	}
+	if($key eq "LNK") {
+		dodir($val2);
+		$files{$val2}++;
+		next;
+	}
+	if($key eq "SLN") {
+		dodir($val2);
+#		if($val !~ /^\//) {
+#			$valn = $val2; $valn =~ s/[^\/]+$//;
+#			$val = $valn.$val;
+#		}
+#		$files{$val}++;
+		$files{$val2}++; ## just in case...
+		next;
+	}
+	if($key eq "REN") {
+		dodir($val2);
+		if($val !~ /^\//) {
+			$valn = $val; $valn =~ s/[^\/]+$//;
+			$val2 = $valn.$val2;
+		}
+		$files{$val2}++;
+		delete $files{$val};
+		next;
+	}
+	if($key eq "DEL") {
+		dodir($val);
+		delete $files{$val};
+		next;
+	}
+}
+
+foreach $file(sort keys %files) {
+	next if $file !~ m#^/#;
+	next if $file =~ m#^/+usr/+src#;
+	next if $file =~ m#^/+d1/+src#;
+	next if $file =~ m#^/+dev/# and $file ^~ m#^/+dev/+MAKEDEV$#;
+	next if $file =~ m#/tmp/#;
+	next if $file =~ m#\.old$#i;
+	next if $file =~ m#\.orig$#i;
+	next if $file =~ m#\.bak$#i;
+	print $file,"\n";
+}

@@ -1,0 +1,13 @@
+x11:xfree386:xc
+x11:xfree386:contrib
+gnu:ghostscript
+gnu:ghostview
+x11:xpinguin
+x11:fvwm
+x11:xpm
+x11:xv
+x11:xpanic
+x11:xvidtune
+x11:xarchie
+x11:xbanner
+x11:xvtdl

@@ -1,0 +1,38 @@
+#!/bin/sh
+export who=${who:-smurf}
+export master=${master:-193.141.166.3:/home/smurf}
+
+PATH=/cd/usr/src/STATUS/bin:/bin:/sbin:/usr/sbin:/cd/bin:/cd/sbin:/cd/usr/bin:/cd/usr/sbin
+
+# Dieses Skript läuft (evtl. unter chroot) in der neuen Umgebung,
+# aber das macht nix. ;-)
+
+set -ex
+
+ldconfig -X
+if test -b /dev/sdd ; then : ; else
+    cd /dev
+    ./MAKEDEV -v generic
+    cd /
+fi
+mklilo
+
+cd /dev
+ln -sf tty1 syscons
+if test -d /etc/ssh ; then : ; else
+	mkdir -p /etc/ssh; chmod 755 /etc/ssh
+fi
+if test -f /etc/ssh/ssh_host_key ; then : ; else 
+	ssh-keygen -b 1024 -f /etc/ssh/ssh_host_key -N ''
+fi
+if test -f /etc/ssh/sshd_config ; then : ; else 
+	cp /cd/etc/ssh/sshd_config /etc/ssh
+fi
+
+cd /
+if killproc -TEST /usr/sbin/inetd ; then : ; else
+	/usr/sbin/inetd
+fi
+if killproc -TEST /usr/sbin/sshd ; then : ; else
+	/usr/sbin/sshd
+fi

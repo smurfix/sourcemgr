@@ -1,0 +1,13 @@
+router
+users
+gnu:uucp
+net:dns:bind8
+gnu:ghostscript
+kernel:linux-pci
+net:www:squid
+kernel:rocket-pci
+net:mail:sendmail
+newsserver
+net:ftp:wu-ftpd
+fax
+misc:bind-inaddr

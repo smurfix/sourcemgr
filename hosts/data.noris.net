@@ -1,0 +1,9 @@
+router
+kernel:linux-pci
+net:appletalk:netatalk
+net:windows:samba
+net:mail:qmail
+net:dns:bind8
+users
+misc:aps
+net:misc:radius

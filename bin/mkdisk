@@ -1,0 +1,544 @@
+#!/bin/sh
+
+PATH=/usr/src/STATUS/bin:/usr/sbin:/sbin:$PATH
+
+usage() {
+cat >&2 <<END
+Usage: $0
+       [ -f | -F /dev/fd0 | -I(mage) ]
+       [ -s ramdisksize ]  [ -S imagesize ]
+       [ -l(ilo) ] [ -v Kernelversion ] [ -p(rerun the disk's shell) ]
+       [ -n(et) -d(ebug) -w X (serial wire X, usually 1) ]
+       [ -r(un without stop in linuxrc) ] [ -R RootDevNum(hex-ohne-0x) ]
+    kernel (smurf, test, ...)
+END
+exit 1
+}
+
+cd /usr/src || die "No sources"
+
+if test $# -eq 0 ; then usage ; fi
+
+size=3500
+imgsize=1440
+fifo=/tmp/pipe.$$
+fd=
+run=
+net=
+ver=
+debug=
+serial=
+prerun=
+rootdev=
+if test -f STATUS/done/kernel:lilo ; then
+wherelilo=done
+else
+wherelilo=legacy
+fi
+
+   set -- $(getopt dfF:Ilnps:S:rR:v:w: $*)
+   if test $? != 0
+   then
+	   usage
+   fi
+   for i
+   do
+	   case "$i"
+	   in
+	       -p)
+		   	   prerun=y; shift;;
+	       -w)
+		       serial=$2; shift; shift;;
+		   -d)
+			   debug=y; shift;;
+		   -I)
+			   fd=IMAGE; shift;;
+		   -F)
+			   fd=$2; shift; shift;;
+		   -v)
+			   ver=$2; shift; shift;;
+		   -f)
+			   fd=/dev/fd0; shift;;
+		   -r)
+			   run=y; shift;;
+		   -S)
+			   imgsize=$2; shift; shift;;
+		   -s)
+			   size=$2; shift; shift;;
+		   -n)
+			   net="net-"; shift;;
+		   -R)
+			   rootdev=$2; shift; shift;;
+		   -l)
+			   lilo=y; shift;;
+		   --)
+			   shift; break;;
+	   esac
+   done
+
+if test -z "$1"; then usage; fi
+sys=$1
+disk=/tmp/disk-$sys
+diskfile=/tmp/diskfile-$sys
+
+set -e
+
+if test -z "$ver" ; then
+	rm -f $fifo; mkfifo $fifo
+	( cd /lib/modules-$sys; /bin/ls -r1 | while read a ; do if test -d $a; then echo $a; fi; done > $fifo ) &
+	read ver <$fifo ; rm $fifo
+fi
+
+if test "$fd" = "IMAGE" ; then
+  fd=/boot-$sys/floppy-$net$ver
+fi
+
+echo 'Unmounting..?'
+umount $disk || true
+rm -rf $disk $diskfile
+
+dd bs=1024 count=$size if=/dev/zero of=$diskfile
+set +e
+yes y | /sbin/mkfs -t ext2 $diskfile $size
+set -e
+mkdir $disk
+echo Mounting disk file
+mount -t ext2 -o loop $diskfile $disk
+
+while read a ; do echo /$a; mkdir $disk/$a; done <<END
+bin
+dev
+etc
+etc/terminfo
+lib
+mnt
+mnt1
+mnt2
+mnt3
+proc
+sbin
+usr
+usr/lib
+usr/sbin
+cd
+var
+var/run
+END
+
+if test -n "$net" ; then ## Netz
+cpio -pvd $disk <<END
+/sbin/route
+/sbin/ifconfig
+/usr/sbin/portmap
+/usr/sbin/rpc.mountd
+/usr/sbin/rpc.nfsd
+/lib/libnss_files-2.0.90.so
+/lib/libnss_files.so.1
+END
+sed -e 's/files.*/files/' </etc/nsswitch.conf >$disk/etc/nsswitch.conf
+else
+cpio -pvd $disk <<END
+/sbin/fdisk
+/sbin/fs/mkfs.ext2
+/sbin/fs/fsck.ext2
+/sbin/swapon
+/sbin/mkswap
+END
+fi
+
+cpio -pvd $disk <<END
+/bin/ls
+/bin/ln
+/bin/cat
+/bin/cp
+/bin/rm
+/bin/mv
+/bin/mount
+/bin/umount
+/sbin/insmod
+/sbin/ldconfig
+/sbin/update
+END
+
+find $disk/bin $disk/sbin -type f -print|xargs strip 
+
+cpio -pvd $disk <<END
+/dev/zero
+/dev/null
+/dev/tty
+/dev/tty1
+/dev/ttyS0
+/dev/ttyS1
+/dev/sda
+/dev/sda1
+/dev/sda2
+/dev/sda3
+/dev/sda4
+/dev/sda5
+/dev/sda6
+/dev/sda7
+/dev/sda8
+/dev/sdb
+/dev/sdb1
+/dev/sdb2
+/dev/sdb3
+/dev/sdb4
+/dev/sdb5
+/dev/sdb6
+/dev/sdb7
+/dev/sdb8
+/dev/sdc
+/dev/sdc1
+/dev/sdc2
+/dev/sdc3
+/dev/sdc4
+/dev/sdc5
+/dev/sdc6
+/dev/sdc7
+/dev/sdc8
+/dev/sdd
+/dev/sdd1
+/dev/sdd2
+/dev/sdd3
+/dev/sdd4
+/dev/sdd5
+/dev/sdd6
+/dev/sdd7
+/dev/sdd8
+/dev/fd0
+/dev/fd1
+/dev/scd0
+/etc/fstab
+END
+
+mkdir -p $disk/etc/terminfo/l $disk/lib
+( cd $disk/lib; ln -s . temp )
+cp -v /usr/lib/terminfo/l/linux  $disk/etc/terminfo/l
+
+(
+  ( (
+#    if test -f STATUS/out/gnu:libc ; then
+#      cat STATUS/out/gnu:libc
+#    else
+      cat <<END
+/lib/libc-2.0.90.so
+/lib/ld-2.0.90.so
+/lib/libc.so.6
+/lib/ld-linux.so.2
+/lib/libshadow.so.3
+/lib/libshadow.so.3.3.1
+/lib/libncurses.so.1.9.9e
+/lib/libncurses.so.3.0
+/lib/libreadline.so.2
+/lib/libdl-2.0.90.so
+/lib/libdl.so.2
+END
+#    fi
+#    cat STATUS/out/gnu:readline
+#    cat STATUS/out/lib:ncurses
+#    cat STATUS/out/lib:shadow
+  ) | grep ^/lib/ ;
+    cat <<END
+/bin/bash
+/bin/sh
+END
+		) | 
+    while read a ; do
+	if test -L $a ; then
+		echo $a
+	elif test -f $a ; then
+		b=/tmp/$$.$(basename $a)
+		cp -a $a $b
+		ls -l $b >&2
+		strip --strip-debug $b || true
+		ls -l $b >&2
+		cp -a $b $disk/$a
+		rm $b
+	else
+		echo $a
+	fi
+	
+    done
+#   grep ^/bin/ < STATUS/out/gnu:bash
+
+) | cpio -pvd $disk
+
+cat <<END > $disk/etc/ld.so.conf
+/lib
+/usr/lib
+/cd/lib
+/cd/usr/lib
+/cd/usr/X11R6/lib
+/mnt/lib
+/mnt/usr/lib
+END
+
+echo ldconfig ...
+LD_PRELOAD="" chroot $disk /sbin/ldconfig -v
+
+mkdir $disk/modules
+
+if test -n "$net" ; then ## Netz
+while read a ; do
+	if test -f /lib/modules-$sys/$ver/$a ; then
+	    b=/tmp/$$.$(basename $a)
+	    cp -a /lib/modules-$sys/$ver/$a $b
+	    ls -l $b >&2
+	    strip --strip-debug $b || true
+	    ls -l $b >&2
+	    cp -a $b $disk/modules/$(basename $a)
+	    rm $b
+	fi
+	done <<END
+net/3c503.o
+net/3c507.o
+net/3c509.o
+net/3c59x.o
+net/8390.o
+net/eepro.o
+net/eexpress.o
+net/ewrk3.o
+net/ne.o
+net/wd.o
+net/de4x5.o
+net/depca.o
+net/smc-ultra.o
+net/smc9194.o
+net/tulip.o
+fs/nfs.o
+block/floppy.o
+END
+
+else ## kein Netz
+
+while read a ; do cp -v /lib/modules-$sys/$ver/$a $disk/modules || true; done <<END
+scsi/scsi_mod.o
+scsi/aha1542.o
+scsi/ncr53c8xx.o
+scsi/aha152x.o
+scsi/aic7xxx.o
+scsi/sd_mod.o
+scsi/sr_mod.o
+fs/isofs.o
+block/floppy.o
+fs/binfmt_aout.o
+END
+fi
+
+ln -s /proc/mounts $disk/var/run/mtab
+
+echo ">> $disk/linuxrc"
+cat <<END >$disk/linuxrc
+#!/bin/sh
+
+set -xv
+PATH=/bin:/sbin
+END
+
+if test -z "$serial" ; then
+   echo "exec </dev/tty1 >/dev/tty1 2>&1" >>$disk/linuxrc
+else
+   echo "exec </dev/ttyS$serial >/dev/ttyS$serial 2>&1" >>$disk/linuxrc
+fi
+
+cat <<END >>$disk/linuxrc
+echo "Dies ist die Bootdiskette für $sys..."
+> /etc/mtab
+
+END
+
+if test -n "$net" ; then
+cp /usr/src/STATUS/bin/doinstall.1 $disk/bin/install
+cat <<END >>$disk/linuxrc
+insmod /modules/8390.o
+insmod /modules/ne.o io=0x300
+insmod /modules/wd.o io=0x240
+insmod /modules/nfs.o
+END
+
+else ## kein Netz
+
+cat <<END >>$disk/linuxrc
+insmod /modules/scsi_mod.o
+insmod /modules/aha1542.o
+insmod /modules/aha152x.o
+insmod /modules/aic7xxx.o
+insmod /modules/ncr53c8xx.o
+insmod /modules/sd_mod.o
+insmod /modules/floppy.o
+insmod /modules/binfmt_aout.o
+END
+fi
+
+cat <<END >>$disk/linuxrc
+
+mount -n /proc
+END
+if test -n "$rootdev" ; then
+echo "echo 0x$rootdev >/proc/sys/kernel/real-root-dev" >>$disk/linuxrc
+else
+echo '# echo 0x801 >/proc/sys/kernel/real-root-dev' >>$disk/linuxrc
+fi
+
+if test -z "$run" ; then
+cat <<END >>$disk/linuxrc
+/bin/sh -i
+END
+fi
+cat <<END >>$disk/linuxrc
+umount -n /proc
+
+END
+
+chmod +x $disk/linuxrc
+
+
+du -s $disk/.
+if test -n "$debug" ; then
+	echo "disk ready for compressing."
+	( cd $disk; /bin/sh -i )
+fi
+
+if test -n "$prerun" ; then
+	echo Starting test shell
+	LD_PRELOAD="" chroot $disk /bin/sh 
+	echo ...continuing.
+else
+	LD_PRELOAD="" chroot $disk /bin/sh -c "echo Running a small test..."
+fi
+
+echo Unmounting disk file
+umount $disk
+sync
+if test -n "$fd" ; then
+  dest=/tmp/cdisk.$$
+else
+  dest=/boot-$sys/disk-$net$ver 
+fi
+
+echo "Compressing $diskfile ($disk) to $dest"
+gzip < $diskfile > $dest &
+
+if test -n "$fd" ; then
+
+  sleep 1
+  if test -b "$fd" ; then
+    echo /sbin/fs/mkfs.ext2 -i 50000 $fd $imgsize
+    set +e
+    /sbin/fs/mkfs.ext2 -i 50000 $fd $imgsize
+    set -e
+    mount -t ext2 $fd $disk
+  else
+    dd bs=1024 count=$imgsize if=/dev/zero of=$fd
+    echo /sbin/fs/mkfs.ext2 -i 50000 $fd $imgsize
+	set +e
+    yes y | /sbin/fs/mkfs.ext2 -i 50000 $fd $imgsize
+	set -e
+    mount -t ext2 -o loop $fd $disk
+  fi
+
+
+  while read a ; do echo /$a; mkdir $disk/$a; done <<END
+boot
+dev
+etc
+END
+
+  (
+    grep ^/boot/ < STATUS/out/kernel:lilo | fgrep -v .old
+    cat <<END
+/dev/null
+/dev/fd0
+END
+  ) | cpio -pvd $disk
+
+  echo $disk/boot/message
+  cat <<END >$disk/boot/message
+Dies ist die Bootfloppy fuer $sys, Kernel $ver.
+
+Erstellt via Buildsystem: $(date)
+
+END
+  if test -n "$net" ; then
+    echo "Konfiguration: NETZ."
+  else
+    echo "Konfiguration: STANDARD."
+  fi >>$disk/boot/message
+
+  echo $disk/etc/lilo.conf
+  cat <<END >$disk/etc/lilo.conf
+#disk=/dev/fd0
+#	bios=0x01
+#	sectors=21
+#	heads=2
+#	cylinders=80
+boot = /dev/fd0
+install = /boot/boot.b
+compact
+delay = 10
+read-only
+END
+
+if test -n "$serial" ; then
+cat <<END >>$disk/etc/lilo.conf
+append="ramdisk=$size console=$serial,9600 reboot=hard,bios"
+serial = 1,9600n8
+END
+else
+cat <<END >>$disk/etc/lilo.conf
+append="ramdisk=$size reboot=hard,bios"
+END
+fi
+cat <<END >>$disk/etc/lilo.conf
+root = /dev/fd0
+message = /boot/message
+### IMAGES ###
+image = 	/boot/linux-$ver
+	initrd = /boot/disk-$net$ver
+	label = $ver
+END
+
+  ls -l /boot-$sys/linux-$ver
+  cp /boot-$sys/linux-$ver $disk/boot/linux-$ver
+  wait ## RAM-Disk wird evtl. noch gepackt...
+  ls -l $dest
+  cp $dest $disk/boot/disk-$net$ver 
+  echo Running LILO...
+  if lilo -r $disk ; then : ; else 
+     umount $disk
+	 exit 1
+  fi
+
+  echo Unmount real disk
+  umount $disk
+
+else # keine Bootfloppy
+
+  echo Compressing the boot disk...
+  wait
+
+fi
+
+
+if test -n "$lilo" ; then
+  if test ! -f /boot/message ; then
+    cat <<END
+Dies ist die Bootplatte für $sys, Kernel $ver.
+
+Erstellt via Buildsystem: $(date)
+Die nd-*-Kernels booten ohne initrd.
+
+END
+  fi
+  if test -z "$net" -a /boot/disk-$ver -ef /boot-$sys/disk-$ver ; then
+    echo " *** LILO kann ich hier nicht für $sys starten -- lebensmüde??? *** "
+  else
+    /sbin/mklilo
+  fi
+fi
+
+if test -n "$fd" ; then
+  rm $dest
+fi
+rm $diskfile
+rmdir $disk

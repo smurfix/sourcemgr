@@ -1,0 +1,8 @@
+NEW /boot/boot.b
+NEW /boot/any_b.b
+NEW /boot/any_d.b
+NEW /boot/chain.b
+NEW /boot/os2_d.b
+# cp lilo $ROOT/sbin
+RUN
+NW? /sbin/lilo

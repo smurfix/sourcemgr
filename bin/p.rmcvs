@@ -1,0 +1,10 @@
+#!/bin/sh
+
+usage() {
+cat >&2 <<END
+Usage: $(basename $0)  -- Löscht CVS-Unterverzeichnisse
+END
+exit 1
+}
+
+exec find . -type d -name CVS -print0 | xargs -0 rm -rf
