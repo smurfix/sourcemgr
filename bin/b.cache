@@ -69,9 +69,15 @@ if test -d "$c" ; then
 	cd "$c.x"
 
 	echo "$what$dv: Updating cache. Changes:" >&2
-	env PAGER=/bin/cat bk changes -L -nd":I:	:USER:@:DOMAIN:" >&2
+	env PAGER=/bin/cat bk changes -R -nd":I:	:USER:@:DOMAIN:" >&2
 	echo "... end of change list" >&2
+	R=$(bk changes -r+ -d':I:\n' $(cat BitKeeper/log/parent))
+	L=$(bk changes -r+ -d':I:\n')
 	bk pull -q $BK_REPOSITORY/$what$dv 
+	if test "$L" != "$R" ; then
+		echo "Problem: remote:$R local:$L" >&2
+		exit 1
+	fi
 else
 	echo "$what$dv: Importing to cache" >&2
 	rm -rf "$c.x"
