@@ -454,6 +454,7 @@ END
 	}
 }
 chdir($tmppn);
+system("bk prs -anhd:KEY: -r+ ChangeSet | tail -1 > BitKeeper/etc/SCCS/x.lmark");
 
 sub cleanout() {
 	unlink bkfiles("x");
