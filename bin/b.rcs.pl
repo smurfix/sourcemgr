@@ -55,11 +55,11 @@ $ENV{BK_LICENSE}="ACCEPTED";
 select(STDERR); $|=1; select(STDOUT);
 
 use Shell qw(); ## bk cvs/rcs
-system("xterm -e true");
-if($?) {
-	print STDERR "No X connection?\n\n";
-	Usage;
-}
+#system("xterm -e true");
+#if($?) {
+#	print STDERR "No X connection?\n\n";
+#	Usage;
+#}
 
 sub init_bk();
 my $rhost="un.known";
