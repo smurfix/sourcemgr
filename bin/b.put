@@ -62,13 +62,13 @@ Das Archiv "$what$dv" hat Änderungen, die du noch nicht hast.
 
 Mögliche Abhilfen:
 - Erst b.merge aufrufen
-- Mit einer anderen (neuen?) Version speichern
+- In einen anderen (neuen?) Zweig speichern
 END
 	fi
 
 else
 	test -z "$vers" || dv="-$vers"
-	echo Version $vers  gibt es noch nicht -- wird neu angelegt:
+	echo Version "$vers" gibt es noch nicht -- wird neu angelegt.
 	echo + bk clone . $BK_REPOSITORY/$what$dv
 	bk clone -q . $BK_REPOSITORY/$what$dv
 	exit 1
