@@ -1,3 +1,9 @@
+sourcemgr (1.308) unstable; urgency=low
+
+  * Typos
+
+ -- Matthias Urlichs <smurf@debian.org>  Wed, 28 Jan 2004 14:31:22 +0100
+
 sourcemgr (1.307) unstable; urgency=low
 
   * major translation, minor bugfix

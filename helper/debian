@@ -1,5 +1,5 @@
 #
-ä shell snippet to set DEBIAN_REPOSITORY
+# shell snippet to set DEBIAN_REPOSITORY
 
 if test -z "$DEBIAN_REPOSITORY" -a -f $HOME/.sourcemgr.cf ; then
 	DEBIAN_REPOSITORY=$(/usr/share/sourcemgr/getvar $HOME/.sourcemgr.cf DEBIAN_REPOSITORY)

@@ -1,5 +1,5 @@
 #
-ä shell snippet to set DATEFUDGE_LIB
+# shell snippet to set DATEFUDGE_LIB
 
 if test -z "$DATEFUDGE_LIB" -a -f $HOME/.sourcemgr.cf ; then
 	DATEFUDGE_LIB=$(/usr/share/sourcemgr/getvar $HOME/.sourcemgr.cf DATEFUDGE_LIB)
