@@ -55,4 +55,4 @@ test -z "$dv" || dv="-$vers"
 
 echo + bk pull $BK_REPOSITORY/$what$dv
 bk pull $(b.cache -d "$dir" $vset)
-
+test -d RESYNC && bk resolve
