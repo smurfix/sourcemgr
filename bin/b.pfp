@@ -46,6 +46,17 @@ my $where="unknown";
 my $when=time;
 my $cmt; $cmt="@ARGV\n" if @ARGV;
 
+my $dtf;
+if(-f "/usr/lib/datefudge.so") {
+	$dtf = "/usr/lib";
+} elsif(-f "/usr/local/lib/datefudge.so") {
+	$dtf = "/usr/local/lib";
+} elsif(-f "/home/smurf/datefudge/datefudge.so") {
+	$dtf = "/home/smurf/datefudge";
+} else {
+	die "No DateFudge";
+}
+
 sub isgone($) {
 	my($x)=@_;
 	return unless $x =~ s/#.* delete//;	# ...FOO#1.2 delete => FOO
@@ -61,7 +72,7 @@ while(<STDIN>) {
 		$state=1;
 		$who=$2; $where=$3;
 		$when=parsedate($4,WHOLE=>1,GMT=>1,DATE_REQUIRED=>1,UK=>1,NO_RELATIVE=>1,VALIDATE=>1) or die "No time parse";
-		@DT = ("LD_PRELOAD=/usr/lib/datefudge.so","DATEFUDGE=".(time-$when));
+		@DT = ("LD_PRELOAD=$dtf","DATEFUDGE=".(time-$when));
 		$where .= ".somewhere" unless $where =~/\./;
 		push(@DT,"BK_USER=$who","BK_HOST=$where");
 	} elsif($state==1 and /^$/) {

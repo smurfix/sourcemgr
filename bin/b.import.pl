@@ -22,11 +22,13 @@ if($ARGV[0] =~ /^(\d\d\d\d)-(\d\d)-(\d\d)$/) {
 	shift;
 	my $dtf;
 	if(-f "/usr/lib/datefudge.so") {
-    	$dtf = "/usr/lib";
+		$dtf = "/usr/lib";
+	} elsif(-f "/usr/local/lib/datefudge.so") {
+		$dtf = "/usr/local/lib";
 	} elsif(-f "/home/smurf/datefudge/datefudge.so") {
-    	$dtf = "/home/smurf/datefudge";
+		$dtf = "/home/smurf/datefudge";
 	} else {
-    	die "No DateFudge";
+		die "No DateFudge";
 	}
 	@DT = ("LD_PRELOAD=$dtf/datefudge.so","DATEFUDGE=".(time-$sec));
 }

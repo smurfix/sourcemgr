@@ -1,4 +1,12 @@
 #!/bin/bash
+if test -f /usr/lib/datefudge.so ; then
+	FUDGE=/usr/lib/datefudge.so
+elif test -f /usr/local/lib/datefudge.so ; then
+	FUDGE=/usr/local/lib/datefudge.so
+else
+	echo "Date-changing library (datefudge.so) not found" >&2
+	exit 1
+fi
 
 set -e
 trap 'usage; exit 1' 0
@@ -104,7 +112,7 @@ rm -rf $tmp $done
 
 sec=$(expr $(date '+%s') - $zeit)
 
-LD_PRELOAD=/usr/lib/datefudge.so DATEFUDGE=$(expr $(date '+%s') - $zeit) \
+LD_PRELOAD=$FUDGE DATEFUDGE=$(expr $(date '+%s') - $zeit) \
 b.import.pl "$cmt"
 
 bk push -q
