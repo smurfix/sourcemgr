@@ -1,3 +1,9 @@
+sourcemgr (1.354) unstable; urgency=low
+
+  * debu: Fix linda call
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 15 Jun 2004 08:16:26 +0200
+
 sourcemgr (1.353) unstable; urgency=low
 
   * drop *.substvars file

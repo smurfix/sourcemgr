@@ -38,7 +38,7 @@ okf=/tmp/okb.$$
 	lintian -viI "$changes"
 
 	echo + linda
-	linda -viIt "$changes"
+	linda -vi "$changes"
 
 	touch $okf
 ) 2>&1 | less
