@@ -9,9 +9,9 @@ Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -d Paket ]
        [ -l (kein PSERVER) ]
        [ -n (kein push) ]
-       [ -r releasename (CVS) ]
-       [ -v releasename (base) ]
-       [ -w releasename (new) ]
+       [ -r Fork (im CVS) ]
+       [ -v releasename (cvs / extern) ]
+       [ -w releasename (cvs) ]
        [ -V (verbose) ]
        [ -D Datum ] [ -Z (keine Kompression) ]
        woher  was
@@ -25,7 +25,7 @@ END
 PATH=/usr/src/STATUS/bin:/usr/local/bin:$PATH
 
 dir=
-vers=extern
+vers=cvs
 nvers=
 nopush=
 rvers=
@@ -102,7 +102,7 @@ if $(b.exists "$dir" -v "$vers" >/tmp/bn.$$)  ; then
 		b.get -d "$dir" -v "$vers" -n "$dest"
 	fi
 else
-	test -z "$nvers"
+	test -z "$nvers" -o "$vers" = "$nvers"
 	b.new -d "$dir" -v "$vers" "aus CVS: $woher / $was"
 	b.get -d "$dir" -v "$vers" -n "$dest"
 fi
@@ -121,7 +121,14 @@ if test -d $gdir$rdir; then
 	rm -rf ChangeSet BitKeeper
 	find . -name SCCS -type d -prune -print0 | xargs -0r rm -rf
 	test -n "$quiet" || echo CVS $quiet $comp -d $woher update -Pd -ko -D "$sdatum" $rvers
-	cvs $quiet $comp -d $woher update -Pd -ko -D "$sdatum" $rvers
+	if cvs $quiet $comp -d $woher update -Pd -ko -D "$sdatum" $rvers | tee /tmp/fl.$$
+	then 
+		rm -f /tmp/fl.$$
+	else
+		perl -ne 'chomp; unlink $_ if s/^C //;' < /tmp/fl.$$
+		rm -f /tmp/fl.$$
+		cvs $quiet $comp -d $woher update -Pd -ko -D "$sdatum" $rvers
+	fi
 else
 	if test "$was" = "." ; then mkdir -p $gdir$rdir; cd $gdir$rdir; ddir=.
 	else ddir="$gdir$rdir"; fi
