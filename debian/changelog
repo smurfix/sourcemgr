@@ -1,3 +1,9 @@
+sourcemgr (1.346) unstable; urgency=low
+
+  * combine_changes: bug in epoch removal
+
+ -- Matthias Urlichs <smurf@debian.org>  Thu,  8 Apr 2004 05:15:21 +0200
+
 sourcemgr (1.345) unstable; urgency=low
 
   * b.get: set parent correctly after cloning

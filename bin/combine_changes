@@ -192,7 +192,7 @@ for fn in argv[1:]:
 epoch=re.compile("\\d+:")
 v=keys["Version:"]
 vm=epoch.search(v)
-if vm: v=v[:epoch.start(0)] + v[epoch.end(0):]
+if vm: v=v[:vm.start(0)] + v[vm.end(0):]
 
 out=open(os.path.join(os.path.dirname(fn), keys["Source:"]+"_"+v+".changes"), "w")
 
