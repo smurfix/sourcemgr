@@ -188,7 +188,11 @@ sub new {
 	if($repo =~ s/^:pserver:(?:(.*?)(?::(.*?))?@)?([^:\/]*)(?::(\d*))?//) {
 		my($user,$pass,$serv,$port) = ($1,$2,$3,$4);
 		$user="anonymous" unless defined $user;
-		$port=2401 unless $port;
+		my $rr2;
+		unless($port) {
+			$rr2 = ":pserver:$user\@$serv:$repo";
+			$port=2401;
+		}
 		my $rr = ":pserver:$user\@$serv:$port$repo";
 
 		unless($pass) {
@@ -197,7 +201,7 @@ sub new {
 					chomp;
 					s/^\/\d+\s+//;
 					my ($w,$p) = split(/\s/,$_,2);
-					if($w eq $rr) {
+					if($w eq $rr or $w eq $rr2) {
 						$pass = $p;
 						last;
 					}
@@ -679,7 +683,7 @@ sub proc(@) {
 		}
 		if($state == 0 and $x =~ s/^RCS file:\s+(\S+),v\s*$/$1/) {
 			$fn = $x;
-			die "Unknown name: $fn\n" unless $fn =~ s/^\Q$re\E\///;
+			die "Unknown name: $fn\n" unless $fn =~ s/^.*?\Q$re\E\///;
 			$fn =~ s#/Attic/#/#;
 			$fn =~ s#^Attic/##;
 			$state=1;

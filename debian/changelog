@@ -1,3 +1,12 @@
+sourcemgr (1.369) unstable; urgency=low
+
+  * bin/b.cvs.pl: 
+       port 2401 may be missing from .cvspass
+       server may report a different absolute path in "cvs log" :-(
+  * 
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon,  4 Oct 2004 18:16:32 +0200
+
 sourcemgr (1.368) unstable; urgency=low
 
   * b.cvs.pl: again bugs. Grumble.
