@@ -1,3 +1,11 @@
+sourcemgr (1.257) unstable; urgency=low
+
+  * bin/b.debuild
+       Originale vernuenftig holen
+  * 
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Sat, 28 Jun 2003 08:35:08 +0200
+
 sourcemgr (1.256) unstable; urgency=low
 
   * b.debuild:
@@ -33,6 +41,7 @@ sourcemgr (1.252) unstable; urgency=low
   * Updated b.deb
 
  -- Matthias Urlichs <smurf@smurf.noris.de>  Fri, 13 Jun 2003 10:08:19 +0200
+>>>>>>>
 
 sourcemgr (1.251) unstable; urgency=low
 
