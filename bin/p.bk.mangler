@@ -1,8 +1,0 @@
-#!/usr/bin/perl -pi
-
-s/\$(Project(?:Major|Minor)?Version)(?::\s.*?)?\$/\$$1\$/g;
-if(/\$Format:/) {
-
-	$_ = <>;
-	$_ = "\n";
-}

@@ -1,7 +1,5 @@
 #!/bin/sh
-test -n "$BK_REPOSITORY" || export BK_REPOSITORY=bk://bitkeeper.noris.de
-
-# 2001-09-24 smurf Kopie aus b.get
+. /usr/share/sourcemgr/repository
 
 set -e
 trap 'usage; exit 1' 0

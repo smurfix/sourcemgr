@@ -1,5 +1,5 @@
 #!/bin/sh
-test -n "$BK_REPOSITORY" || export BK_REPOSITORY=bk://bitkeeper.noris.de
+. /usr/share/sourcemgr/repository
 
 set -e
 trap 'usage; exit 1' 0
@@ -60,7 +60,7 @@ case "$BK_REPOSITORY" in
 			echo "$BK_REPOSITORY/$dir"
 			exit 0
 		else
-			echo "Archiv '$what$dv' gibt es nicht in $BK_REPOSITORY"
+			echo "Archive '$what$dv' doesn't exist in $BK_REPOSITORY"
 			exit 1
 		fi
 		;;

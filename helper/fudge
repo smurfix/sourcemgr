@@ -1,0 +1,17 @@
+#
+ä shell snippet to set DATEFUDGE_LIB
+
+if test -z "$DATEFUDGE_LIB" -a -f $HOME/.sourcemgr.cf ; then
+	DATEFUDGE_LIB=$(/usr/share/sourcemgr/getvar $HOME/.sourcemgr.cf DATEFUDGE_LIB)
+fi
+if test -z "$DATEFUDGE_LIB" ; then
+	DATEFUDGE_LIB=$(/usr/share/sourcemgr/getvar /etc/sourcemgr.cf DATEFUDGE_LIB)
+fi
+if test -z "$DATEFUDGE_LIB" ; then
+	cat <<_END >&2
+$0: Error: You need to set the DATEFUDGE_LIB variable.
+    Do this either as an environment variable,
+        in ~/.sourcemgr.cf, or /etc/sourcemgr.cf
+_END
+	exit 1
+fi

@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# quick and dirty hack
+
+for d in bk cvs cvs/bk ; do
+	mkdir -p /var/cache/$d
+	chgrp src /var/cache/$d
+	chmod 2775 /var/cache/$d
+done
+
+# this wants debconf. Sometime later, I'd say.
+if test ! -f /etc/sourcemgr.cf ; then
+	BK="/usr/src/archive/bk"
+	cat <<_END
+_END
+	echo "# default repo tree location" > /etc/sourcemgr.cf
+	echo "BK_REPOSITORY=$BK" >> /etc/sourcemgr.cf
+fi

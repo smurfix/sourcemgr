@@ -82,23 +82,14 @@ my $cne=$cn;
 
 my @DT; my @AU; my $mdate;
 
-my $dtf;
-if(-f "/usr/lib/datefudge.so") {
-	$dtf = "/usr/lib";
-} elsif(-f "/usr/local/lib/datefudge.so") {
-	$dtf = "/usr/local/lib";
-} elsif(-f "/home/smurf/datefudge/datefudge.so") {
-	$dtf = "/home/smurf/datefudge";
-} else {
-	die "No DateFudge";
-}
+my $dtf = $ENV{"DATEFUDGE_LIB"}
 
 sub dateset($;$) {
 	my($dt,$au) = @_;
 	@DT=();
 	@AU=();
 
-	@DT = ("LD_PRELOAD=$dtf/datefudge.so","DATEFUDGE=".(time-$dt-($$%(1+$diff)))) if $dt;
+	@DT = ("LD_PRELOAD=$dtf","DATEFUDGE=".(time-$dt-($$%(1+$diff)))) if $dt;
 	@AU = ("LOGNAME=$au","USER=$au","BK_USER=$au","BK_HOST=$rhost") if $au;
 }
 

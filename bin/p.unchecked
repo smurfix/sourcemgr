@@ -1,9 +1,0 @@
-#!/bin/sh
-
-cd /usr/src
-( cd STATUS/done ; /bin/ls ) | while read a ; do
-    if test ! -f STATUS/legacy/$a -a ! -f STATUS/keep/$a ; then 
-		b="$(echo $a | sed -e 's#:#/#g')"
-		if test -d $b; then echo $b; fi
-    fi
-done
