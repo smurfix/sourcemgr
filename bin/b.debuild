@@ -36,7 +36,7 @@ dest=local
 bin=
 opt_s=
 
-   eval set -- "$(getopt "bd:t:v:h" "$@")"
+   eval set -- "$(getopt "bd:s:t:v:h" "$@")"
    if test $? != 0
    then
 	   exit 1

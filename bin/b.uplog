@@ -31,18 +31,12 @@ while(<F>) {
 }
 close(F);
 
-my $F = undef;
-if(-f "SCCS/s.rpm.version") { $F="rpm.version" } 
-if(-f "debian/SCCS/s.version") { $F="debian/version" } 
-
 sub vgrab($) {
 	my($vers)=@_;
-	return "($vers)" if not defined $F or not $maxchg;
-	--$maxchg;
-	$rev=`bk c2r -r$vers "$F"`;
+	$rev=`bk c2r -r$vers "debian/version"`;
 	return "($vers)" unless $rev;
 	chop $rev;
-	$rev=`bk get -q -p -r$rev "$F"`;
+	$rev=`bk get -q -p -r$rev "debian/version"`;
 	return "(0.0)" unless $rev;
 	$rev =~ s/\n.*//s;
 	return "($rev)";
