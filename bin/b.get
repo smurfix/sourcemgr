@@ -10,7 +10,7 @@ Usage: $(basename $0)  -- holt Sourcecode aus dem Archiv
        [ -v releasename ]
        [ -w neureleasename, legt eine Kopie an ]
        [ -d Paket ]
-	   [ -n (checkt Sourcen nicht aus) ]
+       [ -n (checkt Sourcen nicht aus) ]
        [ neuesVerzeichnis ]
 	Verzeichnisname ist der Paketname, wenn nicht angegeben.
 END
