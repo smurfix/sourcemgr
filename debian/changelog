@@ -1,3 +1,10 @@
+sourcemgr (1.355) unstable; urgency=low
+
+  * Some CVS trees actually have files with (only) 1.0 revisions.
+    SIGH.
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 29 Jun 2004 15:07:54 +0200
+
 sourcemgr (1.354) unstable; urgency=low
 
   * debu: Fix linda call

@@ -119,6 +119,8 @@ my %cutoff; # date where the vendor version branch ends
    # versions after that are supposed to be merged onto the trunk.
    # This is incidentally the reason why I need to scan revisions 1.1,
    # 1.1.1.1 _and_ 1.1.2.1.
+   # Oh yes, some trees also have 1.0 revisions. Don't ask me where
+   # _those_ come from. :-/
 
 $pn =~ s#[/:]#_#g;
 my %excl;
@@ -506,7 +508,7 @@ if(-f "$tmppn.data") {
 	my $mr=1;
 	while(1) {
 		my $done=0;
-		foreach my $x (qw(1 1.1.1 1.2.1)) {
+		foreach my $x (qw(0 1 1.1.1 1.2.1)) {
 			mkpath("$tmpcv/$mr.$x",1,0755);
 			
 			print STDERR "$CLR $pn: Fetch CVS files $mr.$x\r";
