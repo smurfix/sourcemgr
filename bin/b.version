@@ -23,7 +23,8 @@ if test -n "$1" ; then
 fi
 
 if test -f debian/SCCS/s.version ; then
-	bk get -q debian/version || true
+	bk get -pq debian/version | head -1
+	exit 0
 fi
 
 if test -f debian/version ; then
@@ -31,17 +32,25 @@ if test -f debian/version ; then
 	exit 0
 fi
 
+tmp=
 if test -f debian/SCCS/s.changelog ; then
-	bk get -q debian/changelog || true
+	tmp=$(tempfile)
+	bk get -pq debian/changelog > $tmp
+	chg=$tmp
+else
+	chg="debian/changelog"
 fi
 
-if test -f debian/changelog -a -x /usr/bin/dpkg-parsechangelog ; then
-	dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*//p'
+if test -f $chg -a -x /usr/bin/dpkg-parsechangelog ; then
+	dpkg-parsechangelog -l$chg | sed -ne 's/^Version:[ 	]*//p'
+	test -n "$tmp" && rm -f $tmp
 	exit 0
 fi
+test -n "$tmp" && rm -f $tmp
 
 if test -f SCCS/s.rpm.version ; then
-	bk get -q rpm.version || true
+	bk get -pq rpm.version | head -1
+	exit 0
 fi
 
 if test -f rpm.version ; then
@@ -54,5 +63,5 @@ if test -d BitKeeper ; then
 	exit 0
 fi
 
-echo "keine Versionsnummer gefunden" >&2
+echo "No version number found!" >&2
 exit 1

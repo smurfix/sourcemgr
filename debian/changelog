@@ -1,3 +1,11 @@
+sourcemgr (1.311) unstable; urgency=low
+
+  * b.version required write access to the archive.
+  * 
+  * Fixed.
+
+ -- Matthias Urlichs <smurf@debian.org>  Wed, 28 Jan 2004 15:49:24 +0100
+
 sourcemgr (1.310) unstable; urgency=low
 
   * Set BK_LOGGING_OK for import scripts
