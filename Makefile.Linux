@@ -2,8 +2,8 @@
 compile:
 
 install:
-	install $$(find bin -name SCCS -prune -o -type f -print) $(DESTDIR)/usr/bin
-	install $$(find sbin -name SCCS -prune -o -type f -print) $(DESTDIR)/usr/sbin
+	install $$(find bin -name SCCS -prune -o -name .\* -o -type f -print) $(DESTDIR)/usr/bin
+	install $$(find sbin -name SCCS -prune -o -name .\* -o -type f -print) $(DESTDIR)/usr/sbin
 	@install -d $(DESTDIR)/usr/src/STATUS
 	@install -d $(DESTDIR)/usr/src/STATUS/after
 	@install -d $(DESTDIR)/usr/src/STATUS/checkout

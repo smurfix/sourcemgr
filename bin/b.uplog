@@ -4,11 +4,16 @@
 
 test -d "debian" || exit 0
 test -f "debian/SCCS/s.changelog" && exit 0
+test -f "debian/SCCS/s.control" || exit 0
 test -f "debian/SCCS/s.version" || exit 0
 
-pn="$1"
-test -n "$pn" || pn="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
-test -n "$pn" || pn="$(basename "$(pwd)")"
+bk get -qS debian/control
+
+#pn="$1"
+#test -n "$pn" || \
+pn="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
+#test -n "$pn" || pn="$(basename "$(pwd)")"
+test -n "$pn" || exit 1
 
 export BK_YEAR4=1
 rm -f debian/changelog

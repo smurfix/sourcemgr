@@ -7,10 +7,10 @@ if ! test -d BitKeeper ; then
 	exit 1
 fi
 
-if test -d debian ; then
-	echo "ERROR: Already debianized" >&2
-	exit 1
-fi
+#if test -d debian ; then
+#	echo "ERROR: Already debianized" >&2
+#	exit 1
+#fi
 
 mkdir -p BitKeeper/triggers
 if test ! -f BitKeeper/triggers/SCCS/s.post-commit.changelog ; then
@@ -33,6 +33,9 @@ chmod +x BitKeeper/triggers/post-incoming.changelog
 bk new BitKeeper/triggers/post-incoming.changelog
 fi
 
+if test -d debian ; then 
+	bk mv debian/changelog debian/changelog.old
+else
 D="$(basename "$(pwd)")"-"$(bk prs -ah '-d:I:' -r+ ChangeSet)"
 
 mkdir $D
@@ -42,11 +45,24 @@ cd ..
 mv $D/debian .
 rm -rf $D
 rmdir $D.orig
-b.uplog
-bk ignore debian/changelog "*-stamp" "debian/$D/*" "debian/tmp/*"
-rm -f debian/*.ex debian/ex.* debian/README.Debian
 perl -pi -e 's/\bdh_installdocs$/dh_installdocs -n/' debian/rules
 DN="$(bk prs -ah -d':USER:@:DOMAIN:\n' -r+ ChangeSet)"
 perl -pi -e 's/\@unknown\b/\@'"$DN"'/g' debian/*
-perl -pi -e 's/\bdh_installdocs$/dh_installdocs -n/' debian/rules
+rm -f debian/*.ex debian/ex.* debian/README.Debian
+fi
+
+b.uplog
+cat <<_ >debian/users
+smurf@noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
+smurf@smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
+smurf@play.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
+smurf@rz0.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
+smurf@smurf-o-linux.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
+smurf@linux.smurf.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
+smurf@linux.noris.de +0200 Matthias Urlichs <smurf@smurf.noris.de>
+_
+bk new debian/users
+
+bk ignore debian/changelog "*-stamp" debian/files "debian/tmp/*"
+bk chmod 755 debian/rules
 

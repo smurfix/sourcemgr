@@ -1,7 +1,50 @@
 #!/bin/sh
 
+if test "x$1" = "x-i" ; then INST=1; shift; fi
+
 source /usr/local/bin/gpg-agent-start.sh
 
-b.uplog
-debuild "$@" -b -uc -us -L -viI </dev/null 2>&1 |less
+test ! -d Bitkeeper || b.uplog
+debuild "$@" -eDEB_BUILD_OPTIONS -b -uc -us -L -viI </dev/null 2>&1 | less
 	# +G
+
+mustsetvar () {
+    if [ "x$2" = x ]
+    then
+	echo >&2 "$0: unable to determine $1"
+	exit 1
+    else
+	eval "$1=\"\$2\""
+    fi
+}
+
+mustsetvar package "$(dpkg-parsechangelog | sed -ne 's/^Source: //p')"
+mustsetvar version "$(dpkg-parsechangelog | sed -ne 's/^Version: //p')"
+mustsetvar arch "$(dpkg-architecture -a${targetarch} -t${targetgnusystem} -qDEB_HOST_ARCH)"
+
+sversion=`echo "$version" | perl -pe 's/^\d+://'`
+pva="${package}_${sversion}_${arch}"
+changes="../$pva.changes"
+
+cd `dirname $changes`
+changes=`basename $changes`
+
+if [ ! -r "$changes" ]
+then echo "Can't read $changes!" >&2; exit 1; fi
+
+debs="`perl -e '
+@debs = ();
+while (<>) {
+    last if $infiles and /^[^ ]/;
+    /^Files:/ and $infiles=1, next;
+    next unless $infiles;
+    / (\S*.deb)$/ and push @debs, $1;
+}
+print join(" ",@debs)' $changes`"
+
+mv $changes $debs /var/tmp
+cd /var/tmp
+if test -n "$INST" ; then sudo debpkg -i $debs ; fi
+echo /var/tmp/$changes
+echo $debs
+

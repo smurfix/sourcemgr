@@ -453,7 +453,7 @@ if(-f "$tmppn.data") {
 	my $mr=1;
 	while(1) {
 		my $done=0;
-		foreach my $x (qw(1 1.2.1)) {
+		foreach my $x (qw(1 1.1.1 1.2.1)) {
 			mkpath("$tmpcv/$mr.$x",1,0755);
 			
 			print STDERR " $pn: Fetch CVS files $mr.$x     |\r";
@@ -828,6 +828,7 @@ if($trev ne "" and $ENV{BK_TARGET_NEW}) { # tag must not exist
 	bk("undo","-sfqa$b_rev");
 
 	bk("tag",$trev);
+	bk("clone",".","$ENV{BK_REPOSITORY}/$pn");
 } elsif($trev ne "") { # tag must exist
 	die "Tag '$trev' doesn't exists" unless bk("prs","-hd:I:", "-r$trev","ChangeSet");
 }
@@ -916,6 +917,9 @@ while(@$cset) {
 		bk("push","-q");
 		$done=0;
 	}
+}
+if($ENV{BKCVS_TAG}) {
+	bk("tag","-r+",$ENV{BKCVS_TAG});
 }
 if($ENV{BKCVS_PUSH}) {
 	print STDERR " $pn: Push LAST        |\r" if $verbose;

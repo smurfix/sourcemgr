@@ -20,20 +20,23 @@ test -s "$BK_PENDING" || exit 0
 test -s "$F" || exit 0
 if grep -q '^'"$F"'|' "$BK_PENDING" ; then exit 0; fi
 
-set -- $(bk get -qp "$BF" | head -1 | sed -e 's/\([0-9][0-9]*\)$/ \1/' )
-V="$1"
-W="$2"
-if test -z "$W" ; then
-	if test -n "$V" ; then
-		V="$V."
-	else
-		V="1."
+if test -z "$NEW_VERSION" ; then 
+	set -- $(bk get -qp "$BF" | head -1 | sed -e 's/\([0-9][0-9]*\)$/ \1/')
+	V="$1"
+	W="$2"
+	if test -z "$W" ; then
+		if test -n "$V" ; then
+			V="$V."
+		else
+			V="1."
+		fi
+		W="0"
 	fi
-	W="0"
+	W="$(expr $W + 1)" ## 1.2.3 => 1.2.4
+	NEWVERSION="$V$W"
 fi
-W="$(expr $W + 1)" ## 1.2.3 => 1.2.4
 bk edit -qg "$BF"
-( echo "$V$W"; bk get -qp "$BF" | tail +2 ) > "$BF"
+( echo "$NEWVERSION"; bk get -qp "$BF" | tail +2 ) > "$BF"
 
 bk ci -q -y"Version $V$W" "$BF" >/dev/null
 bk sfiles -pC "$BF" >> "$BK_PENDING"

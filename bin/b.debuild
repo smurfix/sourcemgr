@@ -20,10 +20,11 @@ fi
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- Baue Debian-Source-Pakete.
-	   [ -d Paket ]  [ -v release ]
-	   [ -t HOST (upload there) ]
-	   [ -b (build a binary) ]  [ -B (with pbuilder) ]
-	   [ -s? (pass to dpkg-*) ]
+		[ -d Paket ]  [ -v release ]  [ -t HOST (upload there) ]
+		[ -b (build a binary) ]  [ -B (with pbuilder) ]
+			[ -i (install binaries afterwards) ]
+		[ -s? (pass to dpkg-*) ]  [ -k (keep tempdir) ]
+		[ -n (ignore lintan errors) ]
 END
     trap "" 0
     exit 1
@@ -33,11 +34,14 @@ dir=
 defvers=noris
 vers=
 dest=local
+inst=
 bin=
 pbin=
 opt_s=
+keep=
+lwarn=
 
-   eval set -- "$(getopt "bBd:s:t:v:h" "$@")"
+   eval set -- "$(getopt "bBd:ikns:t:v:h" "$@")"
    if test $? != 0
    then
 	   exit 1
@@ -48,8 +52,14 @@ opt_s=
 	   in
 		   -h)
 		       exit 1 ;;
+		   -n)
+		   		shift; lwarn=y ;;
+		   -i)
+		   		shift; inst=y ;;
 		   -b)
 		   		shift; bin=y ;;
+		   -k)
+		   		shift; keep=y ;;
 		   -B)
 		   		shift; pbin=y ;;
 		   -s)
@@ -63,12 +73,30 @@ opt_s=
 	   esac
    done
 
+if test -n "$inst" -a -z "$bin$pbin" ; then
+	usage
+fi
+
 if test -n "$basev" -a -z "$vers"; then
 	vers=$basev
 	basev=$defbase
 else
 	test -n "$vers" || vers=$defvers
 	test -n "$basev" || basev=$defbase
+fi
+
+if test -z "$dir" -a -z "$vset" ; then # from current directory
+	if test $(bk sfiles -xc | wc -l) -gt 0 ; then
+		echo "Unsaved files." >&2
+		exit 1
+	fi
+	bk pull
+	if test -d RESYNC ; then
+		echo "Unmergeable changes." >&2
+		exit 1
+	fi
+	echo -n "Pushing local version to "; bk parent -p
+	bk push -q
 fi
 
 b.name "$dir" > /tmp/bn.$$
@@ -119,8 +147,12 @@ then : ; else
 fi
 
 # Now build the source archives
-T="/tmp/ex.$$"
-trap 'rm -rf $T' 0 1 2 15
+T="/var/tmp/ex.$$"
+if test -z "$keep" ; then
+	trap 'rm -rf $T' 0 1 2 15
+else
+	trap 'echo DIR $T' 0 1 2 15
+fi
 E="$(bk prs -rEXTERN -h -d:SHORTKEY: ChangeSet)" || true
 A="$(dpkg-architecture -qDEB_BUILD_ARCH)"
 
@@ -129,21 +161,25 @@ b.uplog
 DV="$V"
 V="$(echo $DV | sed -ne 's/\(..*\)-..*/\1/p' )"
 if test -z "$V" ; then E=""; V="$DV"; fi
-bk export -T -w -tplain -r+ . "$T/$N-$V"
-mv debian/changelog "$T/$N-$V"/debian
+VV="$(echo "$V" | sed -e 's/^[0-9][0-9]*://')"
+
+DV="$(echo "$DV" | sed -e 's/^[0-9][0-9]*://')"
+
+bk export -T -w -tplain -r+ . "$T/$N-$VV"
+mv debian/changelog "$T/$N-$VV"/debian
 
 if test -n "$E" ; then # non-original package
-	bk export -T -w -tplain -rEXTERN . "$T/$N-$V.orig"
+	bk export -T -w -tplain -rEXTERN . "$T/$N-$VV.orig"
 fi
 
-cd "$T/$N-$V"
+cd "$T/$N-$VV"
 rm -f debian/users debian/version debian/changelog.old || true
 cd $T
-dpkg-source -b -sa "$N-$V"
-cd "$T/$N-$V"
-fakeroot dpkg-buildpackage -S $opt_s
+dpkg-source -b -sa "$N-$VV"
+cd "$T/$N-$VV"
+fakeroot dpkg-buildpackage -S $opt_s -uc -us
 dpkg-genchanges -S $opt_s > "../${N}_${DV}_source.changes"
-test -z "$bin" || fakeroot dpkg-buildpackage -nc -b
+test -z "$bin" || fakeroot dpkg-buildpackage -nc -b -uc -us
 test -z "$pbin" || pdebuild --buildresult "$T" -- --debbuildopts "-nc -b"
 
 cd $T
@@ -155,7 +191,20 @@ echo "Built:"
 ls 
 echo ""
 #mv $T/* ..
-for f in *.changes; do dput $dest "$f"; done
+
+for f in *.changes; do
+	if lintian -viI "$f" || test -n "$lwarn" ; then : ; else
+		echo "Error in $f: Aborting.\n"; >&2
+		exit 1
+	fi
+done
+
+for f in *.changes; do
+	dput $dest "$f"
+done
+if test -n "$inst" ; then
+	sudo dpkg -i *.deb
+fi
 
 #dpkg-buildpackage -S -rfakeroot -IPENDING -Idebian/users -Idebian/version -IBitkeeper -ISCCS "$@"
 

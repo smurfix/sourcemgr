@@ -14,9 +14,8 @@ trap 'usage; exit 1' 0
 usage() {
 cat >&2 <<END
 Usage: $(basename $0)  -- checkt neue Version von externem Source ein
-       [ -d Paket ]
-       [ -v altes-Release ]
-       [ -w neues-Release ]
+       [ -d Paket ] [ -t TAG ]
+       [ -v altes-Release ] [ -w neues-Release ]
        [ -n ] (BK-Daten danach nicht löschen)
        Verzeichnis-mit-neuem-Source
        Kommentar
@@ -32,14 +31,17 @@ dir=
 ext=
 parent=0
 nodelete=
+tag=
 
-   eval set -- "$(getopt "d:nv:w:h" "$@")"
+   eval set -- "$(getopt "d:nt:v:w:h" "$@")"
    for i
    do
 	   case "$i"
 	   in
 		   -h)
 		       exit 1 ;;
+		   -t)
+			   shift; tag="$1"; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
@@ -116,6 +118,7 @@ sec=$(expr $(date '+%s') - $zeit)
 LD_PRELOAD=$FUDGE DATEFUDGE=$(expr $(date '+%s') - $zeit) \
 b.import.pl "$cmt"
 
+test -z "$tag" || bk tag -r+ "$tag"
 bk push -q
 echo "Import OK:" $(bk prs -ah -r+ -d:I: ChangeSet)
 trap "" 0
