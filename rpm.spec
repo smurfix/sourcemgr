@@ -63,6 +63,9 @@ make -f Makefile.Linux install
 %dir /usr/src/STATUS/subst
 %dir /usr/src/STATUS/to-install
 %dir /usr/src/STATUS/work
+%dir /var/cache/bk
+%dir /var/cache/cvs
+%dir /var/cache/cvs/bk
 /usr/src/STATUS/rpmmacros
 /usr/src/STATUS/rpmrc
 /usr/src/STATUS/checkout/*

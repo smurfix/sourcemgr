@@ -65,6 +65,6 @@ if bk lclone -q "$cache" "$dc" ; then : ; else
 fi
 cd "$dc"
 echo "$dc: Checkout sources" >&2
-bk -r get -q
+bk -r get -q || true # ???!!!
 
 exit 0

@@ -1,0 +1,33 @@
+All files in this repository are (c) 1994-2002
+by Matthias Urlichs <smurf@noris.de>.
+
+Usage: The b.* programs are helper scripts for using Bitkeeper with
+a central repository, pointed to by the environment variable
+"BK_REPOSITORY". They're documented in German; sorry about that.  ;-)
+
+All of these programs accept "-h" for a help text. "-d XX" is the
+repository name and "-v YY" the version/branch/whatever.
+
+Thus, "b.new -s -d foobar -v test" would create a new single-user
+BK repository at '$BK_REPOSITORY/foobar-test'.
+
+If BK_REPOSITORY is a URL (and not simply a local directory), all
+reads of the remote repository are cached in /var/cache/bk.
+
+The CVS import tool ('b.cvs') supports branches and incremental updates
+from an external CVS repository. It will call "bk renametool" when there
+are both deleted and new files.
+
+
+YOUR RIGHTS:
+
+You may use those programs (duh ;-) and make local modifications (of
+course). Please send all feature improvements back to me. You may not
+redistribute these programs outside your organization, nor would you
+want to. ;-)  You may not use them for repositories which are not Open
+Source without talking to me first -- hint: If you save money by using
+these programs, or ideas from them, I want some of it.
+
+You may not use this code if you plan to gain monetary or other
+compensation from me in case anything goes wrong. In other words,
+NO WARRANTY OF ANY KIND WHATSOEVER.

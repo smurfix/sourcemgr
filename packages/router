@@ -1,5 +1,0 @@
-base
-net:route:gated
-kernel:mgetty
-kernel:mrouted
-kernel:pppd

@@ -2,34 +2,38 @@
 compile:
 
 install:
-	install $$(bk sfiles -g bin) /usr/local/bin
-	install $$(bk sfiles -g sbin) /usr/local/sbin
-	@install -m 1777 -d /var/cache/bk
+	install $$(bk sfiles -g bin) $(DESTDIR)/usr/bin
+	install $$(bk sfiles -g sbin) $(DESTDIR)/usr/sbin
+	@install -d $(DESTDIR)/usr/src/STATUS
+	@install -d $(DESTDIR)/usr/src/STATUS/after
+	@install -d $(DESTDIR)/usr/src/STATUS/checkout
+	@install -d $(DESTDIR)/usr/src/STATUS/cvsup
+	@install -d $(DESTDIR)/usr/src/STATUS/dist
+	@install -d $(DESTDIR)/usr/src/STATUS/done
+	@install -d $(DESTDIR)/usr/src/STATUS/fail
+	@install -d $(DESTDIR)/usr/src/STATUS/hosts
+	@install -d $(DESTDIR)/usr/src/STATUS/keep
+	@install -d $(DESTDIR)/usr/src/STATUS/legacy
+	@install -d $(DESTDIR)/usr/src/STATUS/out
+	@install -d $(DESTDIR)/usr/src/STATUS/packages
+	@install -d $(DESTDIR)/usr/src/STATUS/removed
+	@install -d $(DESTDIR)/usr/src/STATUS/rpm
+	@install -d $(DESTDIR)/usr/src/STATUS/sent
+	@install -d $(DESTDIR)/usr/src/STATUS/skip
+	@install -d $(DESTDIR)/usr/src/STATUS/status
+	@install -d $(DESTDIR)/usr/src/STATUS/subst
+	@install -d $(DESTDIR)/usr/src/STATUS/to-install
+	@install -d $(DESTDIR)/usr/src/STATUS/work
 
-	@install -d /usr/src/STATUS
-	@install -d /usr/src/STATUS/after
-	@install -d /usr/src/STATUS/checkout
-	@install -d /usr/src/STATUS/cvsup
-	@install -d /usr/src/STATUS/dist
-	@install -d /usr/src/STATUS/done
-	@install -d /usr/src/STATUS/fail
-	@install -d /usr/src/STATUS/hosts
-	@install -d /usr/src/STATUS/keep
-	@install -d /usr/src/STATUS/legacy
-	@install -d /usr/src/STATUS/out
-	@install -d /usr/src/STATUS/packages
-	@install -d /usr/src/STATUS/removed
-	@install -d /usr/src/STATUS/rpm
-	@install -d /usr/src/STATUS/sent
-	@install -d /usr/src/STATUS/skip
-	@install -d /usr/src/STATUS/status
-	@install -d /usr/src/STATUS/subst
-	@install -d /usr/src/STATUS/to-install
-	@install -d /usr/src/STATUS/work
+	@install -m 644 rpmmacros $(DESTDIR)/usr/src/STATUS/rpmmacros
+	@install -m 644 rpmrc $(DESTDIR)/usr/src/STATUS/rpmrc
 
-	@install rpmmacros /usr/src/STATUS/rpmmacros
-	@install rpmrc /usr/src/STATUS/rpmrc
+	@install -d $(DESTDIR)/usr/src/STATUS/RPM/BUILD/tmp
+	@install -d $(DESTDIR)/usr/src/STATUS/RPM/RPMS
+	@install -d $(DESTDIR)/usr/src/STATUS/RPM/RPMS/i386
+	@install -d $(DESTDIR)/usr/src/STATUS/RPM/RPMS/i586
+	@install -d $(DESTDIR)/usr/src/STATUS/RPM/RPMS/i686
 
-	@install -d /usr/src/STATUS/RPM/BUILD/tmp
-	@install -d /usr/src/STATUS/RPM/RPMS
-	@install -d /usr/src/STATUS/RPM/RPMS/i686
+	@install -m 1777 -d $(DESTDIR)/var/cache/bk
+	@install -m 1777 -d $(DESTDIR)/var/cache/cvs
+	@install -m 1777 -d $(DESTDIR)/var/cache/cvs/bk

@@ -10,12 +10,14 @@ Usage: $(basename $0)  -- updatet Bitkeeper aus Remote-CVS
        [ -d Paket ]
        [ -l (kein PSERVER) ]
        [ -n # (Intermediate-Push alle # Importe; Default 100; 0=garnicht) ]
+       [ -k # (ignoriere CVS-Fehler) ]
        [ -L (kein Fehler wenn Lock nicht geht) ]
        [ -r Fork (im CVS) ]
 	   [ -s (shell instead of renametool) ] [ -S (kein Renametool) ]
        [ -v releasename (cvs) ]
        [ -w neuer releasename ]
        [ -e CVS-Fudge-Sekunden (Default 120) ]
+       [ -q (quiet!) ]
        [ -D (Debug) ] [ -Z (keine Kompression) ] [ -b # (Limit) ]
        woher  was
 
@@ -32,6 +34,8 @@ vers=cvs
 push=100
 rvers=
 nvers=
+ignore=
+verbose=1
 nolock=1
 run="$0.pl"
 comp=-z3
@@ -42,7 +46,7 @@ loc=
 bg=
 df=0
 
-   eval set -- "$(getopt "hb:d:De:lLn:r:sSv:w:Z" "$@")"
+   eval set -- "$(getopt "hb:d:De:klLn:qr:sSv:w:Z" "$@")"
    for i
    do
 	   case "$i"
@@ -61,6 +65,10 @@ df=0
 		       shift; nolock=0 ;;
 		   -e)
 			   shift; diff="$1"; shift;;
+		   -k)
+			   ignore=1; shift;;
+		   -q)
+			   verbose=""; shift;;
 		   -d)
 			   shift; dir="$1"; shift;;
 		   -v)
@@ -127,8 +135,10 @@ if test -n "$nvers" ; then
 	vers="$nvers"
 	export BK_TARGET_NEW=1
 fi
-test -n $diff && test -z "$BKCVS_DIFF" && export BKCVS_DIFF=$diff
+test -n "$diff" && test -z "$BKCVS_DIFF" && export BKCVS_DIFF=$diff
 test -z "$BKCVS_PUSH" && export BKCVS_PUSH=$push
 test -z "$BKCVS_NORENAME" && export BKCVS_NORENAME=$rename
+test -n "$verbose" && export BK_VERBOSE=1
+test -n "$ignore" && export BKCVS_IGNORE_ERROR=1
 export BKCVS_LOCK=$bg
 exec $run "$was" "$what$dv"

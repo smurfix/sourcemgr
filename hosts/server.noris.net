@@ -1,5 +1,0 @@
-base
-kernel:linux-2.1
-net:mail:qmail
-newsserver
-misc:bind-inaddr

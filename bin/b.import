@@ -83,8 +83,9 @@ zeit=$(perl -e '
  use File::Find;
  my $mtime=0;
  find(sub {
+	return if -l $_;
 	return unless -f $_;
-	$t=(stat(_))[9];
+	$t=(lstat($_))[9];
 	$mtime=$t if $mtime<$t;
  }, ".");
  print $mtime;

@@ -1,8 +1,0 @@
-base
-devel
-users
-router
-kernel:hfs-test
-kernel:isdn-test
-kernel:linux-test
-kernel:rocket-test

@@ -12,6 +12,7 @@ use Storable qw(nstore retrieve);
 use File::ShLock;
 
 my $ENDFILE = "/var/run/b.cvs.stop";
+my $verbose = $ENV{"BK_VERBOSE"};
 
 my $lock;
 if($ENV{BKCVS_LOCK}) {
@@ -210,7 +211,7 @@ sub cvs {
 		push(@res,$_);
 	}
 	close(FP);
-	die "CVS error: $?\n" if $?;
+	die "CVS error: $?\n" if $? and not $ENV{BKCVS_IGNORE_ERROR};
 	wantarray ? @res : join(" ",@res);
 }
 
@@ -362,7 +363,7 @@ sub proc(@) {
 		if($state == 0 and $x =~ s/^Working file:\s+(\S+)\s*$/$1/) {
 			$fn = $x;
 			$state=1;
-			# print STDERR " "x70,"\r  $fn\r";
+			# print STDERR " "x70,"\r  $fn\r" if $verbose;
 			next;
 		}
 		if($state == 1 and $x =~ /^symbolic names:/) {
@@ -448,7 +449,7 @@ if(-f "$tmppn.data") {
 	}
 } else {
 	$cset=[];
-	print STDERR " $pn: Processing CVS log     |\r";
+	print STDERR " $pn: Processing CVS log     |\r" if $verbose;
 	my $mr=1;
 	while(1) {
 		my $done=0;
@@ -632,7 +633,7 @@ sub process($$$$) {
 				}
 			}
 			while(@f) {
-				print STDERR " $pn: Processing $len: $cvsdate $cnt ".(0+@f)." $rcnt  |\r";
+				print STDERR " $pn: Processing $len: $cvsdate $cnt ".(0+@f)." $rcnt  |\r" if $verbose;
 				my @ff;
 				if(@f > 30) {
 					@ff = splice(@f,0,25);
@@ -660,7 +661,7 @@ sub process($$$$) {
 			push(@new,$n);
 			next;
 		}
-		print STDERR "$pn: Checking if '$n' is a resurrected file...\n";
+		print STDERR "$pn: Checking if '$n' is a resurrected file...\n" if $verbose;
 		rename($n,"x.$$");
 
 		open(FP,"|-") or do {
@@ -697,7 +698,7 @@ END
 			system($ENV{SHELL} || "/bin/sh","-i");
 			$shells--;
 		} else {
-			print STDERR " $pn: *** rename ***\r";
+			print STDERR " $pn: *** rename ***\r" if $verbose;
 			open(RN,"|env @AU @DT bk renametool -p > $tmf");
 			foreach my $f(sort { $a cmp $b } @gone) { print RN "$f\n"; }
 			print RN "\n";
@@ -803,7 +804,7 @@ END
 	print FP $_ while(<P>);
 	close(P); close(FP);
 	my $tip=bk("prs","-ahn","-r+","-d:I:","ChangeSet");
-	print STDERR "$pn: $cvsdate  $tip     |\n";
+	print STDERR "$pn: $cvsdate  $tip     |\n" if $verbose;
 
 
 	# unlink(bkfiles("g"));
@@ -911,16 +912,17 @@ while(@$cset) {
 	last if -f $ENDFILE;
 	if($ENV{BKCVS_PUSH} and $done >= $ENV{BKCVS_PUSH}) {
 		$ddone += $done;
-		print STDERR " $pn: Push $ddone     |\r";
+		print STDERR " $pn: Push $ddone     |\r" if $verbose;
 		bk("push","-q");
 		$done=0;
 	}
 }
 if($ENV{BKCVS_PUSH}) {
-	print STDERR " $pn: Push LAST        |\r";
+	print STDERR " $pn: Push LAST        |\r" if $verbose;
 	bk("push","-q");
 }
 exit 0 if -f $ENDFILE;
-print STDERR "$pn: OK     |\n";
+print STDERR "$pn: OK     |\n" if $verbose;
 unlink("$tmppn.data");
 unlink("/var/lock/bcvs-$pn");
+exit 0;

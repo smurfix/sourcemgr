@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# Tool, um das Debian-ChangeLog automatisch zu produzieren
+
+test -d "debian" || exit 0
+test -f "debian/SCCS/s.changelog" && exit 0
+test -w "debian/SCCS/s.changelog" && exit 0
+
+pn="$1"
+test -n "$pn" || pn="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
+test -n "$pn" || pn="$(basename "$(pwd)")"
+
+rm -f debian/changelog
+bk changes -d"$pn"' (_>:I:<_) unstable; urgency=low\n\n$each(:C:){  * (:C:)\n}\n -- BK_Importer <:USER:@:HOST:>  :Dd: :DM: :Dy: :T: +0000\n\n' |
+
+perl >debian/changelog -e'
+$maxchg=10;
+unless(-f "debian/users") {
+	print while(<>);
+	exit(0);
+}
+open(F,"<debian/users");
+while(<F>) {
+	chomp;
+	($mail,$tz,$user)=split(/\s+/,$_,3);
+	$mail{$mail}=$user;
+	$tz{$mail}=$tz;
+}
+close(F);
+
+sub vgrab($) {
+	my($vers)=@_;
+	return "($vers)" if not -f "rpm.version" or not $maxchg;
+	--$maxchg;
+	$rev=`bk c2r -r$vers rpm.version`;
+	return "($vers)" unless $rev;
+	chop $rev;
+	$rev=`bk get -q -p -r$rev rpm.version`;
+	return "(0.0)" unless $rev;
+	$rev =~ s/\n.*//s;
+	return "($rev)";
+}
+while(<>) {
+	s/BK_Importer\s+\<([\S+]+)\>(.+)\+0000/$mail{$1}$2$tz{$1}/g;
+	s/\(_\>([.0-9]+)\<_\)/vgrab($1)/eg;
+	print;
+}
+'
+
+chmod 444 debian/changelog
+
+exit 0

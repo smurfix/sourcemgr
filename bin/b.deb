@@ -1,0 +1,52 @@
+#!/bin/sh
+
+### debianize a package.
+
+if ! test -d BitKeeper ; then
+	echo "ERROR: Run from BK root directory" >&2
+	exit 1
+fi
+
+if test -d debian ; then
+	echo "ERROR: Already debianized" >&2
+	exit 1
+fi
+
+mkdir -p BitKeeper/triggers
+if test ! -f BitKeeper/triggers/SCCS/s.post-commit.changelog ; then
+cat <<'END' >BitKeeper/triggers/post-commit.changelog
+#!/bin/sh
+
+b.uplog
+END
+chmod +x BitKeeper/triggers/post-commit.changelog
+bk new BitKeeper/triggers/post-commit.changelog
+fi
+
+if test ! -f BitKeeper/triggers/SCCS/s.post-incoming.changelog ; then
+cat <<'END' >BitKeeper/triggers/post-incoming.changelog
+#!/bin/sh
+
+b.uplog
+END
+chmod +x BitKeeper/triggers/post-incoming.changelog
+bk new BitKeeper/triggers/post-incoming.changelog
+fi
+
+D="$(basename "$(pwd)")"-"$(bk prs -ah '-d:I:' -r+ ChangeSet)"
+
+mkdir $D
+cd $D
+echo "" | dh_make -s -n -c gpl
+cd ..
+mv $D/debian .
+rm -rf $D
+rmdir $D.orig
+b.uplog
+bk ignore debian/changelog "*-stamp" "debian/$D/*" "debian/tmp/*"
+rm -f debian/*.ex debian/ex.* debian/README.Debian
+perl -pi -e 's/\bdh_installdocs$/dh_installdocs -n/' debian/rules
+DN="$(bk prs -ah -d':USER:@:DOMAIN:\n' -r+ ChangeSet)"
+perl -pi -e 's/\@unknown\b/\@'"$DN"'/g' debian/*
+perl -pi -e 's/\bdh_installdocs$/dh_installdocs -n/' debian/rules
+

@@ -1,6 +1,0 @@
-net:www:php
-lib:mysql
-lib:gd
-x11:freetype
-lib:zlib
-lib:png

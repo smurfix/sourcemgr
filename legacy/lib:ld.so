@@ -1,9 +1,0 @@
-/lib/ld-linux.so.1
-/lib/ld-linux.so.1.9.1
-/sbin/ldconfig
-/usr/bin/ldd
-/usr/info/ld.so.info
-/usr/lib/lddstub
-/usr/man/man1/ldd.1
-/usr/man/man8/ld.so.8
-/usr/man/man8/ldconfig.8
