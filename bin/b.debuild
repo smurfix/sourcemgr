@@ -2,11 +2,19 @@
 
 set -ex
 
+# Make sure we're in the BK root
+test -d BitKeeper
+# Make sure there are no outstanding changes
+test "$(bk sfiles -xcg | wc -l)" -eq 0
+# Make sure the remote repository doesn't have more than we do
+test "$(bk changes -d':I:\n' -R | wc -l)" -eq 0
+
+# Tag this release with the current version and push it
 V=$(cat debian/version)
 test -n "$V"
 bk tag -r+ DEBIAN-$V
 bk push
 
-dpkg-buildpackage -rfakeroot -Idebian/users -Idebian/version -IBitkeeper -ISCCS "$@"
+dpkg-buildpackage -S -rfakeroot -IPENDING -Idebian/users -Idebian/version -IBitkeeper -ISCCS "$@"
 
 
