@@ -8,6 +8,7 @@ Standards-Version: 3.5.2
 Package: sourcemgr
 Architecture: any
 Suggests: bitkeeper, prcs
+Depends: devscripts, dput
 Description: Source management speed-up commands
  Helper commands to handle Bitkeeper or PRCS archives.
  Included are commands to debianize source archives and auto-build RPMs
