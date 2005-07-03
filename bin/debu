@@ -32,7 +32,7 @@ okf=/tmp/okb.$$
 (
 	# set -e  ## TODO
 	echo + build
-	debuild --no-lintian "$@" -eDEB_BUILD_OPTIONS -b -uc -us </dev/null
+	debuild --no-lintian "$@" -eDEB_BUILD_OPTIONS -eBK_CONFIG -eBK_HOST -eBK_USER -eBK_LICENSE -b -uc -us </dev/null
 		# +G
 	echo + lintian
 	lintian -viI "$changes"
