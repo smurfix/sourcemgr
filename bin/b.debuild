@@ -123,13 +123,14 @@ fi
 test -n "$dest" || dest="$UPLOAD_TO"
 test -n "$destdir" || destdir="$ddestdir"
 
-if test -z "$dir" -a -z "$vset" ; then # from current directory
-	if test $(bk sfiles -xgc | fgrep -v '/SCCS/' | wc -l) -gt 0 ; then
-		trap "" 0
-		echo "'bk sfiles -cgx' says there are unsaved files." >&2
-		echo "Please fix this before proceeding." >&2
-		exit 1
-	fi
+if { test -d Bitkeeper && test $(bk sfiles -xgc | fgrep -v '/SCCS/' | wc -l) -gt 0 ; } \
+		|| { test -d .git && test $(git-ls-files --others $(test -f IGNORE && echo --exclude-from=IGNORE) | wc -l) -gt 0 ; } ; then
+	trap "" 0
+	echo "There are unsaved files." >&2
+	echo "Please fix this before proceeding." >&2
+	exit 1
+fi
+if test -d BitKeeper; then
 	test -n "$local" || bk pull
 	if test -d RESYNC ; then
 		echo "There's a RESYNC directory, i.e. unmerged changes." >&2
@@ -140,64 +141,23 @@ if test -z "$dir" -a -z "$vset" ; then # from current directory
 		echo -n "Pushing local version to "; bk parent -p
 		bk push -q
 	fi
+elif test -d .git ; then
+	: # nothing to do
+else
+	echo "Could find neither git nor bitkeeper!" >&2
+	exit 1
 fi
 
-if test -z "$local" ; then
-	b.name "$dir" > /tmp/bn.$$
-	read dir overs < /tmp/bn.$$
-	if test -z "$vset" ; then vers="$overs" ; fi
-	rm -f /tmp/bn.$$
-
-	what=$(echo $dir | sed -e 's/[:\/]/_/g' -e 's/_*$//')
-	dir=$(echo $what | sed -e 's/_/\//g')
-
-	test -n "$vers" || vers=$defvers
-	# does not work
-	#read what bkrel <(b.exists -d "$what" -v "$vers")
-
-	b.exists -d "$what" -v "$vers" >/tmp/b.rpm.$$
-	read what bkrel </tmp/b.rpm.$$
-	rm -f /tmp/b.rpm.$$
-
-	if test -z "$bkrel" ; then
-		vget=""
-	else
-		vget="-v $bkrel"
-	fi
-
-	cd "$(b.cache -d "$what" $vget)"
-fi
 trap '' 0
 
-## Make sure we're in the BK root
-if ! test -d BitKeeper ; then
-	echo "You do not seem to be in a BitKeeper repository." >&2
-	exit 1
-fi
-
-## Make sure there are no outstanding changes
-if test "$(bk sfiles -xcg | wc -l)" -ne 0 ; then
-	echo "You have unsaved changes. (bk -xgc)  Aborting." >&2
-	exit 1
-fi
-
-## Make sure the remote repository doesn't have stuff that we don't
-#if test -z "$local" ; then
-#	if test "$(bk changes -d':I:\n' -R | wc -l)" -eq 0 ; then
-#		echo "The remote repository has more changes." >&2
-#	fi
-#fi
-
-# Tag this release with the current version and push it
-if ! test -w debian/control && ! bk get -q debian/control ; then
-	echo "Could not check out debian/control." >&2
-	exit 1
-fi
-if ! test -w debian/changelog && ! bk get -q debian/changelog ; then
-	echo "Could not check out debian/changelog." >&2
-	exit 1
-fi
+for f in debian/control debian/changelog ; do
+	if ! test -w $f && { ! test -d BitKeeper || ! bk get -q debian/control ; } && ! test -d .git ; then
+		echo "Could not check out '$f'." >&2
+		exit 1
+	fi
+done
 V="$(dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*//p')"
+VE="$(dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*\(.*\)-.*/\1/p')"
 DI="$(dpkg-parsechangelog | sed -ne 's/^Distribution:[ 	]*//p')"
 
 N="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
@@ -205,10 +165,13 @@ test -n "$N" || N="$(basename "$dir")"
 N1=$(echo $N | perl -pe 's/^((lib)?.).*/$1/')
 
 test -n "$V"
-if bk prs -r+ -ahnd'$if(:TAG:){$each(:TAG:){:TAG:}}' ChangeSet | fgrep -xqs "DEBIAN-$V"
+if test -d BitKeeper && bk prs -r+ -ahnd'$if(:TAG:){$each(:TAG:){:TAG:}}' ChangeSet | fgrep -xqs "DEBIAN-$V"
 then : ; else
 	bk tag -r+ DEBIAN-$V
 	test -n "$local" || bk push -q
+fi
+if test -d .git -a ! cmp -s .git/HEAD .git/refs/tags/DEBIAN-$V ; then
+	cat .git/HEAD > .git/refs/tags/DEBIAN-$V
 fi
 
 # Now build the source archives
@@ -218,9 +181,20 @@ if test -z "$keep" ; then
 else
 	trap 'echo DIR $T' 0 1 2 15
 fi
-E="$(bk prs -rEXTERN -h -d:SHORTKEY: ChangeSet)" || true
+
+if test -n "$VE" ; then
+	if test -d BitKeeper; then
+		E="$(bk prs -rEXTERN-$VE -h -d:SHORTKEY: ChangeSet)"
+		test -n "$E" || \
+		E="$(bk prs -rEXTERN -h -d:SHORTKEY: ChangeSet)"
+	fi
+	if test -d .git; then
+		E="EXTERN-$VE"
+	fi
+fi
+
 A="$(dpkg-architecture -qDEB_BUILD_ARCH)"
-if echo "$V" | grep -qs -- - ; then
+if test -n "$VE" ; then
 	if test -z "$E" ; then
 		echo "non-native version, but no EXTERN tag set!" >&2
 		exit 1
@@ -239,7 +213,12 @@ VV="$(echo "$V" | sed -e 's/^[0-9][0-9]*://')"
 DV="$(echo "$DV" | sed -e 's/^[0-9][0-9]*://')"
 
 rm -f BitKeeper/etc/SCCS/x.id_cache
-bk export -T -w -tplain -r+ . "$T/$N-$VV"
+if test -d BitKeeper ; then
+	bk export -T -w -tplain -r+ . "$T/$N-$VV"
+fi
+if test -d .git ; then
+	git-checkout-cache --prefix="$T/$N-$VV/" -a
+fi
 
 # If there's a "debian/exporter" script, run it.
 if test -x "$T/$N-$VV"/debian/exporter ; then
@@ -250,43 +229,49 @@ test -f "$T/$N-$VV"/debian/changelog || mv debian/changelog "$T/$N-$VV"/debian
 
 if test -n "$E" ; then # non-original package
 	if \
-	   cp ../${N}_$VV.orig.tar.gz "$T/" 2>/dev/null ||
- 	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
-		"${DEBIAN_REPOSITORY}/upstream/${N}_$VV.orig.tar.gz" ||
-	   wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
-		"http://ftp2.de.debian.org/debian/pool/main/${N1}/${N}/${N}_$VV.orig.tar.gz" ||
-	   false
+		cp ../${N}_$VV.orig.tar.gz "$T/" 2>/dev/null ||
+		wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
+			"${DEBIAN_REPOSITORY}/upstream/${N}_$VV.orig.tar.gz" ||
+		wget -qq -O "$T/${N}_$VV.orig.tar.gz" \
+			"http://ftp2.de.debian.org/debian/pool/main/${N1}/${N}/${N}_$VV.orig.tar.gz" ||
+		false
 	then
 		echo + get original source from .. or via HTTP
-	   if test $(tar tfvz "$T/${N}_$VV.orig.tar.gz" | wc -l) -lt 4 ; then
-		 # Oh no, an embedded tar file. I hate embedded tar files.
-		 SEPARATE=-ss
-		 cd "$T"
-		 mkdir SEP
-		 cd SEP
-		 tar xfz "../${N}_$VV.orig.tar.gz"
-		 if test $(ls | wc -l) -lt 2 ; then
-			mv $(ls) XyZ
-			mv XyZ/* .
-			rm -rf XyZ
-		 fi
-		 rm -f *.sig *.sig.asc || true
-		 for f in *.tar.gz ; do tar xfz "$f"; done
-		 rm -f *.tar.gz
-		 if test $(ls | wc -l) -lt 2 ; then
-			mv $(ls) XyZ
-			mv XyZ/* .
-			rm -rf XyZ
-		 fi
-		 cd ..
+		if test $(tar tfvz "$T/${N}_$VV.orig.tar.gz" | wc -l) -lt 4 ; then
+			# Oh no, an embedded tar file. I hate embedded tar files.
+			SEPARATE=-ss
+			cd "$T"
+			mkdir SEP
+			cd SEP
+			tar xfz "../${N}_$VV.orig.tar.gz"
+			if test $(ls | wc -l) -lt 2 ; then
+				mv $(ls) XyZ
+				mv XyZ/* .
+				rm -rf XyZ
+			fi
+			rm -f *.sig *.sig.asc || true
+			for f in *.tar.gz ; do tar xfz "$f"; done
+			rm -f *.tar.gz
+			if test $(ls | wc -l) -lt 2 ; then
+				mv $(ls) XyZ
+				mv XyZ/* .
+				rm -rf XyZ
+			fi
+			cd ..
 
-		 mv SEP "$T/$N-$VV.orig"
-	   fi
+			mv SEP "$T/$N-$VV.orig"
+		fi
 	else
 		echo + create new original source archive
 		rm -f "$T/${N}_$VV.orig.tar.gz"
-		rm -f BitKeeper/etc/SCCS/x.id_cache
-		bk export -T -w -tplain -rEXTERN . "$T/$N-$VV.orig"
+		if test -d BitKeeper ; then
+			rm -f BitKeeper/etc/SCCS/x.id_cache
+			bk export -T -w -tplain -r$E . "$T/$N-$VV.orig"
+		fi
+		if test -d .git ; then
+			env GIT_INDEX_FILE="$T/git-index" git-read-tree $E
+			env GIT_INDEX_FILE="$T/git-index" git-checkout-cache --prefix="$T/$N-$VV.orig/" -a
+		fi
 		if test -x "$T/$N-$VV"/debian/exporter ; then
 			"$T/$N-$VV"/debian/exporter "$T/$N-$VV.orig" "EXTERN"
 		fi

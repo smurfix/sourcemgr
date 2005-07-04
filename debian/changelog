@@ -1,3 +1,15 @@
+sourcemgr (1.379) unstable; urgency=low
+
+  * Fix a few b.debuild details.
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon,  4 Jul 2005 18:13:11 +0200
+
+sourcemgr (1.378) unstable; urgency=low
+
+  * Make 'b.debuild' work with git too.
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon,  4 Jul 2005 09:08:14 +0200
+
 sourcemgr (1.377) unstable; urgency=low
 
   * build-dep on python-dev
