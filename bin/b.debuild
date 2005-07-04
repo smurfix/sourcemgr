@@ -165,13 +165,18 @@ test -n "$N" || N="$(basename "$dir")"
 N1=$(echo $N | perl -pe 's/^((lib)?.).*/$1/')
 
 test -n "$V"
-if test -d BitKeeper && bk prs -r+ -ahnd'$if(:TAG:){$each(:TAG:){:TAG:}}' ChangeSet | fgrep -xqs "DEBIAN-$V"
-then : ; else
-	bk tag -r+ DEBIAN-$V
-	test -n "$local" || bk push -q
+if test -d BitKeeper ; then
+	if bk prs -r+ -ahnd'$if(:TAG:){$each(:TAG:){:TAG:}}' ChangeSet | fgrep -xqs "DEBIAN-$V"
+	then : ; else
+		bk tag -r+ DEBIAN-$V
+		test -n "$local" || bk push -q
+	fi
 fi
-if test -d .git -a ! cmp -s .git/HEAD .git/refs/tags/DEBIAN-$V ; then
-	cat .git/HEAD > .git/refs/tags/DEBIAN-$V
+if test -d .git ; then
+	if cmp -s .git/HEAD .git/refs/tags/DEBIAN-$V 
+	then : ; else
+		cat .git/HEAD > .git/refs/tags/DEBIAN-$V
+	fi
 fi
 
 # Now build the source archives
