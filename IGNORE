@@ -1,0 +1,4 @@
+*-stamp
+debian/files
+debian/sourcemgr.substvars
+debian/sourcemgr/*
