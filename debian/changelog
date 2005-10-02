@@ -1,3 +1,9 @@
+sourcemgr (1.380) unstable; urgency=low
+
+  * git-checkout-cache => git-checkout-index
+
+ -- Matthias Urlichs <smurf@debian.org>  Sun,  2 Oct 2005 11:44:40 +0200
+
 sourcemgr (1.379) unstable; urgency=low
 
   * Fix a few b.debuild details.

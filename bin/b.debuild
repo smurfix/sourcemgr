@@ -222,7 +222,7 @@ if test -d BitKeeper ; then
 	bk export -T -w -tplain -r+ . "$T/$N-$VV"
 fi
 if test -d .git ; then
-	git-checkout-cache --prefix="$T/$N-$VV/" -a
+	git-checkout-index --prefix="$T/$N-$VV/" -a
 fi
 
 # If there's a "debian/exporter" script, run it.
@@ -275,7 +275,7 @@ if test -n "$E" ; then # non-original package
 		fi
 		if test -d .git ; then
 			env GIT_INDEX_FILE="$T/git-index" git-read-tree $E
-			env GIT_INDEX_FILE="$T/git-index" git-checkout-cache --prefix="$T/$N-$VV.orig/" -a
+			env GIT_INDEX_FILE="$T/git-index" git-checkout-index --prefix="$T/$N-$VV.orig/" -a
 		fi
 		if test -x "$T/$N-$VV"/debian/exporter ; then
 			"$T/$N-$VV"/debian/exporter "$T/$N-$VV.orig" "EXTERN"
