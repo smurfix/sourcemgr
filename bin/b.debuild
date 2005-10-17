@@ -124,7 +124,7 @@ test -n "$dest" || dest="$UPLOAD_TO"
 test -n "$destdir" || destdir="$ddestdir"
 
 if { test -d Bitkeeper && test $(bk sfiles -xgc | fgrep -v '/SCCS/' | wc -l) -gt 0 ; } \
-		|| { test -d .git && test $(git-ls-files --others $(test -f IGNORE && echo --exclude-from=IGNORE) | wc -l) -gt 0 ; } ; then
+		|| { test -d .git && test $(git-ls-files --others $(test -f .gitignore && echo --exclude-from=.gitignore) | wc -l) -gt 0 ; } ; then
 	trap "" 0
 	echo "There are unsaved files." >&2
 	echo "Please fix this before proceeding." >&2
@@ -284,7 +284,7 @@ if test -n "$E" ; then # non-original package
 fi
 
 cd "$T/$N-$VV"
-rm -f debian/users debian/version debian/changelog.old debian/exporter IGNORE || true
+rm -f debian/users debian/version debian/changelog.old debian/exporter .gitignore || true
 
 if test -n "$SEPARATE" ; then
   mkdir debian/patches
