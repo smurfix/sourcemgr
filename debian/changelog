@@ -1,3 +1,9 @@
+sourcemgr (1.382) unstable; urgency=low
+
+  * Use exclude-per-dir for .gitignore in b.debuild.
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 25 Oct 2005 14:41:35 +0200
+
 sourcemgr (1.381) unstable; urgency=low
 
   * IGNORE => .gitignore
