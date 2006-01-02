@@ -306,12 +306,12 @@ test -z "$pbin" || pdebuild --buildresult "$T" -- --debbuildopts "-nc -b"
 if test -z "$bin$pbin" ; then
 	dpkg-genchanges $opt_v -S $opt_s > "../${N}_${DV}_source.changes"
 	cd "$T"
-	test -n "$nosign" || echo y | debsign "${N}_${DV}_source.changes"
-	test -n "$nosign" -o -z "$pbin$bin" || echo y | debsign "${N}_${DV}_$A.changes"
+	test -n "$nosign" || debsign "${N}_${DV}_source.changes"
+	test -n "$nosign" -o -z "$pbin$bin" || debsign "${N}_${DV}_$A.changes"
 else
 	dpkg-genchanges $opt_v $opt_s > "../${N}_${DV}.changes"
 	cd "$T"
-	test -n "$nosign" || echo y | debsign "${N}_${DV}.changes"
+	test -n "$nosign" || debsign "${N}_${DV}.changes"
 	test -n "$nosign" -o -z "$pbin$bin" || rm "${N}_${DV}_$A.changes"
 fi
 

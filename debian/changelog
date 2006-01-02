@@ -1,3 +1,9 @@
+sourcemgr (1.383) unstable; urgency=low
+
+  * b.debuild: workaround a stupid debsign bug
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon,  2 Jan 2006 14:01:23 +0100
+
 sourcemgr (1.382) unstable; urgency=low
 
   * Use exclude-per-dir for .gitignore in b.debuild.
