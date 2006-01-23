@@ -195,6 +195,9 @@ if test -n "$VE" ; then
 	fi
 	if test -d .git; then
 		E="EXTERN-$VE"
+		if test ! -s .git/refs/tags/$E ; then
+			test -s .git/refs/heads/extern
+			cat .git/refs/heads/extern > .git/refs/tags/$E
 	fi
 fi
 
