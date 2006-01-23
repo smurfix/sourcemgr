@@ -1,3 +1,9 @@
+sourcemgr (1.384) unstable; urgency=low
+
+  * Auto-create EXTERN-foo tag from "extern" or "upstream" branch
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon, 23 Jan 2006 11:09:14 +0100
+
 sourcemgr (1.383) unstable; urgency=low
 
   * b.debuild: workaround a stupid debsign bug
