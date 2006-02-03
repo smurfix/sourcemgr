@@ -1,3 +1,9 @@
+sourcemgr (1.385) unstable; urgency=low
+
+  * b.debuild: process subdirectories.
+
+ -- Matthias Urlichs <smurf@debian.org>  Fri,  3 Feb 2006 10:20:14 +0100
+
 sourcemgr (1.384) unstable; urgency=low
 
   * Auto-create EXTERN-foo tag from "extern" or "upstream" branch

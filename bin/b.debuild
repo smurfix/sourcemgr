@@ -15,6 +15,7 @@ Usage: $(basename $0)  -- Build Debian source(+binary) packages.
     [ -t HOST (upload to here: first arg to 'dput') ]
     [ -l (don't push/pull) ] [ -d package ]  [ -v branch ]
     [ -T dir (save stuff here; default: parent directory if '-l' was given) ]
+	[ prefix_to_process ]
 
 This program prepares a Debian source package and pushes it to a
 repository. It can also build binary archives.
@@ -102,6 +103,14 @@ do
 	esac
 done
 
+if test -n "$1" ; then
+	predir=/$1
+	prefix=$(echo $1 | sed -e 's,/,_,g')_
+else
+	predir=""
+	prefix=""
+fi
+
 if test -n "$inst" -a -z "$bin$pbin" ; then
 	usage
 fi
@@ -156,26 +165,26 @@ for f in debian/control debian/changelog ; do
 		exit 1
 	fi
 done
-V="$(dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*//p')"
-VE="$(dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*\(.*\)-.*/\1/p')"
-DI="$(dpkg-parsechangelog | sed -ne 's/^Distribution:[ 	]*//p')"
+V="$(cd .$predir && dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*//p')"
+VE="$(cd .$predir && dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*\(.*\)-.*/\1/p')"
+DI="$(cd .$predir && dpkg-parsechangelog | sed -ne 's/^Distribution:[ 	]*//p')"
 
-N="$(sed -n -e 's/^Source: //p' debian/control | head -1)"
+N="$(sed -n -e 's/^Source: //p' .$predir/debian/control | head -1)"
 test -n "$N" || N="$(basename "$dir")"
 N1=$(echo $N | perl -pe 's/^((lib)?.).*/$1/')
 
 test -n "$V"
 if test -d BitKeeper ; then
-	if bk prs -r+ -ahnd'$if(:TAG:){$each(:TAG:){:TAG:}}' ChangeSet | fgrep -xqs "DEBIAN-$V"
+	if bk prs -r+ -ahnd'$if(:TAG:){$each(:TAG:){:TAG:}}' ChangeSet | fgrep -xqs "${prefix}DEBIAN-$V"
 	then : ; else
-		bk tag -r+ DEBIAN-$V
+		bk tag -r+ ${prefix}DEBIAN-$V
 		test -n "$local" || bk push -q
 	fi
 fi
 if test -d .git ; then
-	if cmp -s .git/HEAD .git/refs/tags/DEBIAN-$V 
+	if cmp -s .git/HEAD .git/refs/tags/${prefix}DEBIAN-$V 
 	then : ; else
-		cat .git/HEAD > .git/refs/tags/DEBIAN-$V
+		cat .git/HEAD > .git/refs/tags/${prefix}DEBIAN-$V
 	fi
 fi
 
@@ -189,12 +198,12 @@ fi
 
 if test -n "$VE" ; then
 	if test -d BitKeeper; then
-		E="$(bk prs -rEXTERN-$VE -h -d:SHORTKEY: ChangeSet)"
+		E="$(bk prs -r${prefix}EXTERN-$VE -h -d:SHORTKEY: ChangeSet)"
 		test -n "$E" || \
-		E="$(bk prs -rEXTERN -h -d:SHORTKEY: ChangeSet)"
+		E="$(bk prs -r${prefix}EXTERN -h -d:SHORTKEY: ChangeSet)"
 	fi
 	if test -d .git; then
-		E="EXTERN-$VE"
+		E="${prefix}EXTERN-$VE"
 		if test ! -s .git/refs/tags/$E ; then
 			if test -s .git/refs/heads/extern ; then
 				cat .git/refs/heads/extern > .git/refs/tags/$E
@@ -202,17 +211,18 @@ if test -n "$VE" ; then
 				test -s .git/refs/heads/upstream
 				cat .git/refs/heads/upstream > .git/refs/tags/$E
 			fi
+		fi
 	fi
 fi
 
 A="$(dpkg-architecture -qDEB_BUILD_ARCH)"
 if test -n "$VE" ; then
 	if test -z "$E" ; then
-		echo "non-native version, but no EXTERN tag set!" >&2
+		echo "non-native version, but no ${prefix}EXTERN tag set!" >&2
 		exit 1
 	fi
 else
-	E="" # must be local, despite the existence of an EXTERN tag
+	E="" # must be local, despite the existence of an ${prefix}EXTERN tag
 fi
 
 b.uplog
@@ -226,11 +236,12 @@ DV="$(echo "$DV" | sed -e 's/^[0-9][0-9]*://')"
 
 rm -f BitKeeper/etc/SCCS/x.id_cache
 if test -d BitKeeper ; then
-	bk export -T -w -tplain -r+ . "$T/$N-$VV"
+	bk export -T -w -tplain -r+ . "$T/$N-$VV.x"
 fi
 if test -d .git ; then
-	git-checkout-index --prefix="$T/$N-$VV/" -a
+	git-checkout-index --prefix="$T/$N-$VV.x/" -a
 fi
+mv "$T/$N-$VV.x$predir" "$T/$N-$VV"
 
 # If there's a "debian/exporter" script, run it.
 if test -x "$T/$N-$VV"/debian/exporter ; then
@@ -278,14 +289,15 @@ if test -n "$E" ; then # non-original package
 		rm -f "$T/${N}_$VV.orig.tar.gz"
 		if test -d BitKeeper ; then
 			rm -f BitKeeper/etc/SCCS/x.id_cache
-			bk export -T -w -tplain -r$E . "$T/$N-$VV.orig"
+			bk export -T -w -tplain -r$E . "$T/$N-$VV.orig.x"
 		fi
 		if test -d .git ; then
 			env GIT_INDEX_FILE="$T/git-index" git-read-tree $E
-			env GIT_INDEX_FILE="$T/git-index" git-checkout-index --prefix="$T/$N-$VV.orig/" -a
+			env GIT_INDEX_FILE="$T/git-index" git-checkout-index --prefix="$T/$N-$VV.orig.x/" -a
 		fi
+		mv "$T/$N-$VV.orig.x$predir" "$T/$N-$VV.orig"
 		if test -x "$T/$N-$VV"/debian/exporter ; then
-			"$T/$N-$VV"/debian/exporter "$T/$N-$VV.orig" "EXTERN"
+			"$T/$N-$VV"/debian/exporter "$T/$N-$VV.orig" "${prefix}EXTERN"
 		fi
 	fi
 fi
