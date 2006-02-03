@@ -339,9 +339,15 @@ ls
 echo ""
 
 for f in *.changes; do
-	if lintian -viI "$f" && linda -vi "$f" || test -n "$lwarn" ; then : ; else
+	if lintian -viI "$f" || test -n "$lwarn" ; then : ; else
 		echo "Error in $f: Aborting.\n"; >&2
 		exit 1
+	fi
+done
+
+if test -z "$nosign" ; then
+	if linda -vi "$f" || test -n "$lwarn" ; then : ; else
+		echo "Error in $f. NOT aborting.\n"; >&2
 	fi
 done
 
