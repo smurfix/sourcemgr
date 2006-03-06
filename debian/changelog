@@ -1,3 +1,9 @@
+sourcemgr (1.386) unstable; urgency=low
+
+  * Also ignore linda in "debu".
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon,  6 Mar 2006 13:47:03 +0100
+
 sourcemgr (1.385) unstable; urgency=low
 
   * b.debuild: process subdirectories.
