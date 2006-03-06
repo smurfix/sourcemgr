@@ -2,3 +2,4 @@
 debian/files
 debian/sourcemgr.substvars
 debian/sourcemgr/*
+.qgit_cache.dat.z
