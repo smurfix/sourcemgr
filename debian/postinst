@@ -16,3 +16,5 @@ _END
 	echo "# default repo tree location" > /etc/sourcemgr.cf
 	echo "BK_REPOSITORY=$BK" >> /etc/sourcemgr.cf
 fi
+
+#DEBHELPER#

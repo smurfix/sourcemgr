@@ -11,3 +11,4 @@ if test "$1" = "purge" ; then
 	rm -f /etc/sourcemgr.cf
 fi
 
+#DEBHELPER#
