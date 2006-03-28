@@ -1,4 +1,4 @@
-sourcemgr (1.388) unstable; urgency=low
+sourcemgr (1.388) stable; urgency=low
 
   * Let b.debuild use versions with '~'
     git doesn't like tags with tilde in them. Replace with '--'.
