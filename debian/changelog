@@ -1,3 +1,9 @@
+sourcemgr (1.389) stable; urgency=low
+
+  * Shell programming and me. Ouch.
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 28 Mar 2006 22:08:32 +0200
+
 sourcemgr (1.388) stable; urgency=low
 
   * Let b.debuild use versions with '~'
