@@ -165,8 +165,9 @@ for f in debian/control debian/changelog ; do
 		exit 1
 	fi
 done
-V="$(cd .$predir && dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*//p')"
-VE="$(cd .$predir && dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*\(.*\)-.*/\1/p')"
+VT="$(cd .$predir && dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*//p')"
+V="$(echo $VT | sed -e 's/~/--/g')"
+VE="$(cd .$predir && dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*\(.*\)-.*/\1/p' | sed -e 's/~/--/g')"
 DI="$(cd .$predir && dpkg-parsechangelog | sed -ne 's/^Distribution:[ 	]*//p')"
 
 N="$(sed -n -e 's/^Source: //p' .$predir/debian/control | head -1)"
@@ -182,9 +183,9 @@ if test -d BitKeeper ; then
 	fi
 fi
 if test -d .git ; then
-	if cmp -s .git/HEAD .git/refs/tags/${prefix}DEBIAN-$V 
+	if "$(git-rev-parse HEAD)" = "$(git-rev-parse refs/tags/${prefix}DEBIAN-$V)"
 	then : ; else
-		cat .git/HEAD > .git/refs/tags/${prefix}DEBIAN-$V
+		git tag -f ${prefix}DEBIAN-$V HEAD
 	fi
 fi
 
@@ -227,10 +228,10 @@ fi
 
 b.uplog
 
-DV="$V"
-V="$(echo $DV | sed -ne 's/\(..*\)-..*/\1/p' )"
-if test -z "$V" ; then E=""; V="$DV"; fi
-VV="$(echo "$V" | sed -e 's/^[0-9][0-9]*://')"
+DV="$VT"
+VT="$(echo $DV | sed -ne 's/\(..*\)-..*/\1/p' )"
+if test -z "$VT" ; then E=""; VT="$DV"; fi
+VV="$(echo "$VT" | sed -e 's/^[0-9][0-9]*://')"
 
 DV="$(echo "$DV" | sed -e 's/^[0-9][0-9]*://')"
 

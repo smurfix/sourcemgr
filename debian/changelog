@@ -1,3 +1,10 @@
+sourcemgr (1.388) unstable; urgency=low
+
+  * Let b.debuild use versions with '~'
+    git doesn't like tags with tilde in them. Replace with '--'.
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 28 Mar 2006 22:03:58 +0200
+
 sourcemgr (1.387) unstable; urgency=low
 
   * Added #DEBHELPER# tags to the post* files.
