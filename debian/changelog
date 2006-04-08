@@ -1,3 +1,9 @@
+sourcemgr (1.390) stable; urgency=low
+
+  * EXTERN tags: also check origin; complain if not set
+
+ -- Matthias Urlichs <smurf@debian.org>  Sat,  8 Apr 2006 06:24:17 +0200
+
 sourcemgr (1.389) stable; urgency=low
 
   * Shell programming and me. Ouch.
