@@ -1,3 +1,9 @@
+sourcemgr (1.392) stable; urgency=low
+
+  * b.debuild: *grumble* colons are bad too, use comma
+
+ -- Matthias Urlichs <smurf@debian.org>  Sun,  9 Apr 2006 20:02:03 +0200
+
 sourcemgr (1.391) stable; urgency=low
 
   * b.debuild: Fix stupid typo
