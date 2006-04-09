@@ -167,7 +167,7 @@ for f in debian/control debian/changelog ; do
 done
 VT="$(cd .$predir && dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*//p')"
 V="$(echo $VT | sed -e 's/~/--/g' -e 's/:/,/g')"
-VE="$(cd .$predir && dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*\(.*\)-.*/\1/p' | sed -e 's/~/--/g' -e 's/:/../g')"
+VE="$(cd .$predir && dpkg-parsechangelog | sed -ne 's/^Version:[ 	]*\(.*\)-.*/\1/p' | sed -e 's/~/--/g' -e 's/:/,/g')"
 DI="$(cd .$predir && dpkg-parsechangelog | sed -ne 's/^Distribution:[ 	]*//p')"
 
 N="$(sed -n -e 's/^Source: //p' .$predir/debian/control | head -1)"
