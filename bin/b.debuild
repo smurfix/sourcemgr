@@ -211,9 +211,9 @@ if test -n "$VE" ; then
 		if test ! -s .git/refs/tags/$E ; then
 			if test -s .git/refs/heads/extern ; then
 				cat .git/refs/heads/extern > .git/refs/tags/$E
-			elif test -s .git/refs/heads/upstream
+			elif test -s .git/refs/heads/upstream ; then
 				cat .git/refs/heads/upstream > .git/refs/tags/$E
-			elif test -s .git/refs/heads/origin
+			elif test -s .git/refs/heads/origin ; then
 				cat .git/refs/heads/origin > .git/refs/tags/$E
 			else
 				echo "Could not find a source for tag $E" >&2
