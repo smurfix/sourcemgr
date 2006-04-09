@@ -187,6 +187,9 @@ if test -d .git ; then
 	then : ; else
 		git tag -f ${prefix}DEBIAN-$V HEAD
 	fi
+	for f in $(ls .git/remotes) ; do
+		git push --tags $f
+	done
 fi
 
 # Now build the source archives
