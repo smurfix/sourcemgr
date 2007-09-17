@@ -1,4 +1,4 @@
-sourcemgr (1.394) feisty; urgency=low
+sourcemgr (1.394) stable; urgency=low
 
   * Explicit support for DEBSIGN_KEYID
 
