@@ -1,3 +1,9 @@
+sourcemgr (1.394) feisty; urgency=low
+
+  * Explicit support for DEBSIGN_KEYID
+
+ -- Matthias Urlichs <smurf@debian.org>  Mon, 17 Sep 2007 12:45:57 +0200
+
 sourcemgr (1.393) stable; urgency=low
 
   * Killed off bitkeeper support.

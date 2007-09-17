@@ -7,7 +7,8 @@ cat >&2 <<END
 Usage: $(basename $0)  -- Build Debian source(+binary) packages.
     [ -b (build a binary) | -B (build with pbuilder) 
         [ -i (install the binaries afterwards) ] ]
-    [ -s? (passed to dpkg-*) ]  [ -k (keep temporary directory) ]
+    [ -s? (passed to dpkg-*) ]  [ -K (keep temporary directory) ]
+	[ -k KEYID (default: DEBSIGK_KEYID) ]
     [ -n (ignore lintan errors) ]  [ -S (don't sign the result) ]
     [ -V VERS -- include changelog since VERS ]
     [ -w http://where/ever/ -- Debian repo with .orig.tar.gz file ]
@@ -52,6 +53,7 @@ lwarn=
 nosign=
 opt_v=
 local=
+keyid=$DEBSIGN_KEYID
 
 eval set -- "$(getopt "bBd:iklns:St:T:v:V:w:W:h" "$@")"
 if test $? != 0
@@ -73,6 +75,8 @@ do
 		-b)
 			shift; bin=y ;;
 		-k)
+			shift; keyid="$1"; shift;;
+		-K)
 			shift; keep=y ;;
 		-B)
 			shift; pbin=y ;;
@@ -294,12 +298,12 @@ test -z "$pbin" || pdebuild --buildresult "$T" -- --debbuildopts "-nc -b"
 if test -z "$bin$pbin" ; then
 	dpkg-genchanges $opt_v -S $opt_s > "../${N}_${DV}_source.changes"
 	cd "$T"
-	test -n "$nosign" || debsign "${N}_${DV}_source.changes"
-	test -n "$nosign" -o -z "$pbin$bin" || debsign "${N}_${DV}_$A.changes"
+	test -n "$nosign" || debsign ${keyid:+"-k$keyid"} "${N}_${DV}_source.changes"
+	test -n "$nosign" -o -z "$pbin$bin" || debsign ${keyid:+"-k$keyid"} "${N}_${DV}_$A.changes"
 else
 	dpkg-genchanges $opt_v $opt_s > "../${N}_${DV}.changes"
 	cd "$T"
-	test -n "$nosign" || debsign "${N}_${DV}.changes"
+	test -n "$nosign" || debsign ${keyid:+"-k$keyid"} "${N}_${DV}.changes"
 	test -n "$nosign" -o -z "$pbin$bin" || rm "${N}_${DV}_$A.changes"
 fi
 
