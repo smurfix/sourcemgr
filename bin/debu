@@ -1,13 +1,13 @@
 #!/bin/sh
 
 mustsetvar () {
-    if [ "x$2" = x ]
-    then
-	echo >&2 "$0: unable to determine $1"
-	exit 1
-    else
-	eval "$1=\"\$2\""
-    fi
+	if [ "$2" = "" ]
+	then
+		echo >&2 "$0: unable to determine $1"
+		exit 1
+	else
+		eval "$1=\"\$2\""
+	fi
 }
 
 mustsetvar package "$(dpkg-parsechangelog | sed -ne 's/^Source: //p')"
@@ -22,8 +22,6 @@ if test -f /usr/local/bin/gpg-agent-start.sh ; then
 	source /usr/local/bin/gpg-agent-start.sh
 fi
 
-test ! -d Bitkeeper || b.uplog
-
 sversion=`echo "$version" | perl -pe 's/^\d+://'`
 pva="${package}_${sversion}_${arch}"
 changes="../$pva.changes"
@@ -32,7 +30,7 @@ okf=/tmp/okb.$$
 (
 	# set -e  ## TODO
 	echo + build
-	debuild --no-lintian -eDEB_BUILD_OPTIONS -eBK_CONFIG -eBK_HOST -eBK_USER -eBK_LICENSE -b -uc -us "$@" </dev/null
+	debuild --no-lintian -eDEB_BUILD_OPTIONS -b -uc -us "$@" </dev/null
 		# +G
 	echo + lintian
 	lintian -viI "$changes"

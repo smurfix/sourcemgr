@@ -64,10 +64,5 @@ if test -f rpm.version ; then
 	exit 0
 fi
 
-if test -d BitKeeper ; then
-	bk prs -ah -d:I:\\n -r+ ChangeSet
-	exit 0
-fi
-
 echo "No version number found!" >&2
 exit 1

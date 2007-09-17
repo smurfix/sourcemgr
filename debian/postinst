@@ -10,11 +10,7 @@ done
 
 # this wants debconf. Sometime later, I'd say.
 if test ! -f /etc/sourcemgr.cf ; then
-	BK="/usr/src/archive/bk"
-	cat <<_END
-_END
-	echo "# default repo tree location" > /etc/sourcemgr.cf
-	echo "BK_REPOSITORY=$BK" >> /etc/sourcemgr.cf
+	echo "# add config stuff here" > /etc/sourcemgr.cf
 fi
 
 #DEBHELPER#

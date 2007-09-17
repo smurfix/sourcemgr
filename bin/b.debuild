@@ -1,5 +1,4 @@
 #!/bin/bash
-. /usr/share/sourcemgr/repository
 . /usr/share/sourcemgr/debian
 . /usr/share/sourcemgr/upload_to
 
@@ -37,11 +36,6 @@ END
 
 set -e
 
-for f in gpg ssh ; do
-	if type -p $f-agent-start.sh >/dev/null 2>&1 ; then
-		. $(type -p $f-agent-start.sh)
-	fi
-done
 trap 'usage; exit 1' 0
 
 dir=
@@ -132,36 +126,25 @@ fi
 test -n "$dest" || dest="$UPLOAD_TO"
 test -n "$destdir" || destdir="$ddestdir"
 
-if { test -d Bitkeeper && test $(bk sfiles -xgc | fgrep -v '/SCCS/' | wc -l) -gt 0 ; } \
-		|| { test -d .git && test $(git-ls-files --others --exclude-per-directory=.gitignore | wc -l) -gt 0 ; } ; then
+if test -d .git && test $(git-ls-files --modified --others --exclude-per-directory=.gitignore | wc -l) -gt 0 ; then
 	trap "" 0
-	echo "There are unsaved files." >&2
+	echo "There are unsaved or uncommitted files:" >&2
+	git-ls-files --others --exclude-per-directory=.gitignore
 	echo "Please fix this before proceeding." >&2
 	exit 1
 fi
-if test -d BitKeeper; then
-	test -n "$local" || bk pull
-	if test -d RESYNC ; then
-		echo "There's a RESYNC directory, i.e. unmerged changes." >&2
-		echo "Please fix this before proceeding." >&2
-		exit 1
-	fi
-	if test -z "$local" ; then
-		echo -n "Pushing local version to "; bk parent -p
-		bk push -q
-	fi
-elif test -d .git ; then
+if test -d .git ; then
 	: # nothing to do
 else
-	echo "Could find neither git nor bitkeeper!" >&2
+	echo "Could find no git!" >&2
 	exit 1
 fi
 
 trap '' 0
 
 for f in debian/control debian/changelog ; do
-	if ! test -w $f && { ! test -d BitKeeper || ! bk get -q debian/control ; } && ! test -d .git ; then
-		echo "Could not check out '$f'." >&2
+	if ! test -w $f && ! test -d .git ; then
+		echo "Could not see out '$f'." >&2
 		exit 1
 	fi
 done
@@ -175,13 +158,6 @@ test -n "$N" || N="$(basename "$dir")"
 N1=$(echo $N | perl -pe 's/^((lib)?.).*/$1/')
 
 test -n "$V"
-if test -d BitKeeper ; then
-	if bk prs -r+ -ahnd'$if(:TAG:){$each(:TAG:){:TAG:}}' ChangeSet | fgrep -xqs "${prefix}DEBIAN-$V"
-	then : ; else
-		bk tag -r+ ${prefix}DEBIAN-$V
-		test -n "$local" || bk push -q
-	fi
-fi
 if test -d .git ; then
 	if test "$(git-rev-parse --verify HEAD 2>/dev/null)" = "$(git-rev-parse --verify "refs/tags/${prefix}DEBIAN-$V" 2>/dev/null)"
 	then : ; else
@@ -201,11 +177,6 @@ else
 fi
 
 if test -n "$VE" ; then
-	if test -d BitKeeper; then
-		E="$(bk prs -r${prefix}EXTERN-$VE -h -d:SHORTKEY: ChangeSet)"
-		test -n "$E" || \
-		E="$(bk prs -r${prefix}EXTERN -h -d:SHORTKEY: ChangeSet)"
-	fi
 	if test -d .git; then
 		E="${prefix}EXTERN-$VE"
 		if test ! -s .git/refs/tags/$E ; then
@@ -233,8 +204,6 @@ else
 	E="" # must be local, despite the existence of an ${prefix}EXTERN tag
 fi
 
-b.uplog
-
 DV="$VT"
 VT="$(echo $DV | sed -ne 's/\(..*\)-..*/\1/p' )"
 if test -z "$VT" ; then E=""; VT="$DV"; fi
@@ -242,10 +211,6 @@ VV="$(echo "$VT" | sed -e 's/^[0-9][0-9]*://')"
 
 DV="$(echo "$DV" | sed -e 's/^[0-9][0-9]*://')"
 
-rm -f BitKeeper/etc/SCCS/x.id_cache
-if test -d BitKeeper ; then
-	bk export -T -w -tplain -r+ . "$T/$N-$VV.x"
-fi
 if test -d .git ; then
 	git-checkout-index --prefix="$T/$N-$VV.x/" -a
 fi
@@ -295,10 +260,6 @@ if test -n "$E" ; then # non-original package
 	else
 		echo + create new original source archive
 		rm -f "$T/${N}_$VV.orig.tar.gz"
-		if test -d BitKeeper ; then
-			rm -f BitKeeper/etc/SCCS/x.id_cache
-			bk export -T -w -tplain -r$E . "$T/$N-$VV.orig.x"
-		fi
 		if test -d .git ; then
 			env GIT_INDEX_FILE="$T/git-index" git-read-tree $E
 			env GIT_INDEX_FILE="$T/git-index" git-checkout-index --prefix="$T/$N-$VV.orig.x/" -a
@@ -375,6 +336,6 @@ if test -n "$destdir" ; then
 	done
 fi
 
-#dpkg-buildpackage -S -rfakeroot -IPENDING -Idebian/users -Idebian/version -IBitkeeper -ISCCS "$@"
+#dpkg-buildpackage -S -rfakeroot -IPENDING -Idebian/users -Idebian/version -I.git "$@"
 
 
