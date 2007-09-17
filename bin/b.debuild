@@ -167,9 +167,11 @@ if test -d .git ; then
 	then : ; else
 		git tag -f ${prefix}DEBIAN-$V HEAD
 	fi
-	for f in $(ls .git/remotes) ; do
-		git push --tags $f
-	done
+	if test -z "$local" ; then
+		for f in $(ls .git/remotes) ; do
+			git push --tags $f || echo "*** Warning: No push to $f"
+		done
+	fi
 fi
 
 # Now build the source archives
