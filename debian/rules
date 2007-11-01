@@ -49,7 +49,6 @@ install: build
 
 	install $$(find bin -name SCCS -prune -o -name .\* -o -type f -print) $D/usr/bin
 	install $$(find sbin -name SCCS -prune -o -name .\* -o -type f -print) $D/usr/sbin
-	@install -m 2775 -g src -d $D/var/cache/cvs
 
 	for f in helper/* ; do \
 		test -f $$f && install -m 644 $$f debian/sourcemgr/usr/share/sourcemgr/;\
