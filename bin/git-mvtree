@@ -1,0 +1,136 @@
+#!/usr/bin/python
+
+# This is a simple script which clones a git subtree to another.
+
+import sys,re,optparse,os,subprocess
+
+parser = optparse.OptionParser("corresponding_file [ old_commit ]", conflict_handler="resolve", description="""\
+Transfer a list of commits from one repository to another.
+
+The first argument is a list of SHA1 entries of the form
+	old new
+It lists which commits are "the same".
+
+old_commit and those of its parents which are not listed in the
+corresponding_file are copied, i.e. new commit objects are created.
+Their SHA1s are added to the file so that you may repeat the process
+with other commits, or run it incrementally.
+
+""")
+parser.add_option("-h","--help","-?", action="help",
+                    help="Print this help message and exit")
+parser.add_option("-v", "--verbose", dest="verbose", action="store_true",
+                    help="Report progress")
+
+(options, args) = parser.parse_args()
+
+if len(args) < 1 or len(args) > 3:
+	parser.error("requires one to three arguments")
+
+
+def end(p):
+	try:
+		retcode = p.wait()
+	except OSError,e:
+		print >>sys.stderr, "git-rev-list failed:", e
+	else:
+		if retcode < 0:
+			print >>sys.stderr, "git-rev-list was terminated by signal", -retcode
+			sys.exit(1)
+		elif retcode > 0:
+			print >>sys.stderr, "git-rev-list exited with non-zero exit code", retcode
+			sys.exit(1)
+
+
+re_cmt = re.compile(r'\s*#.*')
+corr = {}
+rcorr = {}
+corrf=open(args[0],"a+")
+corrf.seek(0,0)
+for l in corrf:
+	l = re_cmt.sub("",l).strip()
+	if l == "": continue
+	try:
+		a,b = l.split()
+	except ValueError:
+		continue
+	if len(a) != 40: continue
+	if len(b) != 40: continue
+	corr[a]=b
+	rcorr[b]=a
+
+if len(args) >= 2:
+	srctag = args[1]
+else:
+	srctag = "HEAD"
+
+srcrepo = os.path.curdir
+
+commits=[]
+cmd = ["git-rev-parse",srctag]
+if options.verbose:
+	print >>sys.stderr,cmd
+
+p=subprocess.Popen(cmd, stdout=subprocess.PIPE)
+l = p.stdout.readline().strip()
+if options.verbose:
+	print >>sys.stderr,l
+commits.append(l)
+end(p)
+
+while len(commits):
+	if options.verbose:
+		print >>sys.stderr,"DO",commits
+	c = commits.pop()
+	if c in corr:
+		d = corr[c]
+		continue
+	if c in rcorr:
+		d = c
+		continue
+	if options.verbose:
+		print "Processing:",c
+
+	### WARNUNG: das wird alle Tags verflachen!
+	p=subprocess.Popen(["git-cat-file","commit",c], stdout=subprocess.PIPE)
+	skip=[]
+	nx=False
+	q = ""
+	for l in p.stdout:
+		if nx:
+			q += l
+			continue
+		l = l.strip()
+		if l == "":
+			nx=True
+			q += "\n"
+			continue
+		a,b = l.split(" ",1)
+		if a == "parent":
+			try:
+				b = corr[b]
+			except KeyError:
+				skip.append(b)
+				continue
+		q += a+" "+b+"\n"
+	end(p)
+	if skip:
+		if options.verbose:
+			print >>sys.stderr,"AGAIN",c,skip
+		commits.extend(skip)
+		commits.insert(0,c)
+		continue
+	x=subprocess.Popen(["git-hash-object","-w","--stdin","-t","commit"], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+	x.stdin.write(q)
+	x.stdin.close()
+	d = x.stdout.read().strip()
+	end(x)
+	corr[c] = d
+	print >>corrf, c,d
+	if options.verbose:
+		print >>sys.stderr,"NEW",d
+		print >>sys.stderr,q
+
+# OK, everything is done.
+corrf.close()
+print d
