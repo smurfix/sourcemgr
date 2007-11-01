@@ -8,14 +8,14 @@ Usage: $(basename $0)  -- Build Debian source(+binary) packages.
     [ -b (build a binary) | -B (build with pbuilder) 
         [ -i (install the binaries afterwards) ] ]
     [ -s? (passed to dpkg-*) ]  [ -K (keep temporary directory) ]
-	[ -k KEYID (default: DEBSIGK_KEYID) ]
+    [ -k KEYID (default: DEBSIGN_KEYID) ]
     [ -n (ignore lintan errors) ]  [ -S (don't sign the result) ]
     [ -V VERS -- include changelog since VERS ]
     [ -w http://where/ever/ -- Debian repo with .orig.tar.gz file ]
     [ -t HOST (upload to here: first arg to 'dput') ]
     [ -l (don't push/pull) ] [ -d package ]  [ -v branch ]
     [ -T dir (save stuff here; default: parent directory if '-l' was given) ]
-	[ prefix_to_process ]
+    [ prefix_to_process ]
 
 This program prepares a Debian source package and pushes it to a
 repository. It can also build binary archives.

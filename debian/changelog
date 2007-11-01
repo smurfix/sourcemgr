@@ -1,8 +1,9 @@
 sourcemgr (1.396) stable; urgency=low
 
   * Added git-mvtree.
+  * Fixed help text of b.debuild.
 
- -- Matthias Urlichs <smurf@debian.org>  Thu, 01 Nov 2007 11:15:05 +0100
+ -- Matthias Urlichs <smurf@debian.org>  Thu, 01 Nov 2007 11:17:29 +0100
 
 sourcemgr (1.395) stable; urgency=low
 
