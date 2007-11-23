@@ -120,7 +120,7 @@ while len(commits):
 		commits.extend(skip)
 		commits.insert(0,c)
 		continue
-	x=subprocess.Popen(["git-hash-object","-w","--stdin","-t","commit"], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+	x=subprocess.Popen(["git-hash-object","-w","-t","commit","--stdin"], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
 	x.stdin.write(q)
 	x.stdin.close()
 	d = x.stdout.read().strip()
