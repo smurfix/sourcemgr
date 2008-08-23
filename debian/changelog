@@ -1,3 +1,9 @@
+sourcemgr (1.399) stable; urgency=low
+
+  * Get b.debuild to usage() upon bad usage
+
+ -- Matthias Urlichs <smurf@debian.org>  Sat, 23 Aug 2008 21:45:07 +0200
+
 sourcemgr (1.398) stable; urgency=low
 
   * Drop linda, it's no longer supported / in Debian.

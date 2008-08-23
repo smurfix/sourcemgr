@@ -55,11 +55,8 @@ opt_v=
 local=
 keyid=$DEBSIGN_KEYID
 
-eval set -- "$(getopt "bBd:iklns:St:T:v:V:w:W:h" "$@")"
-if test $? != 0
-then
-	exit 1
-fi
+T="$(getopt "bBd:iklns:St:T:v:V:w:W:h" "$@")" || usage
+eval set -- "$T"
 for i
 do
 	case "$i"
