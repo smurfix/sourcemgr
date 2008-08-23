@@ -320,12 +320,6 @@ for f in *.changes; do
 	fi
 done
 
-for f in *.changes; do
-	if linda -vi "$f" || test -n "$lwarn" ; then : ; else
-		echo "Error in $f. NOT aborting.\n"; >&2
-	fi
-done
-
 if test -z "$nosign" ; then
 	if test -n "$dest" ; then
 		for f in *.changes; do

@@ -56,7 +56,6 @@ install: build
 	chmod 755 debian/sourcemgr/usr/share/sourcemgr/getvar
 
 	install -m 644 debian/lintian.override debian/sourcemgr/usr/share/lintian/overrides/sourcemgr
-	install -m 644 debian/linda.override debian/sourcemgr/usr/share/linda/overrides/sourcemgr
 
 
 # Build architecture-independent files here.

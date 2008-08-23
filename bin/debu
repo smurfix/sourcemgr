@@ -35,9 +35,6 @@ okf=/tmp/okb.$$
 	echo + lintian
 	lintian -viI "$changes"
 
-	echo + linda
-	linda -vi "$changes" || true # ignore it for now
-
 	touch $okf
 ) 2>&1 | less
 
