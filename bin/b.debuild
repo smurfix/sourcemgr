@@ -59,7 +59,7 @@ opt_v=
 local=
 keyid=$DEBSIGN_KEYID
 
-T="$(getopt "bBd:ikKlns:St:T:v:V:w:W:h" "$@")" || usage
+T="$(getopt "bBd:ik:Klns:St:T:v:V:w:W:h" "$@")" || usage
 eval set -- "$T"
 for i
 do
