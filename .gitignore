@@ -1,3 +1,4 @@
+*.swp
 *-stamp
 debian/files
 debian/sourcemgr.substvars
