@@ -1,6 +1,10 @@
 #!/bin/bash
+if test -s /usr/share/sourcemgr/debian ; then
 . /usr/share/sourcemgr/debian
+fi
+if test -s /usr/share/sourcemgr/upload_to ; then
 . /usr/share/sourcemgr/upload_to
+fi
 
 usage() {
 cat >&2 <<END
@@ -127,10 +131,10 @@ fi
 test -n "$dest" || dest="$UPLOAD_TO"
 test -n "$destdir" || destdir="$ddestdir"
 
-if test -d .git && test $(git ls-files --modified --others --exclude-per-directory=.gitignore | wc -l) -gt 0 ; then
+if test -d .git && test $(git ls-files --others --exclude-per-directory=.gitignore | wc -l) -gt 0 ; then
 	trap "" 0
 	echo "There are unsaved or uncommitted files:" >&2
-	git ls-files --others --exclude-per-directory=.gitignore
+	git ls-files --modified --others --exclude-per-directory=.gitignore
 	echo "Please fix this before proceeding." >&2
 	exit 1
 fi
