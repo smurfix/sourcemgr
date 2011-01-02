@@ -127,10 +127,10 @@ fi
 test -n "$dest" || dest="$UPLOAD_TO"
 test -n "$destdir" || destdir="$ddestdir"
 
-if test -d .git && test $(git-ls-files --modified --others --exclude-per-directory=.gitignore | wc -l) -gt 0 ; then
+if test -d .git && test $(git ls-files --modified --others --exclude-per-directory=.gitignore | wc -l) -gt 0 ; then
 	trap "" 0
 	echo "There are unsaved or uncommitted files:" >&2
-	git-ls-files --others --exclude-per-directory=.gitignore
+	git ls-files --others --exclude-per-directory=.gitignore
 	echo "Please fix this before proceeding." >&2
 	exit 1
 fi
@@ -160,7 +160,7 @@ N1=$(echo $N | perl -pe 's/^((lib)?.).*/$1/')
 
 test -n "$V"
 if test -d .git ; then
-	if test "$(git-rev-parse --verify HEAD 2>/dev/null)" = "$(git-rev-parse --verify "refs/tags/${prefix}DEBIAN-$V" 2>/dev/null)"
+	if test "$(git rev-parse --verify HEAD 2>/dev/null)" = "$(git rev-parse --verify "refs/tags/${prefix}DEBIAN-$V" 2>/dev/null)"
 	then : ; else
 		git tag -f ${prefix}DEBIAN-$V HEAD
 	fi
@@ -215,7 +215,7 @@ VV="$(echo "$VT" | sed -e 's/^[0-9][0-9]*://')"
 DV="$(echo "$DV" | sed -e 's/^[0-9][0-9]*://')"
 
 if test -d .git ; then
-	git-checkout-index --prefix="$T/$N-$VV.x/" -a
+	git checkout-index --prefix="$T/$N-$VV.x/" -a
 fi
 mv "$T/$N-$VV.x$predir" "$T/$N-$VV"
 
@@ -264,8 +264,8 @@ if test -n "$E" ; then # non-original package
 		echo + create new original source archive
 		rm -f "$T/${N}_$VV.orig.tar.gz"
 		if test -d .git ; then
-			env GIT_INDEX_FILE="$T/git-index" git-read-tree $E
-			env GIT_INDEX_FILE="$T/git-index" git-checkout-index --prefix="$T/$N-$VV.orig.x/" -a
+			env GIT_INDEX_FILE="$T/git-index" git read-tree $E
+			env GIT_INDEX_FILE="$T/git-index" git checkout-index --prefix="$T/$N-$VV.orig.x/" -a
 		fi
 		mv "$T/$N-$VV.orig.x$predir" "$T/$N-$VV.orig"
 		if test -x "$T/$N-$VV"/debian/exporter ; then

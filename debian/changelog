@@ -1,3 +1,9 @@
+sourcemgr (1.400) maverick; urgency=low
+
+  * git-foo ⇒ git foo
+
+ -- Matthias Urlichs <smurf@smurf.noris.de>  Sun, 02 Jan 2011 15:49:06 +0100
+
 sourcemgr (1.399) stable; urgency=low
 
   * Get b.debuild to usage() upon bad usage

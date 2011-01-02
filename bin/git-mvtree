@@ -32,13 +32,13 @@ def end(p):
 	try:
 		retcode = p.wait()
 	except OSError,e:
-		print >>sys.stderr, "git-rev-list failed:", e
+		print >>sys.stderr, "git rev-list failed:", e
 	else:
 		if retcode < 0:
-			print >>sys.stderr, "git-rev-list was terminated by signal", -retcode
+			print >>sys.stderr, "git rev-list was terminated by signal", -retcode
 			sys.exit(1)
 		elif retcode > 0:
-			print >>sys.stderr, "git-rev-list exited with non-zero exit code", retcode
+			print >>sys.stderr, "git rev-list exited with non-zero exit code", retcode
 			sys.exit(1)
 
 
@@ -67,7 +67,7 @@ else:
 srcrepo = os.path.curdir
 
 commits=[]
-cmd = ["git-rev-parse",srctag]
+cmd = ["git rev-parse",srctag]
 if options.verbose:
 	print >>sys.stderr,cmd
 
@@ -92,7 +92,7 @@ while len(commits):
 		print "Processing:",c
 
 	### WARNUNG: das wird alle Tags verflachen!
-	p=subprocess.Popen(["git-cat-file","commit",c], stdout=subprocess.PIPE)
+	p=subprocess.Popen(["git cat-file","commit",c], stdout=subprocess.PIPE)
 	skip=[]
 	nx=False
 	q = ""
@@ -120,7 +120,7 @@ while len(commits):
 		commits.extend(skip)
 		commits.insert(0,c)
 		continue
-	x=subprocess.Popen(["git-hash-object","-w","-t","commit","--stdin"], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+	x=subprocess.Popen(["git hash-object","-w","-t","commit","--stdin"], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
 	x.stdin.write(q)
 	x.stdin.close()
 	d = x.stdout.read().strip()
