@@ -131,7 +131,7 @@ fi
 test -n "$dest" || dest="$UPLOAD_TO"
 test -n "$destdir" || destdir="$ddestdir"
 
-if test -d .git && test $(git ls-files --others --exclude-per-directory=.gitignore | wc -l) -gt 0 ; then
+if test -d .git && test $(git ls-files --modified --others --exclude-per-directory=.gitignore | wc -l) -gt 0 ; then
 	trap "" 0
 	echo "There are unsaved or uncommitted files:" >&2
 	git ls-files --modified --others --exclude-per-directory=.gitignore
