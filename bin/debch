@@ -1,0 +1,17 @@
+#!/bin/bash
+set -e
+
+if [ -z "$EMAIL" ] && ! grep -qs '^DEBEMAIL=' $HOME/.devscripts.conf ; then
+	echo "(DEB)EMAIL muss gesetzt sein" >&2
+	exit 1
+fi
+. $HOME/.devscripts.conf 
+export DEBEMAIL
+
+dist=$(dpkg-parsechangelog | sed -ne 's/^Distribution:.//p')
+
+mt=$(stat -c '%Y' debian/changelog)
+debchange -U -i --distribution $dist --force-distribution
+if [ $(stat -c '%Y' debian/changelog) = $mt ] ; then exit 1; fi
+
+git commit -a -e -F <(dpkg-parsechangelog | sed -e '1,/^Changes:/d' |tail -n +3|sed -e 's/^   //')

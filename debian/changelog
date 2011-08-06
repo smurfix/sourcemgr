@@ -1,3 +1,9 @@
+sourcemgr (1.401) smurf; urgency=low
+
+  * Add debch script
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sat, 06 Aug 2011 13:15:00 +0200
+
 sourcemgr (1.400) maverick; urgency=low
 
   * git-foo ⇒ git foo
