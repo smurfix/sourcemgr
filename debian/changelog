@@ -1,3 +1,9 @@
+sourcemgr (1.402) smurf; urgency=low
+
+  * debch: commit to debian/.git if that's a separate archive
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 09 Aug 2011 18:55:30 +0200
+
 sourcemgr (1.401) smurf; urgency=low
 
   * Add debch script

@@ -14,4 +14,12 @@ mt=$(stat -c '%Y' debian/changelog)
 debchange -U -i --distribution $dist --force-distribution
 if [ $(stat -c '%Y' debian/changelog) = $mt ] ; then exit 1; fi
 
-git commit -a -e -F <(dpkg-parsechangelog | sed -e '1,/^Changes:/d' |tail -n +3|sed -e 's/^   //')
+TF=$(tempfile)
+trap 'rm $TF' 0 1 2 15
+
+dpkg-parsechangelog | sed -e '1,/^Changes:/d' |tail -n +3|sed -e 's/^   //' > $TF
+if test -d debian/.git ; then
+	cd debian
+fi
+git commit -a -e -F $TF
+
