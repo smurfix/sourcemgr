@@ -1,3 +1,9 @@
+sourcemgr (1.403) smurf; urgency=low
+
+  * Added build+install to debch.
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 12 Dec 2011 15:22:59 +0100
+
 sourcemgr (1.402) smurf; urgency=low
 
   * debch: commit to debian/.git if that's a separate archive

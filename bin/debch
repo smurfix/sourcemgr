@@ -22,4 +22,9 @@ if test -d debian/.git ; then
 	cd debian
 fi
 git commit -a -e -F $TF
+S=$(dpkg-parsechangelog | sed -ne 's/^Source: *//p')
+V=$(dpkg-parsechangelog | sed -ne 's/^Version: *//p' | sed -e s/^42://)
+
+debuild -b
+dput -u smurf ../${S}_${V}_$(dpkg --print-architecture).deb
 
