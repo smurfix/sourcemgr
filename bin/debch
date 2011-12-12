@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+trap 'echo FAIL >&2' 0
+
 if [ -z "$EMAIL" ] && ! grep -qs '^DEBEMAIL=' $HOME/.devscripts.conf ; then
 	echo "(DEB)EMAIL muss gesetzt sein" >&2
 	exit 1
@@ -25,6 +27,8 @@ git commit -a -e -F $TF
 S=$(dpkg-parsechangelog | sed -ne 's/^Source: *//p')
 V=$(dpkg-parsechangelog | sed -ne 's/^Version: *//p' | sed -e s/^42://)
 
-debuild -b
-dput -u smurf ../${S}_${V}_$(dpkg --print-architecture).deb
+debuild -i -b -us -uc
+dput -u smurf ../${S}_${V}_$(dpkg --print-architecture).changes
 
+trap '' 0
+echo OK
