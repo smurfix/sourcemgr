@@ -1,3 +1,9 @@
+sourcemgr (1.407) smurf; urgency=low
+
+  * debch: Switch to git status --porcelain.
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 12 Dec 2011 22:12:41 +0100
+
 sourcemgr (1.406) smurf; urgency=low
 
   * Push to archives before building.

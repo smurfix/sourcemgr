@@ -6,12 +6,12 @@ fi
 
 set -e
 
-if [ $(git ls-files -o --exclude-standard | wc -l) -gt 0 ] ; then
+if [ $(git status --porcelain | fgrep '^?' | wc -l) -gt 0 ] ; then
 	echo "You have spurious files." >&2
 	exit 1
 fi
-if [ $(git ls-files -m --exclude-standard | wc -l) -eq 0 ] ; then
-	echo "You have no changed files." >&2
+if [ $(git status --porcelain | wc -l) -eq 0 ] ; then
+	echo "You have no uncommitted changes." >&2
 	exit 1
 fi
 
