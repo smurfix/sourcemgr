@@ -1,4 +1,9 @@
 #!/bin/bash
+GIT_ARCHIVES="origin netz"
+if [ -s /etc/default/sourcemgr ]  ; then
+. /etc/default/sourcemgr
+fi
+
 set -e
 
 if [ $(git ls-files -o --exclude-standard | wc -l) -gt 0 ] ; then
@@ -26,17 +31,29 @@ debchange -U -i --distribution $dist --force-distribution
 if [ $(stat -c '%Y' debian/changelog) = $mt ] ; then exit 1; fi
 
 TF=$(tempfile)
-trap 'rm $TF' 0 1 2 15
+trap 'rm -f $TF; echo FAIL >&2' 0
+trap 'rm -f $TF' 0 1 2 15
 
 dpkg-parsechangelog | sed -e '1,/^Changes:/d' |tail -n +3|sed -e 's/^   //' > $TF
 if test -d debian/.git ; then
 	cd debian
 fi
 git commit -a -e -F $TF
-S=$(dpkg-parsechangelog | sed -ne 's/^Source: *//p')
-V=$(dpkg-parsechangelog | sed -ne 's/^Version: *//p' | sed -e s/^42://)
+
+if [ -n "$GIT_ARCHIVES" ] ; then
+	for a in $GIT_ARCHIVES ; do
+		git push $a && rm -f $TF
+	done
+	if [ -f $TF ] ; then
+		echo "Could not push to any archive. Fix it." >&2
+		exit 1
+	fi
+fi
 
 debuild -i -b -us -uc
+
+S=$(dpkg-parsechangelog | sed -ne 's/^Source: *//p')
+V=$(dpkg-parsechangelog | sed -ne 's/^Version: *//p' | sed -e s/^42://)
 dput -u smurf ../${S}_${V}_$(dpkg --print-architecture).changes
 
 trap '' 0

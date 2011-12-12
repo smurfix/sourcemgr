@@ -1,3 +1,9 @@
+sourcemgr (1.406) smurf; urgency=low
+
+  * Push to archives before building.
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 12 Dec 2011 21:10:26 +0100
+
 sourcemgr (1.405) smurf; urgency=low
 
   * debch: fail if spurious files, fail if no changes.
