@@ -1,6 +1,15 @@
 #!/bin/bash
 set -e
 
+if [ $(git ls-files -o --exclude-standard | wc -l) -gt 0 ] ; then
+	echo "You have spurious files." >&2
+	exit 1
+fi
+if [ $(git ls-files -m --exclude-standard | wc -l) -eq 0 ] ; then
+	echo "You have no changed files." >&2
+	exit 1
+fi
+
 trap 'echo FAIL >&2' 0
 
 if [ -z "$EMAIL" ] && ! grep -qs '^DEBEMAIL=' $HOME/.devscripts.conf ; then
