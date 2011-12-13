@@ -11,7 +11,7 @@ if [ $(git status --porcelain | fgrep '^?' | wc -l) -gt 0 ] ; then
 	exit 1
 fi
 if [ $(git status --porcelain | wc -l) -eq 0 ] ; then
-	echo "You have no uncommitted changes. Proceeding to build."
+	echo "You have no uncommitted changes. Proceeding to upload."
 else
 
 trap 'echo FAIL >&2' 0
@@ -39,6 +39,8 @@ if test -d debian/.git ; then
 fi
 git commit -a -e -F $TF
 
+fi
+
 if [ -n "$GIT_ARCHIVES" ] ; then
 	for a in $GIT_ARCHIVES ; do
 		git push $a && rm -f $TF
@@ -47,8 +49,6 @@ if [ -n "$GIT_ARCHIVES" ] ; then
 		echo "Could not push to any archive. Fix it." >&2
 		exit 1
 	fi
-fi
-
 fi
 
 S=$(dpkg-parsechangelog | sed -ne 's/^Source: *//p')
