@@ -1,3 +1,9 @@
+sourcemgr (1.409) smurf; urgency=low
+
+  * Spllit the skip code
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 13 Dec 2011 09:43:59 +0100
+
 sourcemgr (1.408) smurf; urgency=low
 
   * Skip "git commit" when there's nothing to commit

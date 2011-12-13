@@ -11,7 +11,7 @@ if [ $(git status --porcelain | fgrep '^?' | wc -l) -gt 0 ] ; then
 	exit 1
 fi
 if [ $(git status --porcelain | wc -l) -eq 0 ] ; then
-	echo "You have no uncommitted changes. Proceeding to upload."
+	echo "You have no uncommitted changes. Proceeding to build."
 else
 
 trap 'echo FAIL >&2' 0
@@ -49,18 +49,17 @@ if [ -n "$GIT_ARCHIVES" ] ; then
 	fi
 fi
 
-debuild -i -b -us -uc
 fi
 
 S=$(dpkg-parsechangelog | sed -ne 's/^Source: *//p')
 V=$(dpkg-parsechangelog | sed -ne 's/^Version: *//p' | sed -e s/^42://)
-cd ..
-if [ ! -s $CF ] ; then
-	echo "No changes file: $CF" >&2
-	exit 1
-fi
 CF=${S}_${V}_$(dpkg --print-architecture).changes
-dput -u smurf $CF
+if [ -s ../$CF ] ; then
+	echo "Changes file found. Not building."
+else
+	debuild -i -b -us -uc
+fi
+dput -u smurf ../$CF
 
 trap '' 0
 echo OK
