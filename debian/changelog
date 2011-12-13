@@ -1,3 +1,10 @@
+sourcemgr (1.408) smurf; urgency=low
+
+  * Skip "git commit" when there's nothing to commit
+    instead of failing
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 13 Dec 2011 08:39:11 +0100
+
 sourcemgr (1.407) smurf; urgency=low
 
   * debch: Switch to git status --porcelain.
