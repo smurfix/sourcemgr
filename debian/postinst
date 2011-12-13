@@ -1,16 +1,9 @@
 #!/bin/sh
-
-# quick and dirty hack
-
-for d in bk cvs cvs/bk ; do
-	mkdir -p /var/cache/$d
-	chgrp src /var/cache/$d
-	chmod 2775 /var/cache/$d
-done
+set -e
 
 # this wants debconf. Sometime later, I'd say.
-if test ! -f /etc/sourcemgr.cf ; then
-	echo "# add config stuff here" > /etc/sourcemgr.cf
+if test ! -f /etc/default/sourcemgr ; then
+	echo "# add config stuff here" > /etc/default/sourcemgr
 fi
 
 #DEBHELPER#
