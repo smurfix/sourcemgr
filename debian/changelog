@@ -1,3 +1,9 @@
+sourcemgr (1.411) smurf; urgency=low
+
+  * No longer depend on xbase-clients: obsolete
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 13 Dec 2011 09:47:49 +0100
+
 sourcemgr (1.410) smurf; urgency=low
 
   * If no changes: only skip the commit, not the upload.
