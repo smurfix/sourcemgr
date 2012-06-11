@@ -1,3 +1,9 @@
+sourcemgr (1.416) smurf; urgency=low
+
+  * echo 9 >debian/compat
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 11 Jun 2012 07:49:51 +0200
+
 sourcemgr (1.415) smurf; urgency=low
 
   * debch: skip missing upstreams
