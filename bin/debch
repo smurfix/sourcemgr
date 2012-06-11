@@ -46,8 +46,7 @@ if [ -n "$GIT_ARCHIVES" ] ; then
 		git push $a && rm -f $TF
 	done
 	if [ -f $TF ] ; then
-		echo "Could not push to any archive. Fix it." >&2
-		exit 1
+		echo "WARNING: Could not push to any archive. Fix it." >&2
 	fi
 fi
 
