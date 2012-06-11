@@ -1,3 +1,9 @@
+sourcemgr (1.415) smurf; urgency=low
+
+  * debch: skip missing upstreams
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 11 Jun 2012 07:47:27 +0200
+
 sourcemgr (1.414) smurf; urgency=low
 
   * debch: Don't die when unable to push

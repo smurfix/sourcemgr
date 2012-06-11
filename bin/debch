@@ -26,7 +26,7 @@ export DEBEMAIL
 dist=$(dpkg-parsechangelog | sed -ne 's/^Distribution:.//p')
 
 mt=$(stat -c '%Y' debian/changelog)
-debchange -U -i --distribution $dist --force-distribution
+debchange -i --distribution $dist --force-distribution
 if [ $(stat -c '%Y' debian/changelog) = $mt ] ; then exit 1; fi
 
 TF=$(tempfile)
@@ -43,6 +43,10 @@ fi
 
 if [ -n "$GIT_ARCHIVES" ] ; then
 	for a in $GIT_ARCHIVES ; do
+		if ! git remote | fgrep -xqs $a ; then
+			echo "No remote '$a': skipping"
+			continue
+		fi
 		git push $a && rm -f $TF
 	done
 	if [ -f $TF ] ; then
