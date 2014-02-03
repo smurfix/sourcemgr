@@ -1,3 +1,9 @@
+sourcemgr (1.417) smurf; urgency=low
+
+  * debch: add -f and -a flags (force, amend)
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 03 Feb 2014 08:28:13 +0100
+
 sourcemgr (1.416) smurf; urgency=low
 
   * echo 9 >debian/compat

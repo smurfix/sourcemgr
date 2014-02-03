@@ -6,38 +6,42 @@ fi
 
 set -e
 
-if [ $(git status --porcelain | fgrep '^?' | wc -l) -gt 0 ] ; then
+if [ $(git ls-files --others --exclude-standard | wc -l) -gt 0 ] ; then
 	echo "You have spurious files." >&2
 	exit 1
 fi
-if [ $(git status --porcelain | wc -l) -eq 0 ] ; then
+if [ $(git ls-files --modified --deleted --exclude-standard | wc -l) -eq 0 -a "$1" = "" ] ; then
 	echo "You have no uncommitted changes. Proceeding to upload."
 else
 
-trap 'echo FAIL >&2' 0
+	trap 'echo FAIL >&2' 0
 
-if [ -z "$EMAIL" ] && ! grep -qs '^DEBEMAIL=' $HOME/.devscripts.conf ; then
-	echo "(DEB)EMAIL muss gesetzt sein" >&2
-	exit 1
-fi
-. $HOME/.devscripts.conf 
-export DEBEMAIL
+	if [ -z "$EMAIL" ] && ! grep -qs '^DEBEMAIL=' $HOME/.devscripts.conf ; then
+		echo "(DEB)EMAIL muss gesetzt sein" >&2
+		exit 1
+	fi
+	. $HOME/.devscripts.conf 
+	export DEBEMAIL
 
-dist=$(dpkg-parsechangelog | sed -ne 's/^Distribution:.//p')
+	dist=$(dpkg-parsechangelog | sed -ne 's/^Distribution:.//p')
 
-mt=$(stat -c '%Y' debian/changelog)
-debchange -i --distribution $dist --force-distribution
-if [ $(stat -c '%Y' debian/changelog) = $mt ] ; then exit 1; fi
+	mt=$(stat -c '%Y' debian/changelog)
+	debchange -i --distribution $dist --force-distribution
+	if [ $(stat -c '%Y' debian/changelog) = $mt ] ; then exit 1; fi
 
-TF=$(tempfile)
-trap 'rm -f $TF; echo FAIL >&2' 0
-trap 'rm -f $TF' 0 1 2 15
+	TF=$(tempfile)
+	trap 'rm -f $TF; echo FAIL >&2' 0
+	trap 'rm -f $TF' 0 1 2 15
 
-dpkg-parsechangelog | sed -e '1,/^Changes:/d' |tail -n +3|sed -e 's/^   //' > $TF
-if test -d debian/.git ; then
-	cd debian
-fi
-git commit -a -e -F $TF
+	dpkg-parsechangelog | sed -e '1,/^Changes:/d' |tail -n +3|sed -e 's/^   //' > $TF
+	if test -d debian/.git ; then
+		cd debian
+	fi
+	if [ "$1" = "-a" ] ; then
+		git commit --amend -a -e -F $TF
+	else
+		git commit -a -e -F $TF
+	fi
 
 fi
 
