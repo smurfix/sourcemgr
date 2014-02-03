@@ -1,3 +1,9 @@
+sourcemgr (1.418) smurf; urgency=low
+
+  * debch: add github default remote, generate list once
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 03 Feb 2014 08:33:37 +0100
+
 sourcemgr (1.417) smurf; urgency=low
 
   * debch: add -f and -a flags (force, amend)
