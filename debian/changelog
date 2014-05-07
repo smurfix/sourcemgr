@@ -1,3 +1,9 @@
+sourcemgr (1.423) smurf; urgency=medium
+
+  * Fix dependencies and kill Lintian warnings
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 07 May 2014 15:30:17 +0200
+
 sourcemgr (1.422) smurf; urgency=medium
 
   * Remove source changes file if we have a combined changes file.
