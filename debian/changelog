@@ -1,3 +1,9 @@
+sourcemgr (1.419) smurf; urgency=medium
+
+  * b.debuild: do remote signing
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 07 May 2014 04:19:35 +0200
+
 sourcemgr (1.418) smurf; urgency=low
 
   * debch: add github default remote, generate list once
