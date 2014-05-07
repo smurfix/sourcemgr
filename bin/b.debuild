@@ -320,7 +320,9 @@ else
 	dpkg-genchanges $opt_v $opt_s > "../${N}_${DV}.changes"
 	cd "$T"
 	test -n "$nosign" || do_debsign ${keyid:+"-k$keyid"} "${N}_${DV}.changes"
+	#test -n "$nosign" || test ! -f "${N}_${DV}_source.changes" || do_debsign ${keyid:+"-k$keyid"} "${N}_${DV}_source.changes"
 	test -n "$nosign" -o -z "$pbin$bin" || rm "${N}_${DV}_$A.changes"
+	rm -f "../${N}_${DV}_source.changes"
 fi
 
 echo "Built:"
