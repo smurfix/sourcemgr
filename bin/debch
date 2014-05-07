@@ -9,6 +9,7 @@ trap 'echo FAIL >&2' 0
 
 if [ $(git ls-files --others --exclude-standard | wc -l) -gt 0 ] ; then
 	echo "You have spurious files." >&2
+	git ls-files --others --exclude-standard >&2
 	exit 1
 fi
 

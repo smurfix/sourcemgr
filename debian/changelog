@@ -1,3 +1,11 @@
+sourcemgr (1.420) smurf; urgency=medium
+
+  * b.debuild: do local signing if key is present
+  * debch: create changelog entry if the current HEAD patch doesn't have one
+  * debch: consider diffs from HEAD to index as changes
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 07 May 2014 05:15:53 +0200
+
 sourcemgr (1.419) smurf; urgency=medium
 
   * b.debuild: do remote signing
