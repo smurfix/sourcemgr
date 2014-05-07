@@ -105,8 +105,13 @@ done
 do_debsign() {
 	set +x
 	if test -z "$nosign" ; then
-		echo debsign -r $(hostname) ${keyid:+"-k$keyid"} "$(pwd)/$1"
-		while ! grep -sq PGP.SIGNATURE "$1" ; do sleep 1; done
+		if test -f ~/.gnupg/secring.gpg ; then
+			debsign ${keyid:+"-k$keyid"} "$(pwd)/$1"
+		else
+			echo "*******"
+			echo debsign -r $(hostname) ${keyid:+"-k$keyid"} "$(pwd)/$1"
+			while ! grep -sq PGP.SIGNATURE "$1" ; do sleep 1; done
+		fi
 	fi
 }
 
