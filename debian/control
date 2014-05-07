@@ -6,9 +6,8 @@ Build-Depends: debhelper (>> 3.0.0), python (>= 2.2), python-gnupginterface, pyt
 Standards-Version: 3.6.1
 
 Package: sourcemgr
-Architecture: any
-Recommends: bitkeeper (>> 3), bitkeeper (<< 3.0.4)
-Depends: devscripts (>> 2.7.92.1), shlock, dput, rcs, cvs, lintian, dh-make, libshlock-perl, ${python:Depends}, ${perl:Depends}
+Architecture: all
+Depends: devscripts (>> 2.7.92.1), shlock, dput, git, lintian, dh-make, libshlock-perl, ${python:Depends}, ${perl:Depends}
 Description: Source management speed-up commands
  Helper commands to handle Bitkeeper or PRCS archives.
  Included are commands to debianize source archives and auto-build RPMs

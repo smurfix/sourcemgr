@@ -26,7 +26,7 @@ configure-stamp:
 
 
 build: build-stamp
-
+build-arch build-indep: build-stamp
 build-stamp: configure-stamp 
 	dh_testdir
 	# nothing to do, actually
@@ -36,15 +36,13 @@ clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-
 	# nothing to do, actually
-
 	dh_clean
 
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	dh_installdirs
 
 	install $$(find bin -name SCCS -prune -o -name .\* -o -type f -print) $D/usr/bin
@@ -58,12 +56,12 @@ install: build
 	install -m 644 debian/lintian.override debian/sourcemgr/usr/share/lintian/overrides/sourcemgr
 
 
-# Build architecture-independent files here.
-binary-indep: build install
-# We have nothing to do by default.
-
 # Build architecture-dependent files here.
 binary-arch: build install
+# We have nothing to do by default.
+
+# Build architecture-independent files here.
+binary-indep: build install
 	dh_testdir
 	dh_testroot
 #	dh_installdebconf	

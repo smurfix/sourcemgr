@@ -1,3 +1,9 @@
+sourcemgr (1.421) smurf; urgency=medium
+
+  * Debian packaging update
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 07 May 2014 05:20:35 +0200
+
 sourcemgr (1.420) smurf; urgency=medium
 
   * b.debuild: do local signing if key is present
