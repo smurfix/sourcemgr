@@ -15,8 +15,8 @@ fi
 TF=$(tempfile)
 trap 'rm -f $TF; echo FAIL >&2' 0
 
-if [ $(git ls-files --modified --deleted --exclude-standard | wc -l) -eq 0 -a "$1" = "" ] ; then
-	echo "You have no uncommitted changes. Proceeding to upload."
+if [ $(git diff --cached --name-only; git ls-files --modified --deleted --exclude-standard | wc -l) -eq 0 -a "$1" = "" ] ; then
+	echo "You have no uncommitted changes. Proceeding to build."
 else
 	if [ -z "$EMAIL" ] && ! grep -qs '^DEBEMAIL=' $HOME/.devscripts.conf ; then
 		echo "(DEB)EMAIL muss gesetzt sein" >&2
@@ -68,7 +68,7 @@ if [ -s ../$CF ] ; then
 else
 	debuild -i -b -us -uc
 fi
-dput -u smurf ../$CF
+#dput -u smurf ../$CF
 
 trap '' 0
 echo OK
