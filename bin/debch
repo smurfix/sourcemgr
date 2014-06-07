@@ -16,7 +16,7 @@ fi
 TF=$(tempfile)
 trap 'rm -f $TF; echo FAIL >&2' 0
 
-if [ "$1" = "" -a $(git diff --cached --name-only; git ls-files --modified --deleted --exclude-standard | wc -l) -eq 0 ] && git diff --name-only HEAD^ HEAD | fgrep -qs debian/changelog ; then
+if [ "$1" = "" -a $( (git diff --cached --name-only; git ls-files --modified --deleted --exclude-standard) | wc -l ) -eq 0 ] && git diff --name-only HEAD^ HEAD | fgrep -qs debian/changelog ; then
 	echo "You have no uncommitted changes. Proceeding to build."
 else
 	if [ -z "$EMAIL" ] && ! grep -qs '^DEBEMAIL=' $HOME/.devscripts.conf ; then
