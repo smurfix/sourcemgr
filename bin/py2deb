@@ -1,0 +1,38 @@
+#!/bin/sh
+
+if test ! -f setup.py ; then
+	echo "setup.py: not found" >&2
+	exit 1
+fi
+
+rm -rf deb_dist
+
+tmp=$(tempfile)
+trap 'rm -f $tmp' 0
+if test $(git ls-files --exclude-standard --modified --others | wc -l) -ne 0 ; then
+	echo "You have unsaved changes. Exiting." >&2
+	git status
+	exit 1
+fi
+
+if test ! -d debian ; then
+	python setup.py --command-packages=stdeb.command debianize --suite smurf --force-buildsystem=True
+	git add debian
+	git commit -m "auto-Debianized"
+	git-push-init-netz
+	S=$(dpkg-parsechangelog | sed -ne 's/^Source: *//p')
+	git remote add github git@github.com:smurfix/$S.git
+	git config remote.github.push "refs/heads/*:refs/heads/*"
+	cat <<END >debian/.gitignore
+/files
+/*.log
+/*.debhelper
+/*.substvars
+/python-$S/
+END
+	git add debian/.gitignore
+	git commit -m "ignore some Debian build files" debian/.gitignore
+	git-push-all
+fi
+#debch
+

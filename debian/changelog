@@ -1,3 +1,9 @@
+sourcemgr (1.425) smurf; urgency=medium
+
+  * Add (rudimentary) py2deb
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 29 Sep 2014 15:11:55 +0200
+
 sourcemgr (1.424) smurf; urgency=medium
 
   * debch: broken test
