@@ -22,7 +22,12 @@ if test ! -d debian ; then
 	git-push-init-netz
 	S=$(dpkg-parsechangelog | sed -ne 's/^Source: *//p')
 	git remote add github git@github.com:smurfix/$S.git
-	git config remote.github.push "refs/heads/*:refs/heads/*"
+	if git fetch github ; then
+		git config remote.github.push "refs/heads/*:refs/heads/*"
+	else
+		echo "*** no github repo ***" >&2
+		git remote rm github
+	fi
 	cat <<END >debian/.gitignore
 /files
 /*.log
