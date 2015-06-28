@@ -1,3 +1,9 @@
+sourcemgr (1.427) smurf; urgency=medium
+
+  * Drop python-gpginterface build dependency
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 28 Jun 2015 16:50:15 +0200
+
 sourcemgr (1.426) smurf; urgency=medium
 
   * Downgrade shlock dependency
