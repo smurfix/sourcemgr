@@ -1,3 +1,9 @@
+sourcemgr (1.428) smurf; urgency=medium
+
+  * Drop dependency from the stone age
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 15 Nov 2015 10:21:31 +0100
+
 sourcemgr (1.427) smurf; urgency=medium
 
   * … to ext.
