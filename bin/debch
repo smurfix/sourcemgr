@@ -69,7 +69,7 @@ if [ -s ../$CF ] ; then
 else
 	debuild -i -b -us -uc
 fi
-dput -u smurf ../$CF
+dput -u ext ../$CF
 
 trap '' 0
 echo OK
