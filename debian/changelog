@@ -1,3 +1,9 @@
+sourcemgr (1.429) smurf; urgency=medium
+
+  * Repo stupidity
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 15 Nov 2015 10:26:00 +0100
+
 sourcemgr (1.427) smurf; urgency=medium
 
   * Drop python-gpginterface build dependency
@@ -7,8 +13,9 @@ sourcemgr (1.427) smurf; urgency=medium
 sourcemgr (1.426) smurf; urgency=medium
 
   * Downgrade shlock dependency
+  * Push, dammit.
 
- -- Matthias Urlichs <matthias@urlichs.de>  Sun, 28 Jun 2015 16:49:18 +0200
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 15 Nov 2015 10:19:59 +0100
 
 sourcemgr (1.425) smurf; urgency=medium
 
