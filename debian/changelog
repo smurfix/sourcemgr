@@ -1,3 +1,9 @@
+sourcemgr (1.430) smurf; urgency=medium
+
+  * Figure out which archives there are instead of a hardcoded list
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 15 Nov 2015 10:32:57 +0100
+
 sourcemgr (1.429) smurf; urgency=medium
 
   * Repo stupidity

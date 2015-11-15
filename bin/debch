@@ -1,5 +1,5 @@
 #!/bin/bash
-GIT_ARCHIVES="origin netz github"
+GIT_ARCHIVES=$(git config --get-regexp 'remote\...*\.url' | sed -ne 's/^remote\.\([a-z]*\)\.url[= ].*/\1/p')
 if [ -s /etc/default/sourcemgr ]  ; then
 . /etc/default/sourcemgr
 fi
@@ -47,10 +47,6 @@ fi
 git remote >$TF
 if [ -n "$GIT_ARCHIVES" ] ; then
 	for a in $GIT_ARCHIVES ; do
-		if fgrep -xqs $a $TF; then
-			echo "No remote '$a': skipping"
-			continue
-		fi
 		git push $a && rm -f $TF
 	done
 	if [ -f $TF ] ; then
