@@ -85,7 +85,7 @@ else
 	debuild -i -b -us -uc
 	git tag "DEBIAN-$V"
 	for a in $GIT_ARCHIVES ; do
-		git push --tags $a
+		git push --tags $a || true
 	done
 fi
 dput -u ext ../$CF
