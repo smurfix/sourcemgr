@@ -3,6 +3,10 @@ GIT_ARCHIVES=$(git config --get-regexp 'remote\...*\.url' | sed -ne 's/^remote\.
 if [ -s /etc/default/sourcemgr ]  ; then
 . /etc/default/sourcemgr
 fi
+if [ -z "$GIT_ARCHIVES" ] ; then
+	echo "You have no archives. Refusing." >&2
+	exit 1
+fi
 
 set -e
 trap 'echo FAIL >&2' 0
@@ -15,6 +19,15 @@ fi
 
 TF=$(tempfile)
 trap 'rm -f $TF; echo FAIL >&2' 0
+touch $TF
+
+for a in $GIT_ARCHIVES ; do
+	git fetch $a && rm -f $TF
+done
+if [ -f $TF ] ; then
+	echo "Could not reach any archive. Fix it." >&2
+	exit 1
+fi
 
 if [ "$1" = "" -a $( (git diff --cached --name-only; git ls-files --modified --deleted --exclude-standard) | wc -l ) -eq 0 ] && git diff --name-only HEAD^ HEAD | fgrep -qs debian/changelog ; then
 	echo "You have no uncommitted changes. Proceeding to build."
@@ -33,25 +46,30 @@ else
 	if [ $(stat -c '%Y' debian/changelog) = $mt ] ; then exit 1; fi
 
 	dpkg-parsechangelog | sed -e '1,/^Changes:/d' |tail -n +3|sed -e 's/^   //' > $TF
-	if test -d debian/.git ; then
-		cd debian
-	fi
 	if [ "$1" = "-a" ] ; then
 		git commit --amend -a -e -F $TF
 	else
 		git commit -a -e -F $TF
 	fi
+fi
 
+for a in $GIT_ARCHIVES ; do
+	git push $a && rm -f $TF
+done
+
+V=$(dpkg-parsechangelog | sed -ne 's/^Version: *//p' | sed -e s/^42://)
+if git tag -v "DEBIAN-$V" 2>/dev/null ; then
+	echo "Already tagged with building $V. Refusing."
+	exit 1
 fi
 
 git remote >$TF
-if [ -n "$GIT_ARCHIVES" ] ; then
-	for a in $GIT_ARCHIVES ; do
-		git push $a && rm -f $TF
-	done
-	if [ -f $TF ] ; then
-		echo "WARNING: Could not push to any archive. Fix it." >&2
-	fi
+for a in $GIT_ARCHIVES ; do
+	git push $a && rm -f $TF
+done
+if [ -f $TF ] ; then
+	echo "Could not push to any archive. Fix it." >&2
+	exit 1
 fi
 
 rm -f $TF
@@ -59,11 +77,16 @@ trap 'echo FAIL >&2' 0
 
 S=$(dpkg-parsechangelog | sed -ne 's/^Source: *//p')
 V=$(dpkg-parsechangelog | sed -ne 's/^Version: *//p' | sed -e s/^42://)
+UV=$(echo $V | sed -e 's/-.*?//')
 CF=${S}_${V}_$(dpkg --print-architecture).changes
 if [ -s ../$CF ] ; then
 	echo "Changes file found. Not building."
 else
 	debuild -i -b -us -uc
+	git tag "DEBIAN-$V"
+	for a in $GIT_ARCHIVES ; do
+		git push --tags $a
+	done
 fi
 dput -u ext ../$CF
 

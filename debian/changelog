@@ -1,3 +1,10 @@
+sourcemgr (1.431) smurf; urgency=medium
+
+  * Make debch refuse to work when there's no reachable archive
+  * Teach debch to always tag (and pull beforehand)
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 23 Aug 2016 03:11:51 +0200
+
 sourcemgr (1.430) smurf; urgency=medium
 
   * Figure out which archives there are instead of a hardcoded list
