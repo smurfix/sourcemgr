@@ -1,3 +1,9 @@
+sourcemgr (1.433) smurf; urgency=medium
+
+  * no tilde in versions please
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 05 Jul 2018 20:56:34 +0200
+
 sourcemgr (1.432) smurf; urgency=medium
 
   * debch: don't die when pushing a tag fails

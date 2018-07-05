@@ -57,7 +57,7 @@ for a in $GIT_ARCHIVES ; do
 	git push $a && rm -f $TF
 done
 
-V=$(dpkg-parsechangelog | sed -ne 's/^Version: *//p' | sed -e s/^42://)
+V=$(dpkg-parsechangelog | sed -ne 's/^Version: *//p' | sed -e s/^42:// | sed -e 's/~/-/g')
 if git tag -v "DEBIAN-$V" 2>/dev/null ; then
 	echo "Already tagged with building $V. Refusing."
 	exit 1
@@ -76,7 +76,7 @@ rm -f $TF
 trap 'echo FAIL >&2' 0
 
 S=$(dpkg-parsechangelog | sed -ne 's/^Source: *//p')
-V=$(dpkg-parsechangelog | sed -ne 's/^Version: *//p' | sed -e s/^42://)
+V=$(dpkg-parsechangelog | sed -ne 's/^Version: *//p' | sed -e s/^42:// | sed -e 's/~/-/g')
 UV=$(echo $V | sed -e 's/-.*?//')
 CF=${S}_${V}_$(dpkg --print-architecture).changes
 if [ -s ../$CF ] ; then
