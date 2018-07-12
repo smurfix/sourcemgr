@@ -1,5 +1,5 @@
 #!/bin/bash
-GIT_ARCHIVES=$(git config --get-regexp 'remote\...*\.url' | sed -ne 's/^remote\.\([a-z]*\)\.url[= ].*/\1/p')
+GIT_ARCHIVES=$(git config --get-regexp 'remote\...*\.push' | sort -u | sed -ne 's/^remote\.\([a-z]*\)\.push[= ].*/\1/p')
 if [ -s /etc/default/sourcemgr ]  ; then
 . /etc/default/sourcemgr
 fi

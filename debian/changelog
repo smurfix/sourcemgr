@@ -1,3 +1,9 @@
+sourcemgr (1.434) smurf; urgency=medium
+
+  * Only push to push-able git repos
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 12 Jul 2018 09:35:34 +0200
+
 sourcemgr (1.433) smurf; urgency=medium
 
   * no tilde in versions please
