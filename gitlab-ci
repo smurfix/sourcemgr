@@ -9,7 +9,7 @@ head debian/changelog
 echo "deb http://apt.noris.net $(lsb_release -s -c) main noris" >/etc/apt/sources.list.d/noris.list
 apt-get update
 dpkg-source -b .
-mk-build-deps --install --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes --allow-unauthenticated'   + debian/control
+mk-build-deps --install --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes --allow-unauthenticated' debian/control
 
 if ! fgrep -qsx "[smurf]" /etc/dput.cf ; then
 	cat <<'___' >> /etc/dput.cf
