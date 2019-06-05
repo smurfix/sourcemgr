@@ -1,5 +1,7 @@
 # shell script.
 
+set -eux
+
 find ../ -iname "*.changes" -maxdepth 1 -print -delete
 eval $(ssh-agent)
 dch -v "${CI_COMMIT_TAG}.$(lsb_release -s -c)" -D "$(lsb_release -s -c)" -b "Autobuild on Tag ${CI_COMMIT_TAG}"
