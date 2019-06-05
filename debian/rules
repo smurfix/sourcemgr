@@ -47,10 +47,10 @@ install: build
 
 	install $$(find bin -name .\* -o -type f -print) $D/usr/bin
 
-        mkdir -p debian/sourcemgr/usr/lib/git-core
-        for f in git/* ; do \
-                test -f $$f && install -m 755 $$f debian/sourcemgr/usr/lib/git-core/;\
-        done
+	mkdir -p debian/sourcemgr/usr/lib/git-core
+	for f in git/* ; do \
+		test -f $$f && install -m 755 $$f debian/sourcemgr/usr/lib/git-core/;\
+	done
 
 	install -m 644 debian/lintian.override debian/sourcemgr/usr/share/lintian/overrides/sourcemgr
 
