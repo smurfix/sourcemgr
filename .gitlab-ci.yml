@@ -6,7 +6,8 @@ variables:
   USER: "root"
 
 before_script:
-  - "wget -O - https://gitlab.noris.net/matthias.urlichs/sourcemgr/raw/master/gitlab-ci | /bin/bash"
+  - "apt-get install curl"
+  - "curl https://gitlab.noris.net/matthias.urlichs/sourcemgr/raw/master/gitlab-ci | /bin/bash"
 stretch:
   only: 
     - tags
