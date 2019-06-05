@@ -1,0 +1,7 @@
+#!/bin/sh
+
+git config --get-regexp '^remote\..*\.fetch$' | sed -ne 's/^remote\.\(.*\)\.fetch .*/\1/p' | uniq | grep -v odev |
+while read a ; do echo "*** $a"; git fetch $a $@; done
+
+git config --get-regexp '^remote\..*\.fetch$' | sed -ne 's/^remote\.\(.*\)\.fetch .*/\1/p' | uniq | grep odev |
+while read a ; do echo "*** $a"; git fetch $a $@; done
