@@ -1,10 +1,10 @@
 #!/bin/sh
 set -e
 
-git config --system --unset alias.ls
+git config --system alias.ls >/dev/null || \
 git config --system --add alias.ls "ls-files"
 
-git config --system --unset alias.lso
+git config --system alias.lso >/dev/null || \
 git config --system --add alias.lso "ls-files --others --exclude-standard"
 
 #DEBHELPER#
