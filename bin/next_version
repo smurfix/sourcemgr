@@ -13,7 +13,7 @@ from semantic_version import Version
 @click.option("-m", "--minor", count=True, help="Uptick minor version (no downward compat)")
 @click.option("-M", "--major", count=True, help="Uptick major version (no upward compat)")
 @click.option("-b", "--build", count=True, help="Uptick build (no source changes)")
-@click.option("-t", "--tag", count=True, help="Actually tag with this version")
+@click.option("-t", "--tag", is_flag=True, help="Tag with the new version")
 @click.argument("version", required=False, nargs=1)
 def main(build,patch,minor,major,version,tag):
     tagversion = run(["git","describe","--tags"], stdout=PIPE, text=True).stdout.strip()
