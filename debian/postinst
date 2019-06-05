@@ -1,9 +1,5 @@
 #!/bin/sh
 set -e
 
-# this wants debconf. Sometime later, I'd say.
-if test ! -f /etc/default/sourcemgr ; then
-	echo "# add config stuff here" > /etc/default/sourcemgr
-fi
 
 #DEBHELPER#
