@@ -1,0 +1,91 @@
+#!/usr/bin/python3
+
+import io
+import re
+import sys
+import click
+import warnings
+from subprocess import run,PIPE
+from semantic_version import Version
+
+@click.command()
+@click.option("-p", "--patch", count=True, help="Uptick patchlevel")
+@click.option("-m", "--minor", count=True, help="Uptick minor version (no downward compat)")
+@click.option("-M", "--major", count=True, help="Uptick major version (no upward compat)")
+@click.option("-b", "--build", count=True, help="Uptick build (no source changes)")
+@click.option("-t", "--tag", count=True, help="Actually tag with this version")
+@click.argument("version", required=False, nargs=1)
+def main(build,patch,minor,major,version,tag):
+    tagversion = run(["git","describe","--tags"], stdout=PIPE, text=True).stdout.strip()
+
+    debversion = run(["dpkg-parsechangelog"], stdout=PIPE, text=True).stdout.strip()
+    r = re.compile("^Version:\\s+(.+)", re.M)
+    m = r.search(debversion)
+    debversion = m.group(1) if m is not None else None
+    if tagversion[0].isdigit():
+        v = parse(tagversion)
+        if debversion:
+            dv = parse(debversion)
+            if v is None or v < dv:
+                v = dv
+    else:
+        if debversion:
+            v = parse(debversion)
+        elif not version:
+            raise click.UsageError("Can't parse existing versions.")
+
+    if version:
+        vn = parse(version)
+        if v is not None and vn < v:
+            raise click.UsageError("There already is a newer version.")
+        v = vn
+
+    did = 0
+    for _ in range(major):
+        v = v.next_major()
+        did += 1
+    for _ in range(minor):
+        v = v.next_minor()
+        did += 1
+    for _ in range(patch):
+        v = v.next_patch()
+        did += 1
+    for _ in range(build):
+        v = next_build(v)
+        did += 1
+    if not did:
+        print(v)
+        return
+    v.prerelease = None
+    if not v.patch:
+        v.patch = None  # two levels if no patch
+    if tag:
+        dirt = run(["git","status","--porcelain"], stdout=PIPE, text=True).stdout.strip()
+        if dirt:
+            print("Archive is dirty. Not tagging with %s." %(v,), file=sys.stderr)
+            return
+
+        run(["git","tag",str(v)])
+        print("Tagged: ",end='')
+    print(v)
+
+def parse(version):
+    try:
+        v = Version(version, partial=True)
+    except ValueError:
+        try:
+            v = Version.coerce(version, partial=True)
+        except ValueError:
+            print("Version %s is not parseable" % (version,), file=sys.stderr)
+            return None
+        print("Version %s coerced to %s" % (version,v), file=sys.stderr)
+    return v
+
+def next_build(v):
+    b = int(v.build[0]) if v.build else 0
+    v.build = (str(b+1), run(["git","describe","--always","--candidates=1"], stdout=PIPE, text=True).stdout.strip())
+    return v
+
+
+if __name__ == "__main__":
+    main()
