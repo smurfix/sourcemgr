@@ -1,5 +1,6 @@
 # shell script.
 
+printenv | sort
 set -eux
 
 find ../ -iname "*.changes" -maxdepth 1 -print -delete
