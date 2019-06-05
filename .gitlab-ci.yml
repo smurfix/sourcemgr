@@ -6,7 +6,7 @@ variables:
   USER: "root"
 
 before_script:
-  wget -O - https://gitlab.noris.net/matthias.urlichs/sourcemgr/raw/master/gitlab-ci | /bin/bash
+  - "wget -O - https://gitlab.noris.net/matthias.urlichs/sourcemgr/raw/master/gitlab-ci | /bin/bash"
 stretch:
   only: 
     - tags
