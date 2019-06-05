@@ -14,8 +14,11 @@ from semantic_version import Version
 @click.option("-M", "--major", count=True, help="Uptick major version (no upward compat)")
 @click.option("-b", "--build", count=True, help="Uptick build (no source changes)")
 @click.option("-t", "--tag", is_flag=True, help="Tag with the new version")
+@click.option("-P", "--push", type=str, help="Push to this remote")
 @click.argument("version", required=False, nargs=1)
-def main(build,patch,minor,major,version,tag):
+def main(build,patch,minor,major,version,tag,push):
+    if push and not tag:
+        raise click.UsageError("You can't push a tag without tagging.")
     tagversion = run(["git","describe","--tags"], stdout=PIPE, text=True).stdout.strip()
 
     debversion = run(["dpkg-parsechangelog"], stdout=PIPE, text=True).stdout.strip()
@@ -67,6 +70,8 @@ def main(build,patch,minor,major,version,tag):
 
         run(["git","tag",str(v)])
         print("Tagged: ",end='')
+        if push:
+            run(["git","push",push,str(v)])
     print(v)
 
 def parse(version):
