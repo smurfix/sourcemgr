@@ -45,12 +45,15 @@ def main(build,patch,minor,major,version,tag,push):
 
     did = 0
     for _ in range(major):
+        v.prerelease = None
         v = v.next_major()
         did += 1
     for _ in range(minor):
+        v.prerelease = None
         v = v.next_minor()
         did += 1
     for _ in range(patch):
+        v.prerelease = None
         if v.patch is None:
             v.patch = 0
         v = v.next_patch()
