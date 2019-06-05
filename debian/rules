@@ -45,13 +45,7 @@ install: build
 	dh_prep
 	dh_installdirs
 
-	install $$(find bin -name SCCS -prune -o -name .\* -o -type f -print) $D/usr/bin
-	install $$(find sbin -name SCCS -prune -o -name .\* -o -type f -print) $D/usr/sbin
-
-	for f in helper/* ; do \
-		test -f $$f && install -m 644 $$f debian/sourcemgr/usr/share/sourcemgr/;\
-	done
-	chmod 755 debian/sourcemgr/usr/share/sourcemgr/getvar
+	install $$(find bin -name .\* -o -type f -print) $D/usr/bin
 
 	install -m 644 debian/lintian.override debian/sourcemgr/usr/share/lintian/overrides/sourcemgr
 

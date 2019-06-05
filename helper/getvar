@@ -1,6 +1,0 @@
-#!/bin/sh
-# Quick script to read a shell script and echo a variable set therein.
-
-. $1
-echo $(eval echo \$$2)
-

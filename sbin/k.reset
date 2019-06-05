@@ -1,5 +1,0 @@
-#!/bin/sh
-
-sleep 30
-perl -pi -e"s/^default=\\d+/default=0/" /boot/grub/grub.conf
-/sbin/reboot
