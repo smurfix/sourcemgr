@@ -6,9 +6,9 @@ variables:
   USER: "root"
 
 before_script:
-  - "rm -rf ../sourcemgr"
-  - "git clone https://gitlab.noris.net/${CI_PROJECT_NAMESPACE}/sourcemgr ../sourcemgr"
-  - "/bin/bash -x ../sourcemgr/gitlab-ci"
+  - "rm -rf ../.mgr"
+  - "git clone https://gitlab.noris.net/${CI_PROJECT_NAMESPACE}/sourcemgr ../.mgr"
+  - "/bin/bash -x ../.mgr/gitlab-ci"
 stretch:
   only: 
     - tags
