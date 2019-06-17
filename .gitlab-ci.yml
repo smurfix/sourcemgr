@@ -6,6 +6,7 @@ variables:
   USER: "root"
 
 before_script:
+  - "printenv | sort"
   - "apt-get install curl"
   - "curl https://gitlab.noris.net/matthias.urlichs/sourcemgr/raw/master/gitlab-ci | /bin/bash"
 stretch:
