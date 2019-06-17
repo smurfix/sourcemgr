@@ -15,11 +15,11 @@ stretch:
   image: 'docker-registry.noris.net/oci/debbuilder:stretch'
   script:
     - 'dpkg-buildpackage -b -k${CI_GPG_KEYID}'
-    - dput -d smurf ../*.changes
+    - dput -d achmed ../*.changes
 buster:
   only:
     - tags
   image: 'docker-registry.noris.net/oci/debbuilder:buster'
   script:
     - 'dpkg-buildpackage -b -k${CI_GPG_KEYID}'
-    - dput -d smurf ../*.changes
+    - dput -d achmed ../*.changes
