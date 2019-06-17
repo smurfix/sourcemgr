@@ -8,7 +8,7 @@ variables:
 before_script:
   - "printenv | sort"
   - "apt-get install curl"
-  - "curl https://gitlab.noris.net/matthias.urlichs/sourcemgr/raw/master/gitlab-ci | /bin/bash"
+  - "curl https://gitlab.noris.net/${CI_PROJECT_NAMESPACE}/sourcemgr/raw/master/gitlab-ci | /bin/bash"
 stretch:
   only: 
     - tags

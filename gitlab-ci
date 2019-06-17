@@ -6,19 +6,25 @@ set -eux
 find ../ -iname "*.changes" -maxdepth 1 -print -delete
 find ../ -iname "*.upload" -maxdepth 1 -print -delete
 eval $(ssh-agent)
-dch -v "${CI_COMMIT_TAG}.$(lsb_release -s -c)" -D "$(lsb_release -s -c)" -b "Autobuild on Tag ${CI_COMMIT_TAG}"
+dch -v "${CI_COMMIT_TAG}.$(lsb_release -s -c)" \
+    -D "$(lsb_release -s -c)" \
+    -b "Autobuild on Tag ${CI_COMMIT_TAG} for ${CI_PROJECT_NAMESPACE}"
 head debian/changelog
-test "$(lsb_release -s -c)" = "buster" || \
-echo "deb http://apt.noris.net $(lsb_release -s -c) main noris" >/etc/apt/sources.list.d/noris.list
-echo "${CI_COMMIT_TAG}" | grep -qs noris || \
-echo "deb http://build.smurf.noris.de $(lsb_release -s -c) main" >/etc/apt/sources.list.d/smurf.list
+if "${CI_PROJECT_NAMESPACE}" = "matthias.urlichs" ; then
+	echo "deb http://build.smurf.noris.de $(lsb_release -s -c) main" >/etc/apt/sources.list.d/smurf.list
+else
+	echo "deb http://apt.noris.net $(lsb_release -s -c) main noris" >/etc/apt/sources.list.d/noris.list
+fi
+curl https://gitlab.noris.net/${CI_PROJECT_NAMESPACE}/sourcemgr/raw/master/keys.gpg | \
+	apt-key add -
+
 apt-get update
 dpkg-source -b .
 mk-build-deps --install --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes --allow-unauthenticated' debian/control
 
-if ! fgrep -qsx "[smurf]" /etc/dput.cf ; then
-	cat <<'___' >> /etc/dput.cf
-[smurf]
+if "${CI_PROJECT_NAMESPACE}" = "matthias.urlichs" ; then
+	cat <<'___' >> ~/.dput.cf
+[achmed]
 login                   = gitlab
 fqdn                    = dev.smurf.noris.de
 method                  = scp
