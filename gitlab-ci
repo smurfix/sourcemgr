@@ -23,6 +23,7 @@ dpkg-source -b .
 mk-build-deps --install --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes --allow-unauthenticated' debian/control
 
 if [ "${CI_PROJECT_NAMESPACE}" = "matthias.urlichs" ] ; then
+	cat /etc/dput.cf
 	cat <<'___' >> ~/.dput.cf
 [achmed]
 login                   = gitlab
