@@ -7,7 +7,7 @@ variables:
 
 before_script:
   - "apt-get install curl"
-  - "curl https://gitlab.noris.net/${CI_PROJECT_NAMESPACE}/sourcemgr/raw/master/gitlab-ci | /bin/bash"
+  - "curl https://gitlab.noris.net/${CI_PROJECT_NAMESPACE}/sourcemgr/raw/master/gitlab-ci | /bin/bash -x"
 stretch:
   only: 
     - tags
