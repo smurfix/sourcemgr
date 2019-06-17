@@ -6,8 +6,9 @@ variables:
   USER: "root"
 
 before_script:
-  - "apt-get install curl"
-  - "curl https://gitlab.noris.net/${CI_PROJECT_NAMESPACE}/sourcemgr/raw/master/gitlab-ci | /bin/bash -x"
+  - "rm -rf ../sourcemgr"
+  - "git clone https://gitlab.noris.net/${CI_PROJECT_NAMESPACE}/sourcemgr ../sourcemgr"
+  - "/bin/bash -x ../sourcemgr/gitlab-ci"
 stretch:
   only: 
     - tags
