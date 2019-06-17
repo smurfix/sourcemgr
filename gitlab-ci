@@ -23,8 +23,7 @@ dpkg-source -b .
 mk-build-deps --install --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes --allow-unauthenticated' debian/control
 
 if [ "${CI_PROJECT_NAMESPACE}" = "matthias.urlichs" ] ; then
-	cat ~/.dput.cf
-	cat <<'___' >> ~/.dput.cf
+	cat <<'___' > ~/.dput.cf
 [achmed]
 login                   = gitlab
 fqdn                    = dev.smurf.noris.de
@@ -32,6 +31,16 @@ method                  = scp
 incoming                = /srv/debian/incoming
 allow_dcut              = 0
 allowed_distributions   = (?!UNRELEASED|.*-security)
+
+___
+else
+	cat <<'___' > ~/.dput.cf
+[achmed]
+method = scp
+fqdn = achmed.noris.net
+incoming = /var/lib/debarchiver/incoming
+allow_unsigned_uploads = 1
+login = gitlabci
 
 ___
 fi
