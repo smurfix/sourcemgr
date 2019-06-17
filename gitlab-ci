@@ -10,7 +10,7 @@ dch -v "${CI_COMMIT_TAG}.$(lsb_release -s -c)" \
     -D "$(lsb_release -s -c)" \
     -b "Autobuild on Tag ${CI_COMMIT_TAG} for ${CI_PROJECT_NAMESPACE}"
 head debian/changelog
-if "${CI_PROJECT_NAMESPACE}" = "matthias.urlichs" ; then
+if [ "${CI_PROJECT_NAMESPACE}" = "matthias.urlichs" ] ; then
 	echo "deb http://build.smurf.noris.de $(lsb_release -s -c) main" >/etc/apt/sources.list.d/smurf.list
 else
 	echo "deb http://apt.noris.net $(lsb_release -s -c) main noris" >/etc/apt/sources.list.d/noris.list
