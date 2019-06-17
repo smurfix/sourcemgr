@@ -6,7 +6,7 @@ set -eux
 find ../ -iname "*.changes" -maxdepth 1 -print -delete
 find ../ -iname "*.upload" -maxdepth 1 -print -delete
 eval $(ssh-agent)
-dch -v "${CI_COMMIT_TAG}.$(lsb_release -s -c)" \
+dch -v "${CI_COMMIT_TAG}.$(lsb_release -s -r)" \
     -D "$(lsb_release -s -c)" \
     -b "Autobuild on Tag ${CI_COMMIT_TAG} for ${CI_PROJECT_NAMESPACE}"
 head debian/changelog
