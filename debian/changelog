@@ -1,3 +1,9 @@
+sourcemgr (1.436) smurf; urgency=medium
+
+  * Don't enforce Perl deps
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 10 Jan 2020 17:53:35 +0100
+
 sourcemgr (1.435) smurf; urgency=medium
 
   * toss py2
