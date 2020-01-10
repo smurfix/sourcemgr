@@ -3,5 +3,6 @@
 debian/files
 debian/sourcemgr.substvars
 debian/sourcemgr/*
+debian/.debhelper/
 .qgit_cache.dat.z
 debian/*.log
