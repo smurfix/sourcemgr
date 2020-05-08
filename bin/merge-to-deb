@@ -10,8 +10,9 @@ fi
 T=$(git describe --tags --exact-match)
 git checkout deb
 git merge --no-commit "$B"
+D=$(dpkg-parsechangelog -S distribution)
 if dpkg-parsechangelog -S version | grep -qs -- - ; then D="-1" ; else D=".1"; fi
-debchange -r -v "$T$D" "Merge"
+debchange --distribution -v "$T$D" "Merge"
 git add debian/changelog
 git commit -m "Merge to $T"
 debch
