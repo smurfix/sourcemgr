@@ -1,3 +1,9 @@
+sourcemgr (1.456) smurf; urgency=medium
+
+  * Fix permissions
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 08 May 2020 18:41:47 +0200
+
 sourcemgr (1.455) smurf; urgency=medium
 
   * Rename debm
