@@ -1,3 +1,9 @@
+sourcemgr (1.455) smurf; urgency=medium
+
+  * Rename debm
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 08 May 2020 18:12:42 +0200
+
 sourcemgr (1.454) smurf; urgency=medium
 
   * Debmerge script and check-nonsense-into-deb hook.
