@@ -1,8 +1,8 @@
 #!/bin/sh
 set -ex
 
-B="$(git branch)"
-if test -b = "deb" ; then
+B="$(git rev-parse --abbrev-ref HEAD)"
+if test "$B" = "deb" ; then
     echo "You can't be on the Debian branch when you do this." >&2
     exit 1
 fi
@@ -10,8 +10,9 @@ fi
 T=$(git describe --tags --exact-match)
 git checkout deb
 git merge --no-commit "$B"
-debchange -i -v "$T-1" "Merge"
+if dpkg-parsechangelog -S version | grep -qs -- - ; then D="-1" ; else D=".1"; fi
+debchange -r -v "$T$D" "Merge"
 git add debian/changelog
-git commit -m "Merge to $T" debian/changelog
+git commit -m "Merge to $T"
 debch
 git checkout "$B"
