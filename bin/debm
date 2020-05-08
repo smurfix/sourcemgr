@@ -1,0 +1,17 @@
+#!/bin/sh
+set -ex
+
+B="$(git branch)"
+if test -b = "deb" ; then
+    echo "You can't be on the Debian branch when you do this." >&2
+    exit 1
+fi
+
+T=$(git describe --tags --exact-match)
+git checkout deb
+git merge --no-commit "$B"
+debchange -i -v "$T-1" "Merge"
+git add debian/changelog
+git commit -m "Merge to $T" debian/changelog
+debch
+git checkout "$B"

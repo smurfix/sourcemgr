@@ -1,0 +1,11 @@
+#!/bin/sh
+
+## pre-commit hook to catch editing in "deb" branch without modifying the changelog
+
+B=$(git branch)
+if test "$B" = "deb" || test "$B" = "debian" ; then
+    if test $(git ls-files -m debian/changelog | wc -l) = 0 ; then
+        echo "
+        exit 1
+    fi
+fi
