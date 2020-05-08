@@ -15,8 +15,7 @@ if [ "${CI_PROJECT_NAMESPACE}" = "matthias.urlichs" ] ; then
 else
 	echo "deb http://apt.noris.net $(lsb_release -s -c) main noris" >/etc/apt/sources.list.d/noris.list
 fi
-curl https://gitlab.noris.net/${CI_PROJECT_NAMESPACE}/sourcemgr/raw/master/keys.gpg | \
-	apt-key add -
+apt-key add "$(dirname "$0")"/keys.gpg
 
 apt-get update
 dpkg-source -b .
