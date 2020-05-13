@@ -1,3 +1,9 @@
+sourcemgr (1.462) smurf; urgency=medium
+
+  * Allow new debian/changelog file
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 13 May 2020 10:13:38 +0200
+
 sourcemgr (1.461) smurf; urgency=medium
 
   * More bugfixy
