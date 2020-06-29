@@ -82,7 +82,7 @@ CF=${S}_${V}_$(dpkg --print-architecture).changes
 if [ -s ../$CF ] ; then
 	echo "Changes file found. Not building."
 else
-	debuild -i -b -us -uc
+	debuild -i -b -us -uc -j$(( $(grep "^processor.*:" /proc/cpuinfo|wc -l) / 2 + 1))
 	git tag "DEBIAN-$V"
 	for a in $GIT_ARCHIVES ; do
 		git push --tags $a || true

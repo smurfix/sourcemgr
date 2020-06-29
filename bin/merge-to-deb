@@ -1,19 +1,70 @@
 #!/bin/sh
-set -ex
 
-B="$(git rev-parse --abbrev-ref HEAD)"
-if test "$B" = "deb" ; then
-    echo "You can't be on the Debian branch when you do this." >&2
+TEMP=$(getopt -o 'aed:' -n "$(basename "$0")" -- "$@")
+if [ $? -ne 0 ]; then
+        echo 'Terminating...' >&2
+        exit 1
+fi
+eval set -- "$TEMP"
+unset TEMP
+
+TT=n
+ED=n
+DEB=
+while true ; do
+    case "$1" in
+        '-a')
+            TT=y
+            shift ;;
+        '-d')
+            DEB="$2"
+            shift 2 ;;
+        '-e')
+            ED=y
+            shift ;;
+        '--')
+            break ;;
+        *)
+            echo "Unknown argument '$1'" >&2
+            exit 1
+    esac
+done
+
+set -ex
+if test "$TT" = "y" ; then
+    T=$(git describe --tags | sed -e 's/-.*//')
+else
+    T=$(git describe --tags --exact-match)
+fi
+TT=$(echo $T | sed -e 's/^[a-z]*//')
+
+if test -n "$DEB" ; then
+    git describe "$DEB" >/dev/null
+elif git describe --all deb >/dev/null 2>&1; then
+    DEB=deb
+elif git describe --all debian >/dev/null 2>&1; then
+    DEB=debian
+else
+    echo "Neither 'deb' nor 'debian' branches found." >&2
     exit 1
 fi
 
-T=$(git describe --tags --exact-match)
-git checkout deb
+B="$(git rev-parse --abbrev-ref HEAD)"
+if test "$B" = "$DEB" ; then
+    echo "You can't be on the '$DEB' branch when you do this." >&2
+    exit 1
+fi
+
+git checkout "$DEB"
 git merge --no-commit "$B"
 D=$(dpkg-parsechangelog -S distribution)
 if dpkg-parsechangelog -S version | grep -qs -- - ; then V="-1" ; else V=".1"; fi
-debchange --distribution $D -v "$T$V" "Merge"
+debchange --distribution $D -v "$TT$V" "Merge"
 git add debian/changelog
-git commit -m "Merge to $T"
+if test $ED = y ; then
+    "Edit some stuff, then 'exit'"
+    bash
+fi
+git commit -a -m "Merge to $T"
 debch
 git checkout "$B"
