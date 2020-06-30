@@ -51,6 +51,8 @@ install: build
 	for f in git/* ; do \
 		test -f $$f && install -m 755 $$f debian/sourcemgr/usr/lib/git-core/;\
 	done
+	mkdir -p debian/sourcemgr/usr/share
+	cp -a share debian/sourcemgr/usr/share/sourcemgr
 
 	install -m 644 debian/lintian.override debian/sourcemgr/usr/share/lintian/overrides/sourcemgr
 

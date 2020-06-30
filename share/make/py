@@ -1,0 +1,63 @@
+# Makefile snippet for some standard Python stuff
+
+ifeq($(PACKAGE),)
+$(error You need to set PACKAGE)
+endif
+
+PATH := /usr/share/sphinx/scripts/python3:${PATH}
+export PYTHONPATH= $(PYTHONPATH)$(if $(PYTHONPATH),:)$(shell pwd)
+
+PYTEST ?= pytest
+TEST_OPTIONS ?= x
+TESTS ?= tests/
+
+BUILD_DIR ?= build
+INPUT_DIR ?= docs/source
+
+# Sphinx options (are passed to build_docs, which passes them to sphinx-build)
+#   -W       : turn warning into errors
+#   -a       : write all files
+#   -b html  : use html builder
+#   -i [pat] : ignore pattern
+
+SPHINXOPTS ?= -a -W -b html
+AUTOSPHINXOPTS := -i *~ -i *.sw* -i Makefile*
+
+SPHINXBUILDDIR ?= $(BUILD_DIR)/sphinx/html
+ALLSPHINXOPTS ?= -d $(BUILD_DIR)/sphinx/doctrees $(SPHINXOPTS) docs
+
+doc:
+	sphinx-build -a $(INPUT_DIR) $(BUILD_DIR)
+
+livehtml: docs
+	sphinx-autobuild $(AUTOSPHINXOPTS) $(ALLSPHINXOPTS) $(SPHINXBUILDDIR)
+
+update:
+	pip install -r ci/test-requirements.txt
+
+cov:
+	$(PYTEST) tests --cov=distkv --cov-report=term-missing
+
+test:
+	black -l 99 --check distkv tests setup.py
+	flake8 distkv tests setup.py
+	pylint distkv tests setup.py
+	$(PYTEST) $(TEST_OPTIONS) tests
+
+format:
+	black -l 99 distkv tests setup.py
+
+precommit: format test
+
+tagged:
+	git describe --tags --exact-match
+	test $$(git ls-files -m | wc -l) = 0
+
+pypi:	tagged
+	python3 setup.py sdist upload
+	## version depends on tag, so re-tagging doesn't make sense
+
+upload: pypi
+	git push --tags
+
+.PHONY: all tagged pypi upload precommit format test cov update doc livehtml

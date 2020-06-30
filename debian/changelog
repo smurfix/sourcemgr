@@ -1,3 +1,9 @@
+sourcemgr (1.463) smurf; urgency=medium
+
+  * Makefile snippet for Python stuff
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 30 Jun 2020 04:31:09 +0200
+
 sourcemgr (1.462) smurf; urgency=medium
 
   * Allow new debian/changelog file
