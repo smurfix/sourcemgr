@@ -1,3 +1,9 @@
+sourcemgr (1.467) smurf; urgency=medium
+
+  * Packaging
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 30 Jun 2020 04:51:33 +0200
+
 sourcemgr (1.466) smurf; urgency=medium
 
   * Assignment error
