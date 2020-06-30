@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 """\
 This script is used to combine several .changes files into one.
@@ -198,22 +198,22 @@ out=open(os.path.join(os.path.dirname(fn), keys["Source:"]+"_"+v+".changes"), "w
 
 temp.seek(0)
 
-print >>temp, "Format:",FORMAT
+print("Format:",FORMAT, file=temp)
 for s,d in keys.iteritems():
-	print >>temp, s,d
-print >>temp, "Binary:"," ".join(binaries)
-print >>temp, "Architecture:"," ".join(archs)
+	print(s,d, file=temp)
+print("Binary:"," ".join(binaries), file=temp)
+print("Architecture:"," ".join(archs), file=temp)
 if closes:
-	print >>temp, "Closes:"," ".join(closes)
-print >>temp, "Changes:"
-print >>temp, changes,
-print >>temp, "Description:"
+	print("Closes:"," ".join(closes), file=temp)
+print("Changes:", file=temp)
+print(changes,, file=temp)
+print("Description:", file=temp)
 for f in descr.itervalues():
-	print >>temp, f
-print >>temp, "Files:"
+	print(f, file=temp)
+print("Files:", file=temp)
 for fl in files.itervalues():
-	print >>temp, " "+" ".join(fl)
-print >>temp,""
+	print(" "+" ".join(fl), file=temp)
+print("", file=temp)
 
 temp.seek(0)
 

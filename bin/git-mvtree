@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # This is a simple script which clones a git subtree to another.
 
@@ -69,18 +69,18 @@ srcrepo = os.path.curdir
 commits=[]
 cmd = ["git rev-parse",srctag]
 if options.verbose:
-	print >>sys.stderr,cmd
+	print(cmd,file=sys.stderr)
 
 p=subprocess.Popen(cmd, stdout=subprocess.PIPE)
 l = p.stdout.readline().strip()
 if options.verbose:
-	print >>sys.stderr,l
+	print(l,file=sys.stderr)
 commits.append(l)
 end(p)
 
 while len(commits):
 	if options.verbose:
-		print >>sys.stderr,"DO",commits
+		print("DO",commits,file=sys.stderr)
 	c = commits.pop()
 	if c in corr:
 		d = corr[c]
@@ -89,7 +89,7 @@ while len(commits):
 		d = c
 		continue
 	if options.verbose:
-		print "Processing:",c
+		print("Processing:",c,file=sys.stderr)
 
 	### WARNUNG: das wird alle Tags verflachen!
 	p=subprocess.Popen(["git cat-file","commit",c], stdout=subprocess.PIPE)
@@ -116,7 +116,7 @@ while len(commits):
 	end(p)
 	if skip:
 		if options.verbose:
-			print >>sys.stderr,"AGAIN",c,skip
+			print("AGAIN",c,skip, file=sys.stderr)
 		commits.extend(skip)
 		commits.insert(0,c)
 		continue
@@ -126,11 +126,11 @@ while len(commits):
 	d = x.stdout.read().strip()
 	end(x)
 	corr[c] = d
-	print >>corrf, c,d
+	print(c,d,file=corrf)
 	if options.verbose:
-		print >>sys.stderr,"NEW",d
-		print >>sys.stderr,q
+		print("NEW",d,file=sys.stderr)
+		print(q,sys.stderr)
 
 # OK, everything is done.
 corrf.close()
-print d
+print(d)
