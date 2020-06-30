@@ -3,7 +3,7 @@
 PACKAGE ?= $(basename $(pwd))
 
 PATH := /usr/share/sphinx/scripts/python3:${PATH}
-export PYTHONPATH=$(PYTHONPATH)$(if $(PYTHONPATH),:)$(shell pwd)
+export PYTHONPATH := $(PYTHONPATH)$(if $(PYTHONPATH),:)$(shell pwd)
 
 PYTHON ?= python3
 PYTEST ?= pytest
