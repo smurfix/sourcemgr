@@ -9,6 +9,7 @@ PYTHON ?= python3
 PYTEST ?= pytest
 PYTEST_OPTIONS ?= -x
 TESTS ?= tests/
+CODE ?= $(PACKAGE)
 MAXLEN ?= 99
 
 BUILD_DIR ?= build
@@ -36,16 +37,18 @@ update:
 	pip install -r ci/test-requirements.txt
 
 cov:
-	$(PYTEST) $(TESTS) --cov=$(PACKAGE) --cov-report=term-missing
+	$(PYTEST) $(TESTS) --cov=$(CODE) --cov-report=term-missing
 
-test:
-	black -l $(MAXLEN) --check $(PACKAGE) $(TESTS) setup.py
-	flake8 $(PACKAGE) $(TESTS) setup.py
-	pylint $(PACKAGE) $(TESTS) setup.py
+test: statictest pytest
+statictest:
+	black -l $(MAXLEN) --check $(CODE) $(TESTS) setup.py
+	flake8 $(CODE) $(TESTS) setup.py
+	pylint $(CODE) $(TESTS) setup.py
+pytest:
 	$(PYTEST) $(PYTEST_OPTIONS) $(TESTS)
 
 format:
-	black -l $(MAXLEN) $(PACKAGE) $(TESTS) setup.py
+	black -l $(MAXLEN) $(CODE) $(TESTS) setup.py
 
 precommit: format test
 
@@ -60,4 +63,4 @@ pypi:	tagged
 upload: pypi
 	git push --tags
 
-.PHONY: all tagged pypi upload precommit format test cov update doc livehtml
+.PHONY: all tagged pypi upload precommit format test cov update doc livehtml statictest pytest
