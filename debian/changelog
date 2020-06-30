@@ -1,3 +1,9 @@
+sourcemgr (1.464) smurf; urgency=medium
+
+  * Makefile fixes
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 30 Jun 2020 04:43:42 +0200
+
 sourcemgr (1.463) smurf; urgency=medium
 
   * Makefile snippet for Python stuff

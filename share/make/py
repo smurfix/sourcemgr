@@ -1,15 +1,15 @@
 # Makefile snippet for some standard Python stuff
 
-ifeq($(PACKAGE),)
-$(error You need to set PACKAGE)
-endif
+PACKAGE ?= $(basename $(pwd))
 
 PATH := /usr/share/sphinx/scripts/python3:${PATH}
-export PYTHONPATH= $(PYTHONPATH)$(if $(PYTHONPATH),:)$(shell pwd)
+export PYTHONPATH=$(PYTHONPATH)$(if $(PYTHONPATH),:)$(shell pwd)
 
+PYTHON ?= python3
 PYTEST ?= pytest
-TEST_OPTIONS ?= x
+PYTEST_OPTIONS ?= -x
 TESTS ?= tests/
+MAXLEN ?= 99
 
 BUILD_DIR ?= build
 INPUT_DIR ?= docs/source
@@ -36,16 +36,16 @@ update:
 	pip install -r ci/test-requirements.txt
 
 cov:
-	$(PYTEST) tests --cov=distkv --cov-report=term-missing
+	$(PYTEST) $(TESTS) --cov=$(PACKAGE) --cov-report=term-missing
 
 test:
-	black -l 99 --check distkv tests setup.py
-	flake8 distkv tests setup.py
-	pylint distkv tests setup.py
-	$(PYTEST) $(TEST_OPTIONS) tests
+	black -l $(MAXLEN) --check $(PACKAGE) $(TESTS) setup.py
+	flake8 $(PACKAGE) $(TESTS) setup.py
+	pylint $(PACKAGE) $(TESTS) setup.py
+	$(PYTEST) $(PYTEST_OPTIONS) $(TESTS)
 
 format:
-	black -l 99 distkv tests setup.py
+	black -l $(MAXLEN) $(PACKAGE) $(TESTS) setup.py
 
 precommit: format test
 
