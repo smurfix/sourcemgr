@@ -1,3 +1,9 @@
+sourcemgr (1.469) smurf; urgency=medium
+
+  * basename/make isn't basename/shell
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 30 Jun 2020 05:09:06 +0200
+
 sourcemgr (1.468) smurf; urgency=medium
 
   * Sigh
