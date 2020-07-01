@@ -1,3 +1,9 @@
+sourcemgr (1.472) smurf; urgency=medium
+
+  * Makefile addon
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 01 Jul 2020 08:18:16 +0200
+
 sourcemgr (1.471) smurf; urgency=medium
 
   * Improve Makefile

@@ -27,6 +27,14 @@ AUTOSPHINXOPTS := -i *~ -i *.sw* -i Makefile*
 SPHINXBUILDDIR ?= $(BUILD_DIR)/sphinx/html
 ALLSPHINXOPTS ?= -d $(BUILD_DIR)/sphinx/doctrees $(SPHINXOPTS) docs
 
+it: tag format test deb pypi
+
+deb: tagged
+	merge-to-deb
+
+tag:
+	git nt
+
 doc:
 	sphinx-build -a $(INPUT_DIR) $(BUILD_DIR)
 
@@ -63,4 +71,4 @@ pypi:	tagged
 upload: pypi
 	git push --tags
 
-.PHONY: all tagged pypi upload precommit format test cov update doc livehtml statictest pytest
+.PHONY: all tagged pypi upload precommit format test cov update doc livehtml statictest pytest it deb tag
