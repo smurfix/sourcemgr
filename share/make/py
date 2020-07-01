@@ -27,12 +27,13 @@ AUTOSPHINXOPTS := -i *~ -i *.sw* -i Makefile*
 SPHINXBUILDDIR ?= $(BUILD_DIR)/sphinx/html
 ALLSPHINXOPTS ?= -d $(BUILD_DIR)/sphinx/doctrees $(SPHINXOPTS) docs
 
-it: tag format test deb pypi
+it: untagged test push tag format deb pypi
 
 deb: tagged
 	merge-to-deb
 
 tag:
+	test $$(git ls-files -m | wc -l) = 0
 	git nt
 
 doc:
@@ -64,6 +65,9 @@ tagged:
 	git describe --tags --exact-match
 	test $$(git ls-files -m | wc -l) = 0
 
+untagged:
+	if git describe --tags --exact-match ; then exit 1; else exit 0; fi
+
 pypi:	tagged
 	python3 setup.py sdist upload
 	## version depends on tag, so re-tagging doesn't make sense
@@ -71,4 +75,4 @@ pypi:	tagged
 upload: pypi
 	git push --tags
 
-.PHONY: all tagged pypi upload precommit format test cov update doc livehtml statictest pytest it deb tag
+.PHONY: all tagged pypi upload precommit format test cov update doc livehtml statictest pytest it deb tag untagged
