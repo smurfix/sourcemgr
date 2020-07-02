@@ -58,10 +58,6 @@ for a in $GIT_ARCHIVES ; do
 done
 
 V=$(dpkg-parsechangelog | sed -ne 's/^Version: *//p' | sed -e s/^42:// | sed -e 's/~/-/g')
-if git tag -v "DEBIAN-$V" 2>/dev/null ; then
-	echo "Already tagged with building $V. Refusing."
-	exit 1
-fi
 
 git remote >$TF
 for a in $GIT_ARCHIVES ; do
@@ -83,7 +79,6 @@ if [ -s ../$CF ] ; then
 	echo "Changes file found. Not building."
 else
 	debuild -i -b -us -uc -j$(( $(grep "^processor.*:" /proc/cpuinfo|wc -l) / 2 + 1))
-	git tag "DEBIAN-$V"
 	for a in $GIT_ARCHIVES ; do
 		git push --tags $a || true
 	done
