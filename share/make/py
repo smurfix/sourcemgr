@@ -28,6 +28,7 @@ SPHINXBUILDDIR ?= $(BUILD_DIR)/sphinx/html
 ALLSPHINXOPTS ?= -d $(BUILD_DIR)/sphinx/doctrees $(SPHINXOPTS) docs
 
 it: untagged test push tag format deb pypi
+itt: untagged test push ttag format deb pypi
 
 deb: tagged
 	merge-to-deb
@@ -35,6 +36,9 @@ deb: tagged
 tag:
 	test $$(git ls-files -m | wc -l) = 0
 	git nt
+ttag:
+	test $$(git ls-files -m | wc -l) = 0
+	git ntt
 
 doc:
 	sphinx-build -a $(INPUT_DIR) $(BUILD_DIR)
@@ -75,4 +79,7 @@ pypi:	tagged
 upload: pypi
 	git push --tags
 
-.PHONY: all tagged pypi upload precommit format test cov update doc livehtml statictest pytest it deb tag untagged
+push:
+	git push-all
+
+.PHONY: all tagged pypi upload precommit format test cov update doc livehtml statictest pytest it deb tag untagged push ttag itt

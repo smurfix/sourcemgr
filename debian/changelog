@@ -1,3 +1,9 @@
+sourcemgr (1.474) smurf; urgency=medium
+
+  * Add push-all
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 02 Jul 2020 18:55:37 +0200
+
 sourcemgr (1.473) smurf; urgency=medium
 
   * Tagging vs unsaved content
