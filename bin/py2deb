@@ -1,56 +1,21 @@
-#!/bin/sh
+#!/bin/sh -ex
 
-if test ! -f setup.py ; then
-	echo "setup.py: not found" >&2
-	exit 1
-fi
-
+test -f setup.py
+test ! -e debian
 rm -rf deb_dist
-N="$(python setup.py --name)"
+python3 setup.py --command-packages=stdeb.command debianize --suite smurf --maintainer "Matthias Urlichs <matthias@urlichs.de>" "$@"
 
-tmp=$(tempfile)
-trap 'rm -f $tmp' 0
-if test $(git ls-files --exclude-standard --modified --others | wc -l) -ne 0 ; then
-	echo "You have unsaved changes. Exiting." >&2
-	git status
-	exit 1
-fi
-
-for x in pyo pyc swp swo ; do
-fgrep -qs .$x .gitignore || echo "*.$x" >>.gitignore
-done
-fgrep -qs egg-info .gitignore || echo "/$N.egg-info/" >>.gitignore
-fgrep -qs /.pybuild .gitignore || echo "/.pybuild/" >>.gitignore
-fgrep -qs /build .gitignore || echo "/build/" >>.gitignore
-git add .gitignore
-git commit -m "Ignore built files" .gitignore
-
-if test ! -d debian ; then
-	rapydcss.egg-info/
-	python setup.py --command-packages=stdeb.command debianize --suite smurf --with-python2 true --with-python3 true
-	git add debian
-	git commit -m "auto-Debianized"
-	git-push-init-netz
-	git remote add github git@github.com:smurfix/$N.git
-	if git fetch github ; then
-		git config remote.github.push "refs/heads/*:refs/heads/*"
-	else
-		echo "*** no github repo ***" >&2
-		git remote rm github
-	fi
-	cat <<END >debian/.gitignore
+cat >debian/.gitignore <<_
 /files
 /*.log
 /*.debhelper
+/*.debhelper-build-stamp
 /*.substvars
-/python-$N/
-/python3-$N/
-END
-    
+/debhelper-build-stamp
+_
+sed -ne 's#^Package: #/#p' <debian/control >>debian/.gitignore
 
-	git add debian/.gitignore .gitignore
-	git commit -m "ignore some Debian build files" debian/.gitignore .gitignore
-	git-push-all
-fi
-#debch
-
+fgrep -qs .pybuild .gitignore || echo '/.pybuild/' >>.gitignore	
+git add debian .gitignore
+git commit -m "Debianized."
+echo DONE
