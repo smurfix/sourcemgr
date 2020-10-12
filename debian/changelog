@@ -1,3 +1,10 @@
+sourcemgr (1.476) smurf; urgency=medium
+
+  * update "debu" and "debch"
+    dpkg-parsechangelog has a '-S FIELD' option
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 12 Oct 2020 07:45:55 +0200
+
 sourcemgr (1.475) smurf; urgency=medium
 
   * py2deb modernization

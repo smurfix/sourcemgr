@@ -10,8 +10,8 @@ mustsetvar () {
 	fi
 }
 
-mustsetvar package "$(dpkg-parsechangelog | sed -ne 's/^Source: //p')"
-mustsetvar version "$(dpkg-parsechangelog | sed -ne 's/^Version: //p')"
+mustsetvar package "$(dpkg-parsechangelog -S Source)"
+mustsetvar version "$(dpkg-parsechangelog -S Version)"
 mustsetvar arch "$(dpkg-architecture -a${targetarch} -t${targetgnusystem} -qDEB_HOST_ARCH)"
 
 dpkg-checkbuilddeps || sudo apt-get build-dep $package || exit 1

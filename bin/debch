@@ -39,13 +39,13 @@ else
 	. $HOME/.devscripts.conf 
 	export DEBEMAIL
 
-	dist=$(dpkg-parsechangelog | sed -ne 's/^Distribution:.//p')
+	dist=$(dpkg-parsechangelog -S Distribution)
 
 	mt=$(stat -c '%Y' debian/changelog)
 	debchange -i --distribution $dist --force-distribution
 	if [ $(stat -c '%Y' debian/changelog) = $mt ] ; then exit 1; fi
 
-	dpkg-parsechangelog | sed -e '1,/^Changes:/d' |tail -n +3|sed -e 's/^   //' > $TF
+	dpkg-parsechangelog -S Changes | tail -n +4 | sed -e 's/^  //' > $TF
 	if [ "$1" = "-a" ] ; then
 		git commit --amend -a -e -F $TF
 	else
@@ -57,7 +57,7 @@ for a in $GIT_ARCHIVES ; do
 	git push $a && rm -f $TF
 done
 
-V=$(dpkg-parsechangelog | sed -ne 's/^Version: *//p' | sed -e s/^42:// | sed -e 's/~/-/g')
+V=$(dpkg-parsechangelog -S Version | sed -e s/^42:// | sed -e 's/~/-/g')
 
 git remote >$TF
 for a in $GIT_ARCHIVES ; do
@@ -71,8 +71,8 @@ fi
 rm -f $TF
 trap 'echo FAIL >&2' 0
 
-S=$(dpkg-parsechangelog | sed -ne 's/^Source: *//p')
-V=$(dpkg-parsechangelog | sed -ne 's/^Version: *//p' | sed -e s/^42:// | sed -e 's/~/-/g')
+S=$(dpkg-parsechangelog -S Source)
+V=$(dpkg-parsechangelog -S Version | sed -e s/^42:// | sed -e 's/~/-/g')
 UV=$(echo $V | sed -e 's/-.*?//')
 CF=${S}_${V}_$(dpkg --print-architecture).changes
 if [ -s ../$CF ] ; then
