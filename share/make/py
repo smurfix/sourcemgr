@@ -74,7 +74,8 @@ untagged:
 
 pypi:	tagged
 	python3 setup.py sdist upload
-	## version depends on tag, so re-tagging doesn't make sense
+	#python3 setup.py upload
+	twine upload dist/${PACKAGE}-$(shell git describe --tags --exact-match).tar.gz
 
 upload: pypi
 	git push --tags
