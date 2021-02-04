@@ -73,7 +73,7 @@ untagged:
 	if git describe --tags --exact-match ; then exit 1; else exit 0; fi
 
 pypi:	tagged
-	python3 setup.py sdist upload
+	python3 setup.py sdist
 	#python3 setup.py upload
 	twine upload dist/${PACKAGE}-$(shell git describe --tags --exact-match).tar.gz
 
