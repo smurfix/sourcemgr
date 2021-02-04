@@ -1,3 +1,15 @@
+sourcemgr (1.478) smurf; urgency=medium
+
+  * duh
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 04 Feb 2021 11:22:58 +0100
+
+sourcemgr (1.477) smurf; urgency=medium
+
+  * twine and git
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 04 Feb 2021 11:11:25 +0100
+
 sourcemgr (1.476) smurf; urgency=medium
 
   * update "debu" and "debch"
