@@ -1,3 +1,9 @@
+sourcemgr (1.480) smurf; urgency=medium
+
+  * pypi name
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 04 Feb 2021 11:29:33 +0100
+
 sourcemgr (1.479) smurf; urgency=medium
 
   * duh 2

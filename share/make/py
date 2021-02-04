@@ -1,6 +1,7 @@
 # Makefile snippet for some standard Python stuff
 
 PACKAGE ?= $(notdir $(shell pwd))
+PYPI ?= $(PACKAGE)
 
 PATH := /usr/share/sphinx/scripts/python3:${PATH}
 export PYTHONPATH := $(PYTHONPATH)$(if $(PYTHONPATH),:)$(shell pwd)
@@ -75,7 +76,7 @@ untagged:
 pypi:	tagged
 	python3 setup.py sdist
 	#python3 setup.py upload
-	twine upload dist/${PACKAGE}-$(shell git describe --tags --exact-match).tar.gz
+	twine upload dist/${PYPI}-$(shell git describe --tags --exact-match).tar.gz
 
 upload: pypi
 	git push --tags
