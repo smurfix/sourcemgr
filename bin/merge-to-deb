@@ -68,3 +68,4 @@ fi
 git commit -a -m "Merge to $T"
 debch
 git checkout "$B"
+test -s setup.py && make pypi
