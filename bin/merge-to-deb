@@ -59,7 +59,7 @@ git checkout "$DEB"
 git merge --no-commit "$B"
 D=$(dpkg-parsechangelog -S distribution)
 if dpkg-parsechangelog -S version | grep -qs -- - ; then V="-1" ; else V=".1"; fi
-debchange --distribution $D -v "$TT$V" "Merge"
+debchange --distribution $D --force-distribution -v "$TT$V" "Merge"
 git add debian/changelog
 if test $ED = y ; then
     echo "Edit some stuff, then 'exit'"
