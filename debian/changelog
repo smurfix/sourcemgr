@@ -1,3 +1,9 @@
+sourcemgr (1.481) smurf; urgency=medium
+
+  * don't blindly push to pypi
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sat, 11 Dec 2021 12:44:07 +0100
+
 sourcemgr (1.480) smurf; urgency=medium
 
   * pypi name
