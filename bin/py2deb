@@ -13,6 +13,7 @@ cat >debian/.gitignore <<_
 /*.substvars
 /debhelper-build-stamp
 _
+echo 13 >debian/compat
 sed -ne 's#^Package: #/#p' <debian/control >>debian/.gitignore
 
 fgrep -qs .pybuild .gitignore || echo '/.pybuild/' >>.gitignore	
