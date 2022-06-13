@@ -1,3 +1,9 @@
+sourcemgr (1.483.1) smurf; urgency=medium
+
+  * Compat 13
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 13 Jun 2022 18:33:15 +0200
+
 sourcemgr (1.483) smurf; urgency=medium
 
   * Merge
