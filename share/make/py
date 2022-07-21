@@ -56,14 +56,15 @@ cov:
 test: statictest pytest
 statictest:
 	black -l $(MAXLEN) --check $(CODE) $(TESTS) setup.py
+	python3 -misort --check $(CODE) $(TESTS) setup.py
 	flake8 $(CODE) $(TESTS) setup.py
 	pylint $(CODE) $(TESTS) setup.py
-	python3 -misort --check $(CODE) $(TESTS) setup.py
 pytest:
 	$(PYTEST) $(PYTEST_OPTIONS) $(TESTS)
 
 format:
 	black -l $(MAXLEN) $(CODE) $(TESTS) setup.py
+	python3 -misort $(CODE) $(TESTS) setup.py
 
 precommit: format test
 
