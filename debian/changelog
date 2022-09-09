@@ -1,3 +1,9 @@
+sourcemgr (1.483) smurf; urgency=medium
+
+  * Uptick compat level to 13
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 09 Sep 2022 18:37:44 +0200
+
 sourcemgr (1.482) smurf; urgency=medium
 
   * Add "toml2deb" to build rudimentary Debian packaging from `pyproject.toml`.
