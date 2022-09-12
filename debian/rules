@@ -5,6 +5,8 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+# This is the debhelper compatibility version to use.
+
 D=$(CURDIR)/debian/sourcemgr
 
 ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
