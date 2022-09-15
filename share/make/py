@@ -10,7 +10,7 @@ PYTHON ?= python3
 PYTEST ?= pytest
 PYTEST_OPTIONS ?= -x
 TESTS ?= tests/
-CODE ?= $(PACKAGE)
+CODE ?= $(subst -,/,$(PACKAGE))
 MAXLEN ?= 99
 
 BUILD_DIR ?= build
