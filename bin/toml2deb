@@ -109,6 +109,13 @@ def main(no_deb, overwrite):
 export PYBUILD_NAME={named}
 %:
 	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_usrlocal:
+	if test -d debian/python3-{named}/usr/local/bin/ ; then \
+	mkdir -p debian/python3-{named}/usr/bin; \
+	mv debian/python3-{named}/usr/local/bin/* debian/python3-{named}/usr/bin; \
+	fi
+
 """)
 
     with open(deb/"compat","w") as f:
