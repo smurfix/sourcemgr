@@ -126,7 +126,7 @@ override_dh_usrlocal:
     with open(deb/"control","w") as f:
         f.write(f"""\
 Source: {named}
-Maintainer: {maint[0].name} {maint[0].email}
+Maintainer: "{maint[0].name}" <{maint[0].email}>
 Section: python
 Priority: optional
 Build-Depends: dh-python, python3-setuptools, python3-all, debhelper (>= 13),{dev_depends}{build_depends}
