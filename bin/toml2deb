@@ -35,7 +35,8 @@ def main(no_deb, overwrite):
     a 'pyproject.toml' file.
     """
     repo=git.Repo(".")
-    if not no_deb and repo.active_branch.name not in {"deb", "debian"}:
+    main = repo.active_branch.name
+    if not no_deb and main not in {"deb", "debian"}:
         print("Creating 'deb' branch")
         repo.git.checkout("HEAD", b="deb")
     tag=repo.git.describe(tags=True)
@@ -167,6 +168,17 @@ Description: {d.project.description}
     if repo.is_dirty(index=True, working_tree=False, untracked_files=False, submodules=False):
         repo.index.commit("Debianized.")
 
+    ign = Path(".gitignore")
+
+    if not no_deb:
+        repo.checkout(main)
+        with ign.open("a") as f:
+            f.write("\n# Debian packaging\n/debian/\n")
+        repo.index.add(ign)
+        repo.index.commit("Ignore Debian subdir")
+        main = repo.head
+        repo.checkout("deb")
+        repo.index.commit("Debian ignore", parent_commits=(repo.head, main))
 
 if __name__ == "__main__":
     main()
