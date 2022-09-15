@@ -52,7 +52,10 @@ def main(no_deb, overwrite):
     except FileNotFoundError:
         raise UsageError("This is not a Python module, or it doesn't have a 'pyproject.toml' file.")
     # yprint(d)
-    name = d.project.name
+    try:
+        name = d.project.name
+    except AttributeError:
+        name = d.tool.poetry.name
     named = name.replace(".","-").lower()
 
     try:
@@ -62,10 +65,13 @@ def main(no_deb, overwrite):
     if not maint:
         maint = [attrdict(name=os.environ["DEBFULLNAME"],email=os.environ["DEBEMAIL"])]
 
-    depends = "".join(dep_str(x) for x in d.project["dependencies"])
+    try:
+        depends = "".join(dep_str(x) for x in d.project["dependencies"])
+    except (AttributeError,KeyError):
+        depends = ""  # TODO
     try:
         dev_depends = d.project["optional-dependencies"]["dev"]
-    except KeyError:
+    except (AttributeError,KeyError):
         dev_depends = ""
     else:
         dev_depends = "".join(dep_str(x) for x in dev_depends)
@@ -73,7 +79,7 @@ def main(no_deb, overwrite):
     build_depends = ""
     try:
         deps = d["build-system"].requires
-    except KeyError:
+    except (AttributeError,KeyError):
         pass
     else:
         for dep in deps:
@@ -96,7 +102,11 @@ def main(no_deb, overwrite):
 
     # TODO process .md and .rst files?
     readme = ""
-    with open(d.project.readme,"r") as rm:
+    try:
+        rmf = d.project.readme
+    except AttributeError:
+        rmf = d.tool.poetry.readme
+    with open(rmf,"r") as rm:
         for n,l in enumerate(rm):
             readme += f"  {l.rstrip() or '.'}\n"
             if n>5 and not l.strip():
@@ -124,6 +134,14 @@ override_dh_usrlocal:
 13
 """)
 
+    try:
+        hp = d.project.urls.homepage
+    except AttributeError:
+        hp = d.tool.poetry.homepage
+    try:
+        desc = d.project.description
+    except AttributeError:
+        desc = d.tool.poetry.description
     with open(deb/"control","w") as f:
         f.write(f"""\
 Source: {named}
@@ -132,12 +150,12 @@ Section: python
 Priority: optional
 Build-Depends: dh-python, python3-setuptools, python3-all, debhelper (>= 13),{dev_depends}{build_depends}
 Standards-Version: 3.9.6
-Homepage: {d.project.urls.homepage}
+Homepage: {hp}
 
 Package: python3-{named}
 Architecture: all
 Depends: ${{misc:Depends}}, ${{python3:Depends}},{depends}
-Description: {d.project.description}
+Description: {desc}
 {readme}
 """)
 
