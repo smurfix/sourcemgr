@@ -81,8 +81,8 @@ untagged:
 	if git describe --tags --exact-match ; then exit 1; else exit 0; fi
 
 pypi:	tagged
-	if test -f dist/${PYPI}-$(shell git describe --tags --exact-match).tar.gz ; then echo "Source package exists."; elif test -f setup.py ; then python3 setup.py sdist ; else python3 -mbuild -sn ; fi
-	twine upload dist/${PYPI}-$(shell git describe --tags --exact-match).tar.gz
+	if test -f dist/${PYPI}-$(shell git describe --tags --exact-match).tar.gz ; then echo "Source package exists."; elif test -f setup.py ; then python3 setup.py sdist bdist_wheel ; else python3 -mbuild -sn ; fi
+	twine upload dist/${PYPI}-$(shell git describe --tags --exact-match).tar.gz dist/${PYPI}-$(shell git describe --tags --exact-match)-py3-none-any.whl
 
 upload: pypi
 	git push --tags
