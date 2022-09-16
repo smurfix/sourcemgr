@@ -11,7 +11,6 @@ PYTEST ?= pytest
 PYTEST_OPTIONS ?= -x
 TESTS ?= tests/
 CODE ?= $(subst -,/,$(PACKAGE))
-MAXLEN ?= 99
 
 BUILD_DIR ?= build
 INPUT_DIR ?= docs/source
@@ -61,15 +60,15 @@ cov:
 
 test: statictest pytest
 statictest:
-	black -l $(MAXLEN) --check $(CODE) $(TESTS) $(SETUP)
+	black --check $(CODE) $(TESTS) $(SETUP)
 	python3 -misort --check $(CODE) $(TESTS) $(SETUP)
-	flake8 $(CODE) $(TESTS) $(SETUP)
+	flake8p $(CODE) $(TESTS) $(SETUP)
 	pylint $(CODE) $(TESTS) $(SETUP)
 pytest:
 	$(PYTEST) $(PYTEST_OPTIONS) $(TESTS)
 
 format:
-	black -l $(MAXLEN) $(CODE) $(TESTS) $(SETUP)
+	black $(CODE) $(TESTS) $(SETUP)
 	python3 -misort $(CODE) $(TESTS) $(SETUP)
 
 precommit: format test
