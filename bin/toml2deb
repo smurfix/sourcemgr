@@ -41,6 +41,7 @@ def main(no_deb, overwrite):
     if not no_deb and main not in {"deb", "debian"}:
         print("Creating 'deb' branch")
         repo.git.checkout("HEAD", b="deb")
+
     tag=repo.git.describe(tags=True)
     i = tag.find("-")
     if i > -1:
@@ -191,14 +192,14 @@ Description: {desc}
     ign = Path(".gitignore")
 
     if not no_deb:
-        repo.checkout(main)
+        repo.heads.main.checkout()
         with ign.open("a") as f:
             f.write("\n# Debian packaging\n/debian/\n")
         repo.index.add(ign)
         repo.index.commit("Ignore Debian subdir")
-        main = repo.head
-        repo.checkout("deb")
-        repo.index.commit("Debian ignore", parent_commits=(repo.head, main))
+        repo.heads.deb.checkout()
+        repo.index.commit("Debian ignore", parent_commits=(repo.heads.deb.commit, repo.heads.main.commit))
+        repo.heads.main.checkout()
 
 if __name__ == "__main__":
     main()
