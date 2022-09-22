@@ -20,6 +20,8 @@ def dep_str(dep, prefix="python3-"):
             op = spec.operator
             if op in {'<', '>'}:
                 op += op
+            elif op == "~=":
+                op = ">="
             rr += r+f" ({op} {spec.version}),"
         return rr
 
