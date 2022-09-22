@@ -90,7 +90,7 @@ pypi:	tagged
 	fi
 	twine upload \
 		dist/${PYPI}-$(shell git describe --tags --exact-match).tar.gz \
-		dist/${PYPI}-$(shell git describe --tags --exact-match)-py3-none-any.whl
+		dist/$(subst -,_,${PYPI})-$(shell git describe --tags --exact-match)-py3-none-any.whl
 
 upload: pypi
 	git push --tags
