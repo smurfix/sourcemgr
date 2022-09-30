@@ -131,6 +131,7 @@ override_dh_usrlocal:
 	fi
 
 """)
+    (deb/"rules").chmod(0o755)
 
     with open(deb/"compat","w") as f:
         f.write(f"""\
