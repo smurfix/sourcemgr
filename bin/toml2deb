@@ -141,7 +141,10 @@ override_dh_usrlocal:
     try:
         hp = d.project.urls.homepage
     except AttributeError:
-        hp = d.tool.poetry.homepage
+        try:
+            hp = d.tool.poetry.homepage
+        except AttributeError:
+            hp = d.project.urls["Source code"]
     try:
         desc = d.project.description
     except AttributeError:
