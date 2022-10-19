@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TEMP=$(getopt -o 'aed:' -n "$(basename "$0")" -- "$@")
+TEMP=$(getopt -o 'aed:p' -n "$(basename "$0")" -- "$@")
 if [ $? -ne 0 ]; then
         echo 'Terminating...' >&2
         exit 1
@@ -11,6 +11,7 @@ unset TEMP
 TT=n
 ED=n
 DEB=
+PYPI=y
 while true ; do
     case "$1" in
         '-a')
@@ -19,6 +20,9 @@ while true ; do
         '-d')
             DEB="$2"
             shift 2 ;;
+        '-p')
+            PYPI=n
+            shift ;;
         '-e')
             ED=y
             shift ;;
@@ -68,6 +72,8 @@ fi
 git commit -a -m "Merge to $T"
 debch
 git checkout "$B"
-if test -s setup.py || test -s pyproject.toml ; then
-    make pypi
+if test $PYPI = "y" ; then
+    if test -s setup.py || test -s pyproject.toml ; then
+        make pypi
+    fi
 fi
