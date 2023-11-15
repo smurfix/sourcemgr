@@ -54,7 +54,7 @@ else
 fi
 
 for a in $GIT_ARCHIVES ; do
-	git push $a && rm -f $TF
+	git push --no-recurse-submodules $a && rm -f $TF
 done
 
 V=$(dpkg-parsechangelog -S Version | sed -e s/^42:// | sed -e 's/~/-/g')
