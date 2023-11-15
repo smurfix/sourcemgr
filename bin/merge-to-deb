@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TEMP=$(getopt -o 'aed:p' -n "$(basename "$0")" -- "$@")
+TEMP=$(getopt -o 'aed:pt:' -n "$(basename "$0")" -- "$@")
 if [ $? -ne 0 ]; then
         echo 'Terminating...' >&2
         exit 1
@@ -8,10 +8,12 @@ fi
 eval set -- "$TEMP"
 unset TEMP
 
+T=
 TT=n
 ED=n
 DEB=
 PYPI=y
+VERS=
 while true ; do
     case "$1" in
         '-a')
@@ -26,6 +28,9 @@ while true ; do
         '-e')
             ED=y
             shift ;;
+        '-t')
+            T="$2"
+            shift 2 ;;
         '--')
             break ;;
         *)
@@ -35,7 +40,9 @@ while true ; do
 done
 
 set -ex
-if test "$TT" = "y" ; then
+if test -n "$T" ; then
+    :
+elif test "$TT" = "y" ; then
     T=$(git describe --tags | sed -e 's/-.*//')
 else
     T=$(git describe --tags --exact-match)
