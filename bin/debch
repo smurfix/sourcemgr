@@ -1,4 +1,26 @@
 #!/bin/bash
+
+TEMP=$(getopt -o 'ad:' -n "$(basename "$0")" -- "$@")
+if [ $? -ne 0 ]; then
+        echo 'Terminating...' >&2
+        exit 1
+fi
+eval set -- "$TEMP"
+unset TEMP
+
+APPEND=n
+while true ; do
+    case "$1" in
+        '-a')
+            APPEND=y
+            shift ;;
+        *)
+            echo "Unknown argument '$1'" >&2
+            exit 1
+    esac
+done
+
+
 GIT_ARCHIVES=$(git config --get-regexp 'remote\...*\.push' | sort -u | sed -ne 's/^remote\.\([a-z]*\)\.push[= ].*/\1/p')
 if [ -s /etc/default/sourcemgr ]  ; then
 . /etc/default/sourcemgr
@@ -29,7 +51,7 @@ if [ -f $TF ] ; then
 	exit 1
 fi
 
-if [ "$1" = "" -a $( (git diff --cached --name-only; git ls-files --modified --deleted --exclude-standard) | wc -l ) -eq 0 ] && git diff --name-only HEAD^ HEAD | fgrep -qs debian/changelog ; then
+if [ $APPEND = y -a $( (git diff --cached --name-only; git ls-files --modified --deleted --exclude-standard) | wc -l ) -eq 0 ] && git diff --name-only HEAD^ HEAD | fgrep -qs debian/changelog ; then
 	echo "You have no uncommitted changes. Proceeding to build."
 else
 	if [ -z "$EMAIL" ] && ! grep -qs '^DEBEMAIL=' $HOME/.devscripts.conf ; then
@@ -46,7 +68,7 @@ else
 	if [ $(stat -c '%Y' debian/changelog) = $mt ] ; then exit 1; fi
 
 	dpkg-parsechangelog -S Changes | tail -n +4 | sed -e 's/^  //' > $TF
-	if [ "$1" = "-a" ] ; then
+	if [ $APPEND = "y" ] ; then
 		git commit --amend -a -e -F $TF
 	else
 		git commit -a -e -F $TF
