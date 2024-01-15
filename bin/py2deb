@@ -1,6 +1,6 @@
 #!/bin/sh -ex
 
-test -f setup.py
+test -f setup.py || test -f pyproject.toml
 test ! -e debian
 rm -rf deb_dist
 python3 setup.py --command-packages=stdeb.command debianize --suite smurf --maintainer "Matthias Urlichs <matthias@urlichs.de>" "$@"
@@ -15,8 +15,15 @@ cat >debian/.gitignore <<_
 _
 echo 13 >debian/compat
 sed -ne 's#^Package: #/#p' <debian/control >>debian/.gitignore
-sed -ne 's#buildsystem=.*#buildsystem=pybuild#'
-uniq < debian/control > /tmp/x && mv /tmp/x debian/control
+sed -i -e 's#buildsystem=.*#buildsystem=pybuild#' debian/rules
+
+T=$(mktemp)
+if uniq < debian/control > $T ; then
+	mv $T debian/control
+else
+	rm -f $T
+	exit 1
+fi
 
 fgrep -qs .pybuild .gitignore || echo '/.pybuild/' >>.gitignore	
 git add debian .gitignore
