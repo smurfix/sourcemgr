@@ -58,7 +58,11 @@ def main(no_deb, overwrite):
     try:
         name = d.project.name
     except AttributeError:
-        name = d.tool.poetry.name
+        try:
+            name = d.tool.poetry.name
+        except AttributeError:
+            name = d.tool.flit.metadata["dist-name"]
+
     named = name.replace(".","-").lower()
 
     try:
@@ -108,7 +112,10 @@ def main(no_deb, overwrite):
     try:
         rmf = d.project.readme
     except AttributeError:
-        rmf = d.tool.poetry.readme
+        try:
+            rmf = d.tool.poetry.readme
+        except AttributeError:
+            rmf = d.tool.flit.metadata["description-file"]
     with open(rmf,"r") as rm:
         for n,l in enumerate(rm):
             readme += f"  {l.rstrip() or '.'}\n"
@@ -145,14 +152,21 @@ override_dh_usrlocal:
             hp = d.tool.poetry.homepage
         except AttributeError:
             try:
-                hp = d.project.urls["Source code"]
-            except KeyError:
-                hp = ""
+                hp = d.tool.flit.metadata["home-page"]
+            except AttributeError:
+                try:
+                    hp = d.project.urls["Source code"]
+                except KeyError:
+                    hp = ""
 
     try:
         desc = d.project.description
     except AttributeError:
-        desc = d.tool.poetry.description
+        try:
+            desc = d.tool.poetry.description
+        except AttributeError:
+            desc,readme = readme.split("\n",1)
+            desc = desc.strip()
     with open(deb/"control","w") as f:
         f.write(f"""\
 Source: {named}
