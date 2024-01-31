@@ -45,7 +45,7 @@ if [ $(git ls-files --others --exclude-standard | wc -l) -gt 0 ] ; then
 	exit 1
 fi
 
-TF=$(tempfile)
+TF=$(mktemp)
 trap 'rm -f $TF; echo FAIL >&2' 0
 touch $TF
 
