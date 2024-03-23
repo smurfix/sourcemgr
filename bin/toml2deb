@@ -156,7 +156,7 @@ override_dh_usrlocal:
             except AttributeError:
                 try:
                     hp = d.project.urls["Source code"]
-                except KeyError:
+                except (AttributeError,KeyError):
                     hp = ""
 
     try:

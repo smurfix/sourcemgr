@@ -1,3 +1,9 @@
+sourcemgr (1.484) smurf; urgency=medium
+
+  * toml2deb requires dparse
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sat, 23 Mar 2024 17:50:36 +0100
+
 sourcemgr (1.483) smurf; urgency=medium
 
   * Uptick compat level to 13
