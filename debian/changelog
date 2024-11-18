@@ -110,14 +110,9 @@ sourcemgr (1.484) smurf; urgency=medium
 
   * Compat 13
   * add isort
+  * toml2deb requires dparse
 
- -- Matthias Urlichs <matthias@urlichs.de>  Mon, 13 Jun 2022 18:33:15 +0200
-
-sourcemgr (1.483) smurf; urgency=medium
-
-  * Merge
-
- -- Matthias Urlichs <matthias@urlichs.de>  Tue, 31 Aug 2021 14:55:25 +0200
+ -- Matthias Urlichs <matthias@urlichs.de>  Sat, 23 Mar 2024 17:50:36 +0100
 
 sourcemgr (1.483) smurf; urgency=medium
 
