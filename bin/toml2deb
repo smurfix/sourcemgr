@@ -115,7 +115,15 @@ def main(no_deb, overwrite):
         try:
             rmf = d.tool.poetry.readme
         except AttributeError:
-            rmf = d.tool.flit.metadata["description-file"]
+            try:
+                rmf = d.tool.flit.metadata["description-file"]
+            except AttributeError:
+                for f in ("README.txt","README.md","README.rst"):
+                    if os.path.exists(f):
+                        rmf = f
+                        break
+                else:
+                    raise RuntimeError("no README found") from None
     with open(rmf,"r") as rm:
         for n,l in enumerate(rm):
             readme += f"  {l.rstrip() or '.'}\n"
