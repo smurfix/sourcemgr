@@ -148,6 +148,8 @@ mk() {
 	cd $X/$Y
 	$R --chdir=/$Y rm -f *-build-deps_*.changes
 	dput -u ext *.changes || true  # maybe can't write here
+
+	cd "$C"
 	if test $xd = "unstable" ; then
 		git tag smurf/$vv || true
 	else
