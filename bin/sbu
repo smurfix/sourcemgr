@@ -1,0 +1,203 @@
+#!/bin/bash
+
+# build a local dir
+#
+set -u -o pipefail -ex
+umask 022
+
+B=minbase
+S=smurf
+NC=
+BIN=-b
+F=
+C="$(/bin/pwd)"
+
+usage() {
+	if [ $# -gt 0 ] ; then
+		echo "$0: $*"
+		echo "" >&2
+		cat >&2
+	else
+		echo "$0: Simple Build (in a chroot, and tag)."
+		echo ""
+		cat
+	fi <<END
+Usage: $0 [options]
+-A          use all available archs / distributions
+            otherwise default to amd64/testing
+-a ARCH     architecture (default: all)
+-B          only build arch-dependant binaries
+-d DIST     distribution (default: all)
+-f FLAGS    flags for debuild
+-n NAME     name of the generated package (default: basename)
+-N          don't clean the source
+-v VERSION  Package version (default: TAG-1)
+END
+	if test $# -gt 0 ; then
+		echo "$*" >&2
+	else
+		echo 'Terminating...' >&2
+	fi
+	exit 1
+}
+
+TEMP="$(getopt -o 'Aa:Bd:hNn:v:' -n "$(basename "$0")" -- "$@")"
+if [ $? -ne 0 ] ; then usage "Invalid argument"; fi
+
+eval set -- "$TEMP"
+unset TEMP
+BIN=-b
+MBIN=
+while true ; do
+    case "$1" in
+		('-A')
+	    ALL=y; shift ;;
+	('-a')
+	    shift; A=$1; shift ;;
+	('-B')
+	    BIN=-B; shift ;;
+	('-d')
+	    shift; Z=$1; shift ;;
+	('-f')
+	    shift; F="$1"; shift ;;
+	('-h')
+		usage ;;
+	('-n')
+	    shift; N=$1; shift ;;
+	('-N')
+	    NC="-nc"; shift ;;
+	('-v')
+	    shift; V=$1; shift ;;
+	('--')
+		shift; break ;;
+    *)
+        usage "Unknown argument '$1'"
+    esac
+done
+if test ! -v N ; then N=$(basename "$C"); fi
+
+export LC_ALL=C.UTF-8
+
+if [ $(git ls-files --modified --deleted --others --exclude-standard | wc -l) -gt 0 ] ; then
+	echo "Unsaved changes. Not building."
+	exit 1
+fi
+
+sv() {
+	case $1 in
+		(oldoldstable|buster) echo 10 ;;
+		(oldstable|bullseye) echo 11 ;;
+		(stable|bookworm) echo 12 ;;
+		(testing|trixie) echo 13 ;;
+		(unstable) echo 987 ;;
+		(experimental) echo 999 ;;
+		(*)
+			usage "Dunno Debian version for '$1'"
+	esac
+}
+
+next_tag() {
+	local v="$1"
+	v=$(echo $v|sed -e 's#\.#\\.#g')
+	local m="$(git tag|sed -ne "s|^\(.*/\)\?$v.*-\([0-9]\+\)$|\2|p"|sort -rn|head -1)"
+	if test -n "$m" ; then m=$(expr $m + 1 ) ; else m=1; fi
+	echo $m
+}
+
+mk() {
+	local X=$1
+	local Y=$2
+	local xd=$3
+	local vv
+	local a
+	local b
+	local vn
+
+
+	cd "$C"
+
+	if test -v V ; then
+		vv=$V
+	else
+		vv="$(git describe --tags)"
+		vv="$(basename $vv)"
+		IFS="-" read vv b < <(echo $vv)
+		vn=$(next_tag $vv)
+	fi
+
+	# extract epoch
+	vx=$(dpkg-parsechangelog  -l debian/changelog  -S version | sed -ne 's/^\([0-9]\):.*/\1:/p')
+
+	export EMAIL=${DEBEMAIL?:$EMAIL}
+	export FULLNAME=${DEBFULLNAME?:$FULLNAME}
+	local R="sudo --preserve-env=EMAIL,FULLNAME systemd-nspawn -E EMAIL -E FULLNAME --private-users=pick -D $X --bind-ro=$C:/$Y/orig:rootidmap"
+	$R --chdir=/$Y git clone --depth 1 --shallow-submodules orig src
+	$R eatmydata apt update
+	$R --chdir=/$Y eatmydata mk-build-deps -i -t 'apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' src/debian/control
+	$R --chdir=/$Y/src debchange -b -D $xd -v "$vx$vv" "Autobuild."
+	# $R dpkg --unpack /$Y/$(cd $X/$Y; ls | grep '.*-build-deps_.*\.deb$')
+	# $R eatmydata apt-get --no-install-recommends --yes -f install
+	# test -v SH && $R /bin/bash
+	if test -f bootstrap.sh ; then
+		$R --chdir=/$Y/src bash bootstrap.sh
+	fi
+	$R --chdir=/$Y/src eatmydata debuild -eDEB_BUILD_OPTIONS='$F' $MBIN -us -uc $NC -j$(( $(nproc) * 3 / 2))
+
+	test -n "$NC" || git ls-files --others -z | xargs -0r rm -f
+
+	$R --chdir=/$Y rm -f ../*-build-deps_*.changes
+	cd $X/$Y
+	dput -u ext *.changes
+	if test $xd = "unstable" ; then
+		git tag smurf/$vv || true
+	else
+		git tag smurf/$xd/$vv || true
+	fi
+}
+
+mk2() {
+	local xd=$1
+	local xa=$2
+	local DR=$D/$xd/$xa
+	local X=$D/make/$xd/$xa
+	local Y=build/$N
+
+	if test -n "$NC" ; then
+		test -d $X || usage "Noclean set but doesn't exist"
+	else
+		test -d $X && sudo btrfs subvolume delete $X
+		sudo mkdir -p $(dirname $X)
+		sudo btrfs subvolume snapshot $DR $X
+	fi
+
+	sudo mkdir -p $X/$Y/orig
+
+	mk $X $Y $xd
+}
+
+mk1() {
+	local xd=$1
+	local DD=$D/$xd
+
+	MBIN="$BIN"
+	if test -v A ; then
+		mk2 $xd $A
+	elif test -v ALL ; then
+		for dd in $(ls $DD) ; do
+			mk2 $xd $dd
+			MBIN="-B"
+		done
+	else
+		mk2 $xd amd64
+	fi
+}
+
+D=/srv/build/minbase
+if test -v Z ; then
+	mk1 $Z
+elif test -v ALL ; then
+	for d in $(ls $D) ; do mk1 $d; done
+else
+	mk1 testing
+fi
+

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+set -e
+cp /dev/null /etc/schroot/schroot.conf.new
+
+T=$(mktemp -d)
+trap 'rm -r $T' EXIT
+
+DIST="stable testing unstable"
+ARCH="arm64 amd64 armhf"
+
+for D in $DIST; do for A in $ARCH; do
+
+	(
+		tf=$T/$A-$D
+		if mkboot -a $A -v minbase -s $D -m http://ftp.de.debian.org/debian git >$tf 2>&1 ; then
+			rm $tf
+		fi
+	) &
+
+done;done
+wait
+
+err=$(find $T -type f | wc -l)
+if [ $err -gt 0 ] ; then
+	echo ERRORS:
+	for f in $(ls $T) ; do
+		echo "**********" $f "**********"
+		cat $T/$F
+		echo "**********"
+		echo ""
+	done
+	exit 1
+fi
