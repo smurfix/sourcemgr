@@ -5,6 +5,7 @@ set -u -o pipefail -e
 D=/srv/build
 S=stable
 V=base
+SM=
 M=http://mirror.noris.net/debian/
 
 usage() {
@@ -16,6 +17,7 @@ Usage: $ [options]
 -m MIRROR   mirror to use ($M)
 -v VERSION  debbootstrap version ($V)
 -s RELEASE  OS release ($S)
+-S          add smurf.noris.de repo
 PACKAGES    additional packages to install
 END
         if test $# -gt 0 ; then
@@ -26,7 +28,7 @@ END
         exit 1
 }
 
-TEMP="$(getopt -o 'fa:d:m:s:v:' -n "$(basename "$0")" -- "$@")"
+TEMP="$(getopt -o 'fa:d:m:s:Sv:' -n "$(basename "$0")" -- "$@")"
 if [ $? -ne 0 ]; then usage; fi
 
 eval set -- "$TEMP"
@@ -44,6 +46,8 @@ while true ; do
 	    shift; M=$1; shift ;;
 	'-v')
 	    shift; V=$1; shift ;;
+	'-S')
+	    SM=Y; shift ;;
 	'-s')
 	    shift; S=$1; shift ;;
         '--')
@@ -70,19 +74,13 @@ fi
 
 export LC_ALL=C.UTF-8
 
-chroot $B apt update
-if ! test -v V ; then
-	chroot $B apt -o APT::Install-Recommends=false -o APT::Get::Assume-Yes=true install gnupg
-	wget -q -O $B/tmp/pgp_key.asc http://build.smurf.noris.de/info/pgp_key.asc
-	chroot $B apt-key add /tmp/pgp_key.asc
-	rm $B/tmp/pgp_key.asc
+if test -n "$SM" && ! test -s $B/etc/apt/trusted.gpg.d/smurf.archive.gpg ; then
 	cat >$B/etc/apt/sources.list.d/smurf.list <<END
 deb http://build.smurf.noris.de $S main
-deb http://build.smurf.noris.de smurf main
 END
-
-	chroot $B apt update
+	wget -O $B/etc/apt/trusted.gpg.d/smurf.archive.gpg http://build.smurf.noris.de:/info/smurf.archive.gpg
 fi
+chroot $B apt update
 chroot $B apt -o APT::Install-Recommends=false -o APT::Get::Assume-Yes=true dist-upgrade
 chroot $B apt -o APT::Install-Recommends=false -o APT::Get::Assume-Yes=true install eatmydata
 chroot $B eatmydata apt -o APT::Install-Recommends=false -o APT::Get::Assume-Yes=true install build-essential devscripts equivs $@
