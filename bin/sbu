@@ -41,19 +41,22 @@ END
 	exit 1
 }
 
-TEMP="$(getopt -o 'Aa:Bd:hNn:v:' -n "$(basename "$0")" -- "$@")"
+TEMP="$(getopt -o 'Aa:b:Bd:hNn:v:' -n "$(basename "$0")" -- "$@")"
 if [ $? -ne 0 ] ; then usage "Invalid argument"; fi
 
 eval set -- "$TEMP"
 unset TEMP
 BIN=-b
 MBIN=
+BR=
 while true ; do
     case "$1" in
 		('-A')
 	    ALL=y; shift ;;
 	('-a')
 	    shift; A=$1; shift ;;
+	('-b')
+	    shift; BR=$1; shift ;;
 	('-B')
 	    BIN=-B; shift ;;
 	('-d')
@@ -81,6 +84,25 @@ export LC_ALL=C.UTF-8
 if [ $(git ls-files --modified --deleted --others --exclude-standard | wc -l) -gt 0 ] ; then
 	echo "Unsaved changes. Not building."
 	exit 1
+fi
+
+CBR=$(git branch --show-current)
+if test -n "$BR" ; then
+	:
+elif [ "$CBR" = "deb" ] || [ "$CBR" = "debian" ] ; then
+    BR=$CBR
+elif git describe --all deb >/dev/null 2>&1; then
+    BR=deb
+elif git describe --all debian >/dev/null 2>&1; then
+    BR=debian
+elif test ! -f debian/changelog ; then
+    echo "Neither 'deb' nor 'debian' branches found." >&2
+    exit 1
+elif test -n "$CBR" ; then
+	BR=$CBR
+else
+    echo "The current checkout is headless!" >&2
+    exit 1
 fi
 
 sv() {
@@ -132,7 +154,7 @@ mk() {
 	export FULLNAME=${DEBFULLNAME?:$FULLNAME}
 
 	local R="sudo --preserve-env=EMAIL,FULLNAME systemd-nspawn -E EMAIL -E FULLNAME --private-users=pick -D $X --bind-ro=$C:/$Y/orig:rootidmap"
-	test -n "$NC" || $R --chdir=/$Y git clone --depth 1 --shallow-submodules orig src
+	test -n "$NC" || $R --chdir=/$Y git clone --depth 1 -b $BR --shallow-submodules orig src
 	$R --chdir=/$Y/src git submodule update --init
 
 	test "$ov" = "$vx$vv" || $R --chdir=/$Y/src debchange -b -D $xd -v "$vx$vv" "Autobuild."
