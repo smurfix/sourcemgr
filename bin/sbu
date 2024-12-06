@@ -41,7 +41,7 @@ END
 	exit 1
 }
 
-TEMP="$(getopt -o 'Aa:b:Bd:hNn:v:' -n "$(basename "$0")" -- "$@")"
+TEMP="$(getopt -o 'Aa:b:Bd:f:hNn:v:' -n "$(basename "$0")" -- "$@")"
 if [ $? -ne 0 ] ; then usage "Invalid argument"; fi
 
 eval set -- "$TEMP"
