@@ -99,7 +99,7 @@ sv() {
 next_tag() {
 	local v="$1"
 	v=$(echo $v|sed -e 's#\.#\\.#g')
-	local m="$(git tag|sed -ne "s|^\(.*/\)\?$v.*-\([0-9]\+\)$|\2|p"|sort -rn|head -1)"
+	local m="$(git tag|sed -ne "s/^v//" -e "s|^\(.*/\)\?$v.*-\([0-9]\+\)$|\2|p"|sort -rn|head -1)"
 	if test -n "$m" ; then m=$(expr $m + 1 ) ; else m=1; fi
 	echo $m
 }
@@ -120,6 +120,7 @@ mk() {
 	else
 		vv="$(git describe --tags)"
 		vv="$(basename $vv)"
+		vv="${vv#v}"
 		IFS="-" read vv b < <(echo $vv)
 		vv="$vv-$(next_tag $vv)"
 	fi
@@ -127,14 +128,15 @@ mk() {
 	# extract epoch
 	vx=$(dpkg-parsechangelog  -l debian/changelog  -S version | sed -ne 's/^\([0-9]\):.*/\1:/p')
 	local ov="$(dpkg-parsechangelog  -l debian/changelog  -S version)"
-
-	local R="sudo --preserve-env=EMAIL,FULLNAME systemd-nspawn -E EMAIL -E FULLNAME --private-users=pick -D $X --bind-ro=$C:/$Y/orig:rootidmap"
-	test "$ov" = "$vx$vv" || $R --chdir=/$Y/src debchange -b -D $xd -v "$vx$vv" "Autobuild."
-
 	export EMAIL=${DEBEMAIL?:$EMAIL}
 	export FULLNAME=${DEBFULLNAME?:$FULLNAME}
+
+	local R="sudo --preserve-env=EMAIL,FULLNAME systemd-nspawn -E EMAIL -E FULLNAME --private-users=pick -D $X --bind-ro=$C:/$Y/orig:rootidmap"
 	test -n "$NC" || $R --chdir=/$Y git clone --depth 1 --shallow-submodules orig src
 	$R --chdir=/$Y/src git submodule update --init
+
+	test "$ov" = "$vx$vv" || $R --chdir=/$Y/src debchange -b -D $xd -v "$vx$vv" "Autobuild."
+
 	test -n "$NC" || $R eatmydata apt update
 	$R --chdir=/$Y eatmydata mk-build-deps -i -t 'apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' src/debian/control
 
