@@ -127,11 +127,12 @@ mk() {
 	# extract epoch
 	vx=$(dpkg-parsechangelog  -l debian/changelog  -S version | sed -ne 's/^\([0-9]\):.*/\1:/p')
 	local ov="$(dpkg-parsechangelog  -l debian/changelog  -S version)"
+
+	local R="sudo --preserve-env=EMAIL,FULLNAME systemd-nspawn -E EMAIL -E FULLNAME --private-users=pick -D $X --bind-ro=$C:/$Y/orig:rootidmap"
 	test "$ov" = "$vx$vv" || $R --chdir=/$Y/src debchange -b -D $xd -v "$vx$vv" "Autobuild."
 
 	export EMAIL=${DEBEMAIL?:$EMAIL}
 	export FULLNAME=${DEBFULLNAME?:$FULLNAME}
-	local R="sudo --preserve-env=EMAIL,FULLNAME systemd-nspawn -E EMAIL -E FULLNAME --private-users=pick -D $X --bind-ro=$C:/$Y/orig:rootidmap"
 	test -n "$NC" || $R --chdir=/$Y git clone --depth 1 --shallow-submodules orig src
 	$R --chdir=/$Y/src git submodule update --init
 	test -n "$NC" || $R eatmydata apt update
@@ -155,6 +156,7 @@ mk() {
 	else
 		git tag smurf/$xd/$vv || true
 	fi
+	git push-all
 }
 
 mk2() {
