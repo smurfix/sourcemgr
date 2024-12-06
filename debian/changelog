@@ -1,3 +1,9 @@
+sourcemgr (1.510.1) smurf; urgency=medium
+
+  * Merge
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 06 Dec 2024 11:39:43 +0100
+
 sourcemgr (1.508.1) smurf; urgency=medium
 
   * Merge
