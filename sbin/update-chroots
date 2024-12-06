@@ -13,7 +13,7 @@ for D in $DIST; do for A in $ARCH; do
 
 	(
 		tf=$T/$A-$D
-		if mkboot -a $A -v minbase -s $D -m http://ftp.de.debian.org/debian git >$tf 2>&1 ; then
+		if mkboot -S -a $A -v minbase -s $D -m http://ftp.de.debian.org/debian git >$tf 2>&1 ; then
 			rm $tf
 		fi
 	) &
