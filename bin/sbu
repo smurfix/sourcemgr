@@ -150,6 +150,10 @@ mk() {
 	# extract epoch
 	vx=$(dpkg-parsechangelog  -l debian/changelog  -S version | sed -ne 's/^\([0-9]\):.*/\1:/p')
 	local ov="$(dpkg-parsechangelog  -l debian/changelog  -S version)"
+	if dpkg --compare-versions $vv "<<" $ov ; then
+		vv="$ov"
+		echo "WARNING using Debian version '$ov' instead of '$vv'"
+	fi
 	export EMAIL=${DEBEMAIL?:$EMAIL}
 	export FULLNAME=${DEBFULLNAME?:$FULLNAME}
 
