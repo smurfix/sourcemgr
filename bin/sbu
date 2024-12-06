@@ -111,7 +111,6 @@ mk() {
 	local vv
 	local a
 	local b
-	local vn
 
 
 	cd "$C"
@@ -122,28 +121,29 @@ mk() {
 		vv="$(git describe --tags)"
 		vv="$(basename $vv)"
 		IFS="-" read vv b < <(echo $vv)
-		vn=$(next_tag $vv)
+		vv="$vv-$(next_tag $vv)"
 	fi
 
 	# extract epoch
 	vx=$(dpkg-parsechangelog  -l debian/changelog  -S version | sed -ne 's/^\([0-9]\):.*/\1:/p')
+	local ov="$(dpkg-parsechangelog  -l debian/changelog  -S version)"
+	test "$ov" = "$vx$vv" || $R --chdir=/$Y/src debchange -b -D $xd -v "$vx$vv" "Autobuild."
 
 	export EMAIL=${DEBEMAIL?:$EMAIL}
 	export FULLNAME=${DEBFULLNAME?:$FULLNAME}
 	local R="sudo --preserve-env=EMAIL,FULLNAME systemd-nspawn -E EMAIL -E FULLNAME --private-users=pick -D $X --bind-ro=$C:/$Y/orig:rootidmap"
-	$R --chdir=/$Y git clone --depth 1 --shallow-submodules orig src
-	$R eatmydata apt update
+	test -n "$NC" || $R --chdir=/$Y git clone --depth 1 --shallow-submodules orig src
+	$R --chdir=/$Y/src git submodule update --init
+	test -n "$NC" || $R eatmydata apt update
 	$R --chdir=/$Y eatmydata mk-build-deps -i -t 'apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' src/debian/control
-	$R --chdir=/$Y/src debchange -b -D $xd -v "$vx$vv" "Autobuild."
+
 	# $R dpkg --unpack /$Y/$(cd $X/$Y; ls | grep '.*-build-deps_.*\.deb$')
 	# $R eatmydata apt-get --no-install-recommends --yes -f install
 	# test -v SH && $R /bin/bash
 	if test -f bootstrap.sh ; then
 		$R --chdir=/$Y/src bash bootstrap.sh
 	fi
-	$R --chdir=/$Y/src eatmydata debuild -eDEB_BUILD_OPTIONS='$F' $MBIN -us -uc $NC -j$(( $(nproc) * 3 / 2))
-
-	test -n "$NC" || git ls-files --others -z | xargs -0r rm -f
+	$R --chdir=/$Y/src eatmydata debuild -eDEB_BUILD_OPTIONS="$F" $MBIN -us -uc $NC -j$(( $(nproc) * 3 / 2))
 
 	cd $X/$Y
 	$R --chdir=/$Y rm -f *-build-deps_*.changes
