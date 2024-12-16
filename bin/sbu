@@ -32,6 +32,7 @@ Usage: $0 [options]
 -n NAME     name of the generated package (default: basename)
 -N          don't clean the source
 -v VERSION  Package version (default: TAG-1)
+-V          use existing version from debian/changelog
 END
 	if test $# -gt 0 ; then
 		echo "$*" >&2
@@ -41,7 +42,7 @@ END
 	exit 1
 }
 
-TEMP="$(getopt -o 'Aa:b:Bd:f:hNn:v:' -n "$(basename "$0")" -- "$@")"
+TEMP="$(getopt -o 'Aa:b:Bd:f:hNn:v:V' -n "$(basename "$0")" -- "$@")"
 if [ $? -ne 0 ] ; then usage "Invalid argument"; fi
 
 eval set -- "$TEMP"
@@ -71,6 +72,8 @@ while true ; do
 	    NC="-nc"; shift ;;
 	('-v')
 	    shift; V=$1; shift ;;
+	('-V')
+	    VR=y; shift ;;
 	('--')
 		shift; break ;;
     *)
@@ -103,6 +106,10 @@ elif test -n "$CBR" ; then
 else
     echo "The current checkout is headless!" >&2
     exit 1
+fi
+
+if test -v VR ; then
+	V=$(dpkg-parsechangelog  -l debian/changelog  -S version | sed -e 's/^\[0-9]\://p')
 fi
 
 sv() {
@@ -157,7 +164,7 @@ mk() {
 	export EMAIL=${DEBEMAIL?:$EMAIL}
 	export FULLNAME=${DEBFULLNAME?:$FULLNAME}
 
-	local R="sudo --preserve-env=EMAIL,FULLNAME systemd-nspawn -E EMAIL -E FULLNAME --private-users=pick -D $X --bind-ro=$C:/$Y/orig:rootidmap"
+	local R="sudo --preserve-env=EMAIL,FULLNAME systemd-nspawn -E EMAIL -E FULLNAME --private-users=pick -D $X --bind-ro=$C:/$Y/orig:rootidmap --bind=/srv/build/cache:/var/cache/apt/archives:rootidmap"
 	test -n "$NC" || $R --chdir=/$Y git clone --depth 1 -b $BR --shallow-submodules orig src
 	$R --chdir=/$Y/src git submodule update --init
 
