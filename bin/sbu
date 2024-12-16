@@ -164,7 +164,7 @@ mk() {
 	export EMAIL=${DEBEMAIL?:$EMAIL}
 	export FULLNAME=${DEBFULLNAME?:$FULLNAME}
 
-	local R="sudo --preserve-env=EMAIL,FULLNAME systemd-nspawn -E EMAIL -E FULLNAME --private-users=pick -D $X --bind-ro=$C:/$Y/orig:rootidmap"
+	local R="sudo --preserve-env=EMAIL,FULLNAME systemd-nspawn -E EMAIL -E FULLNAME --private-users=pick -D $X --bind-ro=$C:/$Y/orig:rootidmap --bind=/srv/build/cache:/var/cache/apt/archives:rootidmap"
 	test -n "$NC" || $R --chdir=/$Y git clone --depth 1 -b $BR --shallow-submodules orig src
 	$R --chdir=/$Y/src git submodule update --init
 
