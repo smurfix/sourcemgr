@@ -10,8 +10,7 @@ PYTHON ?= python3
 PYTEST ?= pytest
 PYTEST_OPTIONS ?= -x
 TESTS ?= tests/
-CODE ?= $(PACKAGE)
-MAXLEN ?= 99
+CODE ?= $(subst -,/,$(PACKAGE))
 
 BUILD_DIR ?= build
 INPUT_DIR ?= docs/source
@@ -27,6 +26,12 @@ AUTOSPHINXOPTS := -i *~ -i *.sw* -i Makefile*
 
 SPHINXBUILDDIR ?= $(BUILD_DIR)/sphinx/html
 ALLSPHINXOPTS ?= -d $(BUILD_DIR)/sphinx/doctrees $(SPHINXOPTS) docs
+
+ifneq ($(wildcard setup.py),)
+	SETUP := setup.py
+else
+	SETUP :=
+endif
 
 it: untagged test push tag format deb pypi
 itt: untagged test push ttag format deb pypi
@@ -55,14 +60,16 @@ cov:
 
 test: statictest pytest
 statictest:
-	black -l $(MAXLEN) --check $(CODE) $(TESTS) setup.py
-	flake8 $(CODE) $(TESTS) setup.py
-	pylint $(CODE) $(TESTS) setup.py
+	black --check $(CODE) $(TESTS) $(SETUP)
+	python3 -misort --check $(CODE) $(TESTS) $(SETUP)
+	flake8p $(CODE) $(TESTS) $(SETUP)
+	pylint $(CODE) $(TESTS) $(SETUP)
 pytest:
 	$(PYTEST) $(PYTEST_OPTIONS) $(TESTS)
 
 format:
-	black -l $(MAXLEN) $(CODE) $(TESTS) setup.py
+	black $(CODE) $(TESTS) $(SETUP)
+	python3 -misort $(CODE) $(TESTS) $(SETUP)
 
 precommit: format test
 
@@ -74,9 +81,16 @@ untagged:
 	if git describe --tags --exact-match ; then exit 1; else exit 0; fi
 
 pypi:	tagged
-	python3 setup.py sdist
-	#python3 setup.py upload
-	twine upload dist/${PYPI}-$(shell git describe --tags --exact-match).tar.gz
+	if test -f dist/${PYPI}-$(shell git describe --tags --exact-match).tar.gz ; then \
+		echo "Source package exists."; \
+	elif test -f setup.py ; then \
+		python3 setup.py sdist bdist_wheel ; \
+	else \
+		python3 -mbuild -snw ; \
+	fi
+	twine upload \
+		dist/${PYPI}-$(shell git describe --tags --exact-match).tar.gz \
+		dist/$(subst -,_,${PYPI})-$(shell git describe --tags --exact-match)-py3-none-any.whl
 
 upload: pypi
 	git push --tags

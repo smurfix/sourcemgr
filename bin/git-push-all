@@ -1,6 +1,0 @@
-#!/bin/sh
-
-for a in $(git config --get-regexp '^remote\..*\.push$' | sed -ne 's/^remote\.\(.*\)\.push .*/\1/p' | uniq) ; do
-	git push $a $@ &
-done
-wait

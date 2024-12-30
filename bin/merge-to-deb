@@ -1,6 +1,19 @@
 #!/bin/sh
 
-TEMP=$(getopt -o 'aed:' -n "$(basename "$0")" -- "$@")
+usage() {
+    cat <<END >&2
+Usage: $0 -- merge to Debian branch
+ -a         use the most recent tag. Default: only consider a tag on HEAD
+ -d BRANCH  Branch name (default: 'deb' or 'debian')
+ -e         edit before committing the merge
+ -h         print this help text and exit
+ -p         Do NOT try to push to pypi
+ -s DIST    Use "sbu -d DIST" instead of 'debch' to build
+ -t VERS    Behave as if this tag was on HEAD
+END
+}
+
+TEMP=$(getopt -o 'aed:hps:t:' -n "$(basename "$0")" -- "$@")
 if [ $? -ne 0 ]; then
         echo 'Terminating...' >&2
         exit 1
@@ -8,9 +21,13 @@ fi
 eval set -- "$TEMP"
 unset TEMP
 
+T=
 TT=n
 ED=n
 DEB=
+SBU=
+PYPI=y
+VERS=
 while true ; do
     case "$1" in
         '-a')
@@ -22,6 +39,18 @@ while true ; do
         '-e')
             ED=y
             shift ;;
+        '-h')
+            usage
+            ;;
+        '-p')
+            PYPI=n
+            shift ;;
+        '-s')
+            SBU="$2"
+            shift 2 ;;
+        '-t')
+            T="$2"
+            shift 2 ;;
         '--')
             break ;;
         *)
@@ -31,7 +60,9 @@ while true ; do
 done
 
 set -ex
-if test "$TT" = "y" ; then
+if test -n "$T" ; then
+    :
+elif test "$TT" = "y" ; then
     T=$(git describe --tags | sed -e 's/-.*//')
 else
     T=$(git describe --tags --exact-match)
@@ -66,6 +97,14 @@ if test $ED = y ; then
     bash
 fi
 git commit -a -m "Merge to $T"
-debch
+if test -n "$SBU" ; then
+    sbu -d $SBU
+else
+    debch
+fi
 git checkout "$B"
-test -s setup.py && make pypi
+if test $PYPI = "y" ; then
+    if test -s setup.py || test -s pyproject.toml ; then
+        make pypi
+    fi
+fi

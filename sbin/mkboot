@@ -1,0 +1,87 @@
+#!/bin/bash
+
+set -u -o pipefail -e
+
+D=/srv/build
+S=stable
+V=base
+SM=
+M=http://mirror.noris.net/debian/
+
+usage() {
+	cat <<END >&2
+Usage: $ [options]
+-f          force rebuild
+-a ARCH     Architecture (no default, mandatory)
+-d DIR      Build directory ($D/VERSION/RELEASE/ARCH/)
+-m MIRROR   mirror to use ($M)
+-v VERSION  debbootstrap version ($V)
+-s RELEASE  OS release ($S)
+-S          add smurf.noris.de repo
+PACKAGES    additional packages to install
+END
+        if test $# -gt 0 ; then
+                echo "$*" >&2
+        else
+                echo 'Terminating...' >&2
+        fi
+        exit 1
+}
+
+TEMP="$(getopt -o 'fa:d:m:s:Sv:' -n "$(basename "$0")" -- "$@")"
+if [ $? -ne 0 ]; then usage; fi
+
+eval set -- "$TEMP"
+unset TEMP
+while true ; do
+    case "$1" in
+        '-f')
+            F=y
+            shift ;;
+	'-a')
+	    shift; A=$1; shift ;;
+	'-d')
+	    shift; B=$1; shift ;;
+	'-m')
+	    shift; M=$1; shift ;;
+	'-v')
+	    shift; V=$1; shift ;;
+	'-S')
+	    SM=Y; shift ;;
+	'-s')
+	    shift; S=$1; shift ;;
+        '--')
+	    shift; break ;;
+        *)
+            usage "Unknown argument '$1'"
+    esac
+done
+
+
+if ! test -v A ; then usage "Required argument: -a arch"; fi
+if ! test -v F ; then F= ; fi
+if ! test -v B ; then B=$D/$V/$S/$A; fi
+
+set -ex
+cd $D
+mkdir -p $(dirname $B)
+test -n "$F" && test -d $B && btrfs subvolume delete $B
+test -d $B || btrfs subvolume create $B
+if ! test -d $B/etc ; then
+	debootstrap --arch=$A ${V:+--variant=$V} $S $B $M
+	chmod 755 $B
+fi
+
+export LC_ALL=C.UTF-8
+
+if test -n "$SM" && ! test -s $B/etc/apt/trusted.gpg.d/smurf.archive.gpg ; then
+	cat >$B/etc/apt/sources.list.d/smurf.list <<END
+deb http://build.smurf.noris.de $S main
+END
+	wget -O $B/etc/apt/trusted.gpg.d/smurf.archive.gpg http://build.smurf.noris.de:/info/smurf.archive.gpg
+fi
+chroot $B apt update
+chroot $B apt -o APT::Install-Recommends=false -o APT::Get::Assume-Yes=true dist-upgrade
+chroot $B apt -o APT::Install-Recommends=false -o APT::Get::Assume-Yes=true install eatmydata
+chroot $B eatmydata apt -o APT::Install-Recommends=false -o APT::Get::Assume-Yes=true install build-essential devscripts equivs $@
+chroot $B apt -o APT::Get::Assume-Yes=true autoremove
