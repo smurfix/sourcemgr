@@ -201,7 +201,7 @@ mk2() {
 	local xd=$1
 	local xa=$2
 	local DR=$D/$xd/$xa
-	local X=$D/make/$xd/$xa
+	local X=$DM/$xd/$xa
 	local Y=build/$N
 
 	if test -n "$NC" ; then
@@ -235,6 +235,7 @@ mk1() {
 }
 
 D=/srv/build/minbase
+DM=/srv/build/make
 if test -v Z ; then
 	mk1 $Z
 elif test -v ALL ; then
