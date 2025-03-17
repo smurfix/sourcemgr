@@ -182,6 +182,7 @@ mk() {
 	if test -f bootstrap.sh ; then
 		$R --chdir=/$Y/src bash bootstrap.sh
 	fi
+	$R --chdir=/$Y rm -f \*.changes
 	$R --chdir=/$Y/src eatmydata debuild -eDEB_BUILD_OPTIONS="$F" $MBIN -us -uc $NC -j$(( $(nproc) * 3 / 2))
 
 	cd $X/$Y
