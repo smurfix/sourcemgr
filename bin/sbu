@@ -42,8 +42,7 @@ END
 	exit 1
 }
 
-TEMP="$(getopt -o 'Aa:b:Bd:f:hNn:v:V' -n "$(basename "$0")" -- "$@")"
-if [ $? -ne 0 ] ; then usage "Invalid argument"; fi
+TEMP="$(getopt -o 'Aa:b:Bd:f:hNn:v:V' -n "$(basename "$0")" -- "$@")" || usage "Invalid argument"
 
 eval set -- "$TEMP"
 unset TEMP
@@ -165,7 +164,11 @@ mk() {
 	export FULLNAME=${DEBFULLNAME?:$FULLNAME}
 
 	local R="sudo --preserve-env=EMAIL,FULLNAME systemd-nspawn -E EMAIL -E FULLNAME --private-users=pick -D $X --bind-ro=$C:/$Y/orig:rootidmap --bind=/srv/build/cache:/var/cache/apt/archives:rootidmap"
-	test -n "$NC" || $R --chdir=/$Y git clone --depth 1 -b $BR --shallow-submodules orig src
+	if test -n "$NC" ; then
+		$R --chdir=/$Y/src git pull
+	else
+		$R --chdir=/$Y git clone --depth 1 -b $BR --shallow-submodules orig src
+	fi
 	$R --chdir=/$Y/src git submodule update --init
 
 	test "$ov" = "$vx$vv" || $R --chdir=/$Y/src debchange -b -D $xd -v "$vx$vv" "Autobuild."
@@ -179,11 +182,11 @@ mk() {
 	if test -f bootstrap.sh ; then
 		$R --chdir=/$Y/src bash bootstrap.sh
 	fi
+	$R --chdir=/$Y rm -f \*.changes
 	$R --chdir=/$Y/src eatmydata debuild -eDEB_BUILD_OPTIONS="$F" $MBIN -us -uc $NC -j$(( $(nproc) * 3 / 2))
 
 	cd $X/$Y
-	$R --chdir=/$Y rm -f *-build-deps_*.changes
-	dput -u ext *.changes || true  # maybe can't write here
+	dput -u ext $(ls *.changes | grep -v .-build-deps_) || true  # maybe can't write here
 
 	cd "$C"
 	if test $xd = "unstable" ; then
@@ -198,7 +201,7 @@ mk2() {
 	local xd=$1
 	local xa=$2
 	local DR=$D/$xd/$xa
-	local X=$D/make/$xd/$xa
+	local X=$DM/$xd/$xa
 	local Y=build/$N
 
 	if test -n "$NC" ; then
@@ -232,6 +235,7 @@ mk1() {
 }
 
 D=/srv/build/minbase
+DM=/srv/build/make
 if test -v Z ; then
 	mk1 $Z
 elif test -v ALL ; then
