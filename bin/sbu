@@ -181,8 +181,7 @@ mk() {
 	$R --chdir=/$Y/src eatmydata debuild -eDEB_BUILD_OPTIONS="$F" $MBIN -us -uc $NC -j$(( $(nproc) * 3 / 2))
 
 	cd $X/$Y
-	$R --chdir=/$Y rm -f *-build-deps_*.changes
-	dput -u ext *.changes || true  # maybe can't write here
+	dput -u ext $(ls *.changes | grep -v .-build-deps_) || true  # maybe can't write here
 
 	cd "$C"
 	if test $xd = "unstable" ; then
