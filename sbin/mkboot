@@ -5,7 +5,6 @@ set -u -o pipefail -e
 D=/srv/build
 S=stable
 V=base
-SM=
 M=http://mirror.noris.net/debian/
 
 usage() {
@@ -17,7 +16,7 @@ Usage: $ [options]
 -m MIRROR   mirror to use ($M)
 -v VERSION  debbootstrap version ($V)
 -s RELEASE  OS release ($S)
--S          add smurf.noris.de repo
+-S          add build.smurf.noris.de repo
 PACKAGES    additional packages to install
 END
         if test $# -gt 0 ; then
@@ -74,11 +73,12 @@ fi
 
 export LC_ALL=C.UTF-8
 
-if test -n "$SM" && ! test -s $B/etc/apt/trusted.gpg.d/smurf.archive.gpg ; then
+if test -v SM ; then
 	cat >$B/etc/apt/sources.list.d/smurf.list <<END
 deb http://build.smurf.noris.de $S main
 END
 	wget -O $B/etc/apt/trusted.gpg.d/smurf.archive.gpg http://build.smurf.noris.de:/info/smurf.archive.gpg
+	chmod 644 $B/etc/apt/sources.list.d/smurf.list $B/etc/apt/trusted.gpg.d/smurf.archive.gpg
 fi
 chroot $B apt update
 chroot $B apt -o APT::Install-Recommends=false -o APT::Get::Assume-Yes=true dist-upgrade

@@ -124,6 +124,8 @@ def main(no_deb, overwrite):
                         break
                 else:
                     raise RuntimeError("no README found") from None
+    if isinstance(rmf,dict):
+        rmf=rmf["file"]
     with open(rmf,"r") as rm:
         for n,l in enumerate(rm):
             readme += f"  {l.rstrip() or '.'}\n"
