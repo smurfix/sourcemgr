@@ -1,0 +1,330 @@
+#!/bin/bash
+set -ex
+test -e "$1"
+test -z "$2"
+IMG="$1"
+T="$IMG"
+P=
+
+if test -f "$IMG" ; then
+	P=p
+	L=$(losetup -f)
+	losetup -P $L "$IMG"
+else
+	L=${IMG}
+fi
+
+cleanup() {
+	cd /
+	umount $T/var/cache || true
+	umount $T/boot/firmware || true
+	umount $T/var/lib/dpkg || true
+	umount $T
+	rm -r $C
+	test "$L" = "$IMG" || losetup -d $L
+	rmdir "$T"
+}
+error() {
+	echo "" >&2
+	echo ERROR >&2
+	cleanup
+	echo "$L" NOT ejected. >&2
+}
+allok() {
+	echo "" >&2
+	echo "DONE, OK" >&2
+	cleanup
+	eject "$L"
+	echo "$L" ejected. >&2
+}
+
+PU="$(blkid -o value -s PTUUID $IMG)"
+test -n "$PU"
+
+T=$(mktemp -d)
+C=$(mktemp -d)
+
+L1=${L}${P}1
+L2=${L}${P}2
+trap 'error' 0 1 2
+
+udevadm settle
+while umount $L1 ; do : ; done
+while umount $L2 ; do : ; done
+fsck -fy $L2 || fsck -fy $L2
+
+OK=
+TY=$(blkid -s TYPE -o value $L2)
+
+sfdisk -d $L | sed -e 's#^\('"$L2"' :.*size=\) *[0-9][0-9]*#\1+#' | sfdisk $L
+udevadm settle
+while umount $L1 ; do : ; done
+while umount $L2 ; do : ; done
+fatlabel $L1 RASPIFIRM
+
+if [ "$TY" = "btrfs" ] ; then
+	: already OK
+	if mount -o subvol=r $L2 $T ; then OK=1; umount $T; fi
+else
+	resize2fs $L2
+	btrfs-convert --checksum crc32c -l RASPIROOT -O skinny-metadata --uuid new $L2
+	# echo "+ +" | sfdisk -N 2 $L
+fi
+
+umask 0022
+
+mount -o subvol=/ $L2 $T
+btrfs filesystem resize max $T
+if test -n "$OK" ; then
+	umount $T
+else
+	btrfs filesystem resize max $T
+	cd $T
+	btrfs subvolume create _r
+	cd _r
+	btrfs subvolume create usr
+	btrfs subvolume create usr/local
+	btrfs subvolume create var
+	btrfs subvolume create var/cache
+	btrfs subvolume create var/log
+	btrfs subvolume create var/tmp
+	mkdir -p usr/state/dpkg var/lib/dpkg
+	mount --bind usr/state/dpkg var/lib/dpkg
+
+	cd ..
+	cp -prx --reflink=always [a-z]* _r/
+	rm -rf [a-z]*
+	mv _r r
+	btrfs subvolume set-default r
+	echo "/usr/state/dpkg /var/lib/dpkg none bind" >>r/etc/fstab
+
+	cd r/var/lib
+	for x in apt aptitude ; do
+		mkdir ../cache/lib$x
+		mv $x/* ../cache/lib$x || true
+		rmdir $x || true
+		ln -s ../cache/lib$x $x || true
+	done
+
+	cd /
+	umount $T/r/var/lib/dpkg
+	umount $T
+fi
+mount -o subvol=r $L2 $T
+mount $L1 $T/boot/firmware
+mount --bind $C $T/var/cache
+mount --bind $T/usr/state/dpkg $T/var/lib/dpkg
+
+cd $T
+
+echo RESUME=none >etc/initramfs-tools/conf.d/resume
+
+mkdir -p root/.ssh
+cat <<END >root/.ssh/authorized_keys
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIECKIg5nuBzRrX/ins4rNR7uPy58M026w7bFQmzT5L13 smurf@s-desk
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVkNqUk84zzU86FTZquvxAsahcEH1h5O+TVbQBAmZh5 backup@s-bed
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC+UHhlPv5RKN3yH4p9LXH1x5m/H9i3C2d+e2jZ7FHhJQVeCm1AqY66YaVjwpgIp2P07F+Y9b0NLku7p8CvX4qhmKGCv9RDrfmfmEEsoQNpOgfOLzPNJ7EiEXDnoL/RkaiGohCrLMMBYRafqV7jOgGgpYZJtyfpCA/hTL+SsHtsNTqseglgaADMG0JN/H8VKTO9HnaFCWfOYzF1ayW+Kme/vq9909rxhYRh/63QnhBAHL0EFQni2WA7J+d+EMzGCZDEOeJki+3S++C9oB6tym9tLl7yMn43d23mr+PS5iV+iAG42LY+JY3m6RznTQtVjsOP0Gk+3eLYEShfy4R+QJYvja4Ut85rwSmrY7Rf8x87z5r1GO/Dmn7Gga5O/wRsXkRFtTj4YZl2RxCQ+B3kMG/AUcD7zzIpF+IsfrHbIOYcRcQPoxbNw7VENJcTygml8YALKl+fNiburw3Zfvb2JLgI3JXzsAiBcpcZNWT1B4aUSnXUx/CnJ6C1Qx1tlIQpHaMWLLokBoLows5mwjitMBQVTAEELY6xFUcliRrfBrY5qxEPexVuzmvw6o4GYnnT61RfnAFk+XOVAnThbW5rx/lVZFXiuljRRJiws0DY5PRgZZ67R+1hp22L3bpV6anDnLWjHGh3uoU4bF1m9SE2802D9G39VklziEkqC0ne6G4I/w== smurf@desk
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCuDrsa46I7EBow3YpFaInCnGnkbROMIQ55rn5GWS5d4uR2eBzs6P+CgNyICXbCaY67j7ob1+QC9dcG2cttqBI5Tfz4SooBtOSYLm+hUZ38ZKH7d3U5BtDOFvdppbEFbSWg9bR44Cdqb9KI1THZ5LSeJrJm7glHX1Z1TX26HIHVDqb9ocdDNhj/LGRwXGrK/bOzFwQwg8cracO7XqnNcqeazSZQzSJs/i1GAFpxifbyZWGSLss/pWkqEraU2rSV/emLpbA594hj6fSMNA2+NmbXzJ8RDP4x8ZGCkqkjNcaF3171jhLZ5SuPWH26M3cD+agz8sOTdqZkJvxDbAwcvy9CMXnB3vdWHQ1wJd/MG1fIIYVJtkfGbv2KOy0zuguSJzJ21A3TUBDZDOPGB8l7Iocc8Ppce8LdfdmGG308kIE1GKFSLQ+Mj43yKB0NfaWRW/xL/zEyqYJe2vyKcOcybvTCbzyyuS+v/XqvOec+IXhBeBZiLA+juoPoBdZE2QnYRGl5gcSRE/uVSCLanHs2BLRnYQhahfnJfJZzcJrMLEedEY1YshSaxUqwiIq63BBOrWTlORZgO1vOFZjZXkCPTlbPLa3d8FT7lll2iBMyKkF29ivqz0TXYMUjsnW3Q/SSGhu4XK0cKnIaBWaBVdyXZaBmLJoXQhGwgSYngIpO314q/w== ansible@store
+END
+
+if ! grep -qs "\s/mnt/r\b" etc/fstab ; then
+	echo >> etc/fstab "LABEL=rootfs  /mnt/r btrfs noatime,subvol=/ 0 1"
+	mkdir mnt/r || true
+fi
+sed -i -e "s/PARTUUID=[0-9a-f]*/LABEL=rootfs/g" boot/firmware/cmdline.txt etc/fstab
+
+sed -i -e "s/console=serial0[^ ]* //" boot/firmware/cmdline.txt
+sed -i -e "s/quiet //" -e "s/rootfstype=ext4/rootfstype=btrfs/ " boot/firmware/cmdline.txt
+grep -qs "net.ifnames=0" boot/firmware/cmdline.txt || \
+  sed -i -e 's/$/ net.ifnames=0 biosdevname=0/' boot/firmware/cmdline.txt
+
+grep -qs btrfs etc/initramfs-tools/modules || echo btrfs >> etc/initramfs-tools/modules
+grep -qs xxhash64 etc/initramfs-tools/modules || echo xxhash64 >> etc/initramfs-tools/modules
+
+sed -i -e 's/.*COMPRESSLEVEL=.*/COMPRESSLEVEL=3/' etc/initramfs-tools/initramfs.conf
+
+mkdir -p etc/systemd/network
+cat <<END >etc/systemd/network/99-default.network
+[Match]
+Name=*
+
+[Network]
+DHCP=yes
+
+[DHCP]
+CriticalConnection=true
+
+END
+chmod 644 etc/systemd/network/99-default.network
+
+#cat <<END >etc/apt/sources.list
+#deb http://mirrordirector.raspbian.org/raspbian/ stretch main contrib non-free rpi
+#deb http://mirrordirector.raspbian.org/raspbian/ bullseye main contrib non-free rpi
+#END
+
+rm -f etc/resolv.conf
+echo "nameserver 8.8.8.8" >etc/resolv.conf
+chmod 644 etc/resolv.conf
+
+cat <<END >etc/apt/preferences
+Package: *
+Pin: release a=smurf
+Pin-Priority: 750
+
+Package: *
+Pin: release a=oldstable
+Pin-Priority: 650
+
+Package: *
+Pin: release a=stable
+Pin-Priority: 750
+
+Package: *
+Pin: release a=testing
+Pin-Priority: 700
+
+Package: *
+Pin: release a=unstable
+Pin-Priority: 600
+
+Package: *
+Pin: release a=experimental
+Pin-Priority: 550
+
+Package: *
+Pin: origin *.deb-multimedia.org
+Pin-Priority: -1
+END
+mkdir -p etc/systemd/system/sockets.target.wants etc/systemd/system/multi-user.target.wants etc/systemd/system/sysinit.target.wants
+ln -sf /lib/systemd/system/systemd-networkd.service etc/systemd/system/multi-user.target.wants/systemd-networkd.service
+ln -sf /lib/systemd/system/debug-shell.service etc/systemd/system/sysinit.target.wants/debug-shell.service
+ln -sf /lib/systemd/system/systemd-resolved.service etc/systemd/system/multi-user.target.wants/systemd-resolved.service
+ln -sf /lib/systemd/system/systemd-networkd.socket etc/systemd/system/sockets.target.wants/systemd-networkd.socket
+ln -sf /lib/systemd/system/ssh.service etc/systemd/system/multi-user.target.wants/ssh.service
+ln -sf /dev/null etc/systemd/system/networking.service
+echo CONFIGURE_INTERFACES=no >>etc/default/networking
+
+grep -qs '^max_usb_current' boot/firmware/config.txt || echo max_usb_current=1 >>boot/firmware/config.txt
+test -e usr/bin/qemu-arm-static || cp /usr/bin/qemu-arm-static usr/bin/qemu-arm-static
+echo 'root:$6$3p6oMizl$cPgeRCuM6f/5.7q5.NhYEXSQUQleNzYHxfwIseZD6z3fZp9Y7eaSE5ueeYIa98i9NF19y4hdEeL4j7DW9rYDW.' | /usr/sbin/chpasswd -e -R $T
+echo "wget -O - http://build.smurf.noris.de:/info/pgp_key.asc | apt-key add -"
+echo "vi /etc/ld.so.preload"
+
+NSP="systemd-nspawn -D $T --resolv-conf=off"
+# $NSP /bin/bash -i
+
+F=$T/etc/default/console-setup
+touch $F
+sed -i -e 's/^FONTFACE=.*/FONTFACE="TerminusBold"/' $F || echo 'FONTFACE="TerminusBold"' >>$F
+sed -i -e 's/^FONTSIZE=.*/FONTSIZE="14x28"/' $F || echo 'FONTSIZE="14x28"' >>$F
+
+cp /etc/default/keyboard $T/etc/default/keyboard
+
+mkdir -p $T/var/cache/libapt/archives/partial
+$NSP chown -R _apt /var/cache/libapt
+$NSP dpkg --purge man-db manpages manpages-dev cron logrotate rsyslog dphys-swapfile build-essential gcc g++ cpp ed nano ruby-power-assert ruby-net-telnet ruby-minitest ruby-did-you-mean ruby ruby1.9.1 ruby2.1 ruby2.3 rubygems-integration libruby2.3 ruby-test-unit raspi-copies-and-fills userconf-pi network-manager modemmanager raspberrypi-net-mods apparmor udisks2 triggerhappy || true
+$NSP deluser pi || true
+
+$NSP apt-get update
+$NSP apt-get install --yes -o Dpkg::Options::="--force-confdef" eatmydata
+$NSP eatmydata apt-get install --yes -o Dpkg::Options::="--force-confdef" systemd libpam-systemd libnss-systemd udev libudev1 python3 openssh-server nfs-common zstd usr-is-merged kbd btrfs-progs python3-apt wget kitty-terminfo systemd-resolved aptitude screen netcat-openbsd dosfstools
+$NSP eatmydata apt-get --yes -o Dpkg::Options::="--force-confdef" dist-upgrade
+$NSP eatmydata apt --yes autoremove
+# $NSP eatmydata /bin/bash -c 'U=$(uname -r); cd /; test etc/initramfs-tools/initramfs.conf -ot boot/firmware initrd.img-$U || update-initramfs -u -k all'
+#
+$NSP ssh-keygen -A
+
+if ! grep -qsxF "de_DE.UTF-8 UTF-8" etc/locale.gen ; then
+	cat >>etc/locale.gen <<_
+de_DE.UTF-8 UTF-8
+en_GB.UTF-8 UTF-8
+en_US.UTF-8 UTF-8
+_
+	$NSP locale-gen
+fi
+
+if test -s boot/firmware/cmdline.txt  ; then
+	sed -i 's| init=/usr/lib/raspberrypi-sys-mods/firstboot||' boot/firmware/cmdline.txt
+fi
+
+if ! test -s etc/systemd/system/xsshd.service ; then
+	cat >etc/systemd/system/xsshd.service <<_
+[Unit]
+Description=Shell server on 50022
+After=network.target
+
+[Service]
+EnvironmentFile=-/etc/default/ssh
+ExecStart=/usr/sbin/sshd -p 50022 -D $SSHD_OPTS
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+_
+	
+fi
+
+$NSP systemctl enable xsshd.service
+
+cat <<'_' >$T/tmp_get
+#!/bin/sh
+wget -q -O - http://build.smurf.noris.de/info/GET | sh -x
+apt install --yes --no-install-recommends i2c-tools lifepo4wered || true
+systemctl daemon-reload
+systemctl enable lifepo4wered-daemon || systemctl enable lifepo4wered
+_
+$NSP sh -x /tmp_get
+rm $T/tmp_get
+
+
+rm -f etc/resolv.conf
+ln -sf /run/systemd/resolve/resolv.conf etc/resolv.conf
+set +x
+
+pwd
+echo "This shell runs in the new system. Exit to unmount and finish."
+$NSP env PS1="inst# " bash
+
+trap 'allok' 0 1 2
+exit 0
+
+## install
+systemd
+systemd-journal-remote
+systemd-coredump
+systemd-cron
+openssh-server
+etckeeper
+
+fake-hwclock
+
+## pulesaudio
+/etc/pulse/client.conf
+autospawn = no
+
+/etc/pulse/daemon.conf
+allow-module-loading = yes
+system-instance = yes
+flat-volumes = no
+default-sample-format = s16le
+default-sample-rate = 48000
+default-sample-channels = 2
+default-channel-map = front-left,front-right
+
+/etc/pulse/default.pa
+.ifexists module-equalizer-sink.so
+load-module module-equalizer-sink
+.endif
+.ifexists module-dbus-protocol.so
+load-module module-dbus-protocol
+.endif
+
+/etc/pulse/system.pa
+load-module module-native-protocol-unix auth-cookie-enabled=0
+# load-module module-suspend-on-idle
+
+## TODO
+APT::Keep-Downloaded-Packages = false
+

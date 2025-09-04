@@ -1,0 +1,171 @@
+#!/bin/bash
+set -ex
+test -e "$1"
+test -n "$2"
+test -z "$3"
+IMG="$1"
+HOST=$2
+P=
+
+if test -f "$IMG" ; then
+        P=p
+        L=$(losetup -f)
+        losetup -P $L "$IMG"
+else
+        L=${IMG}
+fi
+
+T=$(mktemp -d)
+end() {
+    set +e
+    cd
+    umount --recursive $T/root
+    rm -rf $T
+}
+trap 'end' EXIT
+
+L1=${L}${P}1
+L2=${L}${P}2
+
+if [ "$(blkid -s TYPE -o value $L2)" = "btrfs" ] && 
+   [ "$(blkid -s LABEL -o value $L2)" = "RASPIROOT" ] && 
+   [ "$(blkid -s LABEL -o value $L1)" = "RASPIFIRM" ] ; then : ; else
+sfdisk $L <<_
+label: dos
+label-id: 0xa3f161f3
+device: /dev/sdh
+unit: sectors
+sector-size: 512
+
+$L1 : start=        8192, size=     1048576, type=c
+$L2 : start=     1056768, size=+, type=83
+_
+
+blockdev --rereadpt $L
+mkfs.vfat -n RASPIFIRM $L1
+mkfs.btrfs -f -L RASPIROOT $L2
+fi
+
+mkdir $T/root
+mount -t btrfs -o subvol=/ $L2 $T/root
+cd $T/root
+
+if true ; then
+ssh -n bed.s.s ls /mnt/x/btrbk/$HOST/ > $T/bkup
+test -d restore || btrfs subv cre restore
+cd restore
+for part in $(sed -e 's/\..*//' < $T/bkup | uniq) ; do
+    last=$(grep "^$part\\." $T/bkup | tail -1)
+    if test -z "$last" ; then continue; fi
+    ssh -n bed.s.s mkdir -p /mnt/x/btrbk/$HOST/snap
+    if test -d $part ; then
+        if test -d $part.prev ; then
+            echo "$part: partial send exists. Failing." >&2
+            exit 1
+        fi
+        ssh -n bed.s.s btrfs subv del /mnt/x/btrbk/$HOST/snap/$part.prev || true
+        ssh -n bed.s.s mv /mnt/x/btrbk/$HOST/snap/$part /mnt/x/btrbk/$HOST/snap/$part.prev
+        ssh -n bed.s.s btrfs subv snapshot -r /mnt/x/btrbk/$HOST/$last /mnt/x/btrbk/$HOST/snap/$part
+        mv $part $part.prev
+        ssh -n bed.s.s btrfs send --compressed-data /mnt/x/btrbk/$HOST/snap/$part -p /mnt/x/btrbk/$HOST/snap/$part.prev | btrfs receive -m $T/root .
+        ssh -n bed.s.s btrfs subv del /mnt/x/btrbk/$HOST/snap/$part.prev
+        btrfs subv del $part.prev
+    else
+        ssh -n bed.s.s btrfs subv del /mnt/x/btrbk/$HOST/snap/$part || true
+        ssh -n bed.s.s btrfs subv snapshot -r /mnt/x/btrbk/$HOST/$last /mnt/x/btrbk/$HOST/snap/$part 
+        ssh -n bed.s.s btrfs send --compressed-data /mnt/x/btrbk/$HOST/snap/$part | btrfs receive -m $T/root .
+    fi
+done
+else
+cd $T/root/restore
+fi
+
+# drop all to-be-restored subvolumes
+btrfs subv set-def ..
+if test -d ../_r ; then
+    ls|grep -E '^(usr|var)'|while read a ; do echo $(echo $a|wc -c) $a ; done|sort -rn | while read a b ; do
+        d=$(echo $b | tr - / )
+        btrfs subv del ../_r/$d || true
+    done
+    test -d root && btrfs subv del ../_r
+fi
+ls|grep -Ev '^(usr|var|root)'|while read a ; do echo $(echo $a|wc -c) $a ; done|sort -rn | while read a b ; do
+    d=$(echo $b | tr - / )
+    btrfs subv del ../$d || true
+done
+
+test -d root && btrfs subv snap root ../_r
+ls|grep -E '^(usr|var)'|while read a ; do echo $(echo $a|wc -c) $a ; done|sort -n | while read a b ; do
+    d=$(echo $b | tr - / )
+    btrfs subv snap $b ../_r/$d || true
+done
+ls|grep -Ev '^(usr|var|root)'|while read a ; do echo $(echo $a|wc -c) $a ; done|sort -n | while read a b ; do
+    d=$(echo $b | tr - / )
+    btrfs subv snap $b ../$d || true
+done
+cd ..
+btrfs subv set-def _r
+test -d btrbk || btrfs subv cre btrbk
+
+# Now rebuild /boot/firmware
+cd _r
+mount $L1 boot/firmware
+NSP="systemd-nspawn -D $(pwd) --resolv-conf=off"
+mkdir -p var/tmp
+mkdir -p var/cache
+mkdir -p var/log
+mount -t tmpfs tmpfs var/tmp
+mount -t tmpfs tmpfs var/cache
+mount -t tmpfs tmpfs var/log
+mount --bind usr/state/dpkg var/lib/dpkg
+grep -qs =none etc/initramfs-tools/conf.d/resume || echo RESUME=none >etc/initramfs-tools/conf.d/resume
+if false ; then
+    $NSP update-initramfs -u -k all
+else
+#
+    cat <<'_' >var/tmp/run
+#!/bin/bash
+set -ex
+version=$(linux-version list |
+                while read -r version; do
+                      test -e "/boot/initrd.img-$version" && echo "$version"
+                done |
+                linux-version sort | tail -1
+    )
+initramfs="/boot/initrd.img-${version}"
+if ! test -f /boot/firmware/initrd.img-${version} ; then
+# run-parts --verbose --arg="${version}" --arg="${initramfs}" /etc/initramfs/post-update.d/
+cp ${initramfs} /boot/firmware/initrd.img-${version}
+fi
+if ! test -f /boot/firmware/vmlinuz-${version} ; then
+DEB_MAINT_PARAMS="configure" bash -x /etc/kernel/postinst.d/z50-raspi-firmware ${version} /boot/vmlinuz-${version}
+fi
+if ! test -f boot/firmware/fixup.dat ; then
+    DEB_MAINT_PARAMS="configure" bash -x /usr/state/dpkg/info/raspi-firmware.postinst configure || true
+fi
+
+if ! test -f /boot/firmware/config.txt ; then
+cat <<__ >/boot/firmware/config.txt
+arm_64bit=1
+
+enable_uart=1
+upstream_kernel=1
+
+kernel=vmlinuz-${version}
+initramfs initrd.img-${version}
+
+dtparam=i2c1=on
+dtparam=i2c_arm=on
+__
+fi
+if ! test -f /boot/firmware/cmdline.txt ; then
+cat <<__ >/boot/firmware/cmdline.txt
+console=tty0 root=LABEL=RASPIROOT rw fsck.repair=yes net.ifnames=0  rootwait
+__
+fi
+_
+    $NSP /bin/bash /var/tmp/run
+fi
+sed -i -e 's/PARTUUID=[a-f0-9]*-01/LABEL=RASPIFIRM/' \
+       -e 's/PARTUUID=[a-f0-9]*-02/LABEL=RASPIROOT/' etc/fstab
+
