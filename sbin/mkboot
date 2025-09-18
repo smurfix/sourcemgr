@@ -27,16 +27,18 @@ END
         exit 1
 }
 
-TEMP="$(getopt -o 'fa:d:m:s:Sv:' -n "$(basename "$0")" -- "$@")"
+TEMP="$(getopt -o 'hfa:d:m:s:Sv:' -n "$(basename "$0")" -- "$@")"
 if [ $? -ne 0 ]; then usage; fi
 
 eval set -- "$TEMP"
 unset TEMP
 while true ; do
     case "$1" in
-        '-f')
-            F=y
-            shift ;;
+	'-h')
+		usage ;;
+	'-f')
+		F=y
+		shift ;;
 	'-a')
 	    shift; A=$1; shift ;;
 	'-d')
