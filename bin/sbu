@@ -27,6 +27,7 @@ Usage: $0 [options]
             otherwise default to amd64/testing
 -a ARCH     architecture (default: all)
 -B          only build arch-dependant binaries
+-R          style of root (default: minbase)
 -d DIST     distribution (default: all)
 -f FLAGS    flags for debuild
 -n NAME     name of the generated package (default: basename)
@@ -69,6 +70,8 @@ while true ; do
 	    shift; N=$1; shift ;;
 	('-N')
 	    NC="-nc"; shift ;;
+	('-R')
+	    shift; B=$1; shift ;;
 	('-v')
 	    shift; V=$1; shift ;;
 	('-V')
@@ -155,10 +158,10 @@ mk() {
 
 	# extract epoch
 	vx=$(dpkg-parsechangelog  -l debian/changelog  -S version | sed -ne 's/^\([0-9]\):.*/\1:/p')
-	local ov="$(dpkg-parsechangelog  -l debian/changelog  -S version)"
+	local ov="$(dpkg-parsechangelog  -l debian/changelog  -S version | sed -ne 's/^[0-9]://')"
 	if dpkg --compare-versions $vv "<<" $ov ; then
-		vv="$ov"
 		echo "WARNING using Debian version '$ov' instead of '$vv'"
+		vv="$ov"
 	fi
 	export EMAIL=${DEBEMAIL?:$EMAIL}
 	export FULLNAME=${DEBFULLNAME?:$FULLNAME}
@@ -234,7 +237,7 @@ mk1() {
 	fi
 }
 
-D=/srv/build/minbase
+D=/srv/build/$B
 DM=/srv/build/make
 if test -v Z ; then
 	mk1 $Z
