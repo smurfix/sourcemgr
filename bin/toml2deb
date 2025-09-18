@@ -31,11 +31,15 @@ def dep_str(dep, prefix="python3-"):
 @click.command()
 @click.option("--no-deb",is_flag=True,help="use the current branch")
 @click.option("-o","--overwrite",is_flag=True,help="ignore files in existing debian/ subdir")
-def main(no_deb, overwrite):
+@click.option("-m","--main",type=str,default="main",help="Branch to base the .deb on")
+@click.option("-d","--debian","--deb",type=str,default="deb",help="Name of the debian branch")
+def main(no_deb, overwrite, main,debian):
     """
     Create a Debian subdirectory for a Python module described via
     a 'pyproject.toml' file.
     """
+    if debian and no_deb:
+        raise click.UsageError("To Deb or not to Deb, that is the question")
     repo=git.Repo(".")
     main = repo.active_branch.name
     if not no_deb and main not in {"deb", "debian"}:
@@ -53,7 +57,7 @@ def main(no_deb, overwrite):
         with open("pyproject.toml","r") as tf:
             d = to_attrdict(toml.load(tf))
     except FileNotFoundError:
-        raise UsageError("This is not a Python module, or it doesn't have a 'pyproject.toml' file.")
+        raise click.UsageError("This is not a Python module, or it doesn't have a 'pyproject.toml' file.")
     # yprint(d)
     try:
         name = d.project.name
@@ -63,7 +67,7 @@ def main(no_deb, overwrite):
         except AttributeError:
             name = d.tool.flit.metadata["dist-name"]
 
-    named = name.replace(".","-").lower()
+    named = name.replace(".","-").replace("_","-").lower()
 
     try:
         maint = d.project.maintainers
@@ -224,14 +228,17 @@ Description: {desc}
     ign = Path(".gitignore")
 
     if not no_deb:
-        repo.refs["main"].checkout()
+        try:
+            repo.refs[main].checkout()
+        except IndexError:
+            raise click.UsageError(f"There is no {main!r} branch.") from None
         with ign.open("a") as f:
             f.write("\n# Debian packaging\n/debian/\n")
         repo.index.add(ign)
         repo.index.commit("Ignore Debian subdir")
-        repo.refs["deb"].checkout()
-        repo.index.commit("Debian ignore", parent_commits=(repo.heads.deb.commit, repo.heads.main.commit))
-        repo.heads.main.checkout()
+        repo.refs[debian].checkout()
+        repo.index.commit("Debian ignore", parent_commits=(repo.heads[debian].commit, repo.heads[main].commit))
+        repo.heads[main].checkout()
 
 if __name__ == "__main__":
     main()
