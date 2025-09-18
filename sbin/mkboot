@@ -17,6 +17,7 @@ Usage: $ [options]
 -v VERSION  debbootstrap version ($V)
 -s RELEASE  OS release ($S)
 -S          add build.smurf.noris.de repo
+-N          don't add development packages
 PACKAGES    additional packages to install
 END
         if test $# -gt 0 ; then
@@ -27,7 +28,7 @@ END
         exit 1
 }
 
-TEMP="$(getopt -o 'hfa:d:m:s:Sv:' -n "$(basename "$0")" -- "$@")"
+TEMP="$(getopt -o 'hfa:d:m:Ns:Sv:' -n "$(basename "$0")" -- "$@")"
 if [ $? -ne 0 ]; then usage; fi
 
 eval set -- "$TEMP"
@@ -47,6 +48,8 @@ while true ; do
 	    shift; M=$1; shift ;;
 	'-v')
 	    shift; V=$1; shift ;;
+	'-N')
+	    ND=Y; shift ;;
 	'-S')
 	    SM=Y; shift ;;
 	'-s')
@@ -85,5 +88,6 @@ fi
 chroot $B apt update
 chroot $B apt -o APT::Install-Recommends=false -o APT::Get::Assume-Yes=true dist-upgrade
 chroot $B apt -o APT::Install-Recommends=false -o APT::Get::Assume-Yes=true install eatmydata
+test -v ND || \
 chroot $B eatmydata apt -o APT::Install-Recommends=false -o APT::Get::Assume-Yes=true install build-essential devscripts git equivs $@
 chroot $B apt -o APT::Get::Assume-Yes=true autoremove
