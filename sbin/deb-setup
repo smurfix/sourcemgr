@@ -1,0 +1,115 @@
+#!/bin/bash
+set -ex
+test -e "$1"
+test -z "$2"
+IMG="$1"
+T="$IMG"
+P=
+
+if test -f "$IMG" ; then
+	P=p
+	L=$(losetup -f)
+	losetup -P $L "$IMG"
+else
+	L=${IMG}
+fi
+
+cleanup() {
+	cd /
+	umount $T/_r/boot/firmware || umount $T/r/boot/firmware || true
+	umount $T || true
+	#rm -r $C
+	test "$L" = "$IMG" || losetup -d $L
+	rmdir "$T"
+}
+error() {
+	echo "" >&2
+	echo ERROR >&2
+	cleanup
+	echo "$L" NOT ejected. >&2
+}
+allok() {
+	echo "" >&2
+	echo "DONE, OK" >&2
+	cleanup
+	eject "$L"
+	echo "$L" ejected. >&2
+}
+
+
+#PU="$(blkid -o value -s PTUUID $IMG)"
+#test -n "$PU"
+
+T=$(mktemp -d)
+#C=$(mktemp -d)
+
+L1=${L}${P}1
+L2=${L}${P}2
+trap 'error' 0 1 2
+
+udevadm settle
+while umount $L1 ; do : ; done
+while umount $L2 ; do : ; done
+
+sfdisk $L <<_
+label: dos
+unit: sectors
+sector-size: 512
+
+$L1 : start=   8192, size=1572864, type=c
+$L2 : start=1581056, size=      +, type=83
+_
+PU="$(blkid -o value -s PTUUID $L)"
+
+mkfs.vfat -n RASPIFIRM $L1
+mkfs.btrfs -f -L RASPIROOT $L2
+
+mount -o subvol=/ $L2 $T
+
+btrfs subvolume create $T/_rest
+
+pushd FS/trixie/arm64
+mkdir -p snap
+test -d snap/root && btrfs subvol del snap/root
+test -d snap/usr && btrfs subvol del snap/usr
+test -d snap/var && btrfs subvol del snap/var
+if btrfs subvol snap -r r snap/root ; then
+btrfs subvol snap -r r/usr snap/usr
+btrfs subvol snap -r r/var snap/var
+
+btrfs send snap/root | btrfs receive $T/_rest
+btrfs send snap/usr | btrfs receive $T/_rest
+btrfs send snap/var | btrfs receive $T/_rest
+
+btrfs subvol snap $T/_rest/root $T/_r
+btrfs subvol snap $T/_rest/usr $T/_r/usr
+btrfs subvol snap $T/_rest/var $T/_r/var
+
+mount $L1 $T/_r/boot/firmware
+cp -a r/boot/firmware/. $T/_r/boot/firmware
+
+else
+	btrfs subvolume create $T/_r
+	btrfs subvolume create $T/_r/usr
+	btrfs subvolume create $T/_r/var
+	mkdir -p $T/_r/boot/firmware
+	mount $L1 $T/_r/boot/firmware
+	rsync -aAX --partial --numeric-ids r/. $T/_r/.
+
+fi
+btrfs subvolume create $T/_r/var/log
+btrfs subvolume create $T/_r/var/cache
+btrfs subvolume create $T/_r/var/tmp
+btrfs subvolume create $T/_r/usr/local
+
+sed -i -e "s/PARTUUID=[a-zA-Z0-9]*/PARTUUID=$PU/g" \
+	$T/_r/etc/fstab \
+	$T/_r/boot/firmware/cmdline.txt \
+
+mv $T/_r $T/r
+btrfs subvolume set-default $T/r
+grep -qs state.dpkg $T/r/etc/fstab || \
+	echo "/usr/state/dpkg /var/lib/dpkg none bind" >>$T/r/etc/fstab
+
+trap 'allok' 0 1 2
+exit 0
