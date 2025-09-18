@@ -18,6 +18,7 @@ Usage: $ [options]
 -s RELEASE  OS release ($S)
 -S          add build.smurf.noris.de repo
 -N          don't add development packages
+-R root     Build root ($D)
 PACKAGES    additional packages to install
 END
         if test $# -gt 0 ; then
@@ -28,7 +29,7 @@ END
         exit 1
 }
 
-TEMP="$(getopt -o 'hfa:d:m:Ns:Sv:' -n "$(basename "$0")" -- "$@")"
+TEMP="$(getopt -o 'hfa:d:m:NR:s:Sv:' -n "$(basename "$0")" -- "$@")"
 if [ $? -ne 0 ]; then usage; fi
 
 eval set -- "$TEMP"
@@ -48,6 +49,8 @@ while true ; do
 	    shift; M=$1; shift ;;
 	'-v')
 	    shift; V=$1; shift ;;
+	'-R')
+	    shift; D=$1; shift ;;
 	'-N')
 	    ND=Y; shift ;;
 	'-S')
