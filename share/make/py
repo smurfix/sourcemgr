@@ -88,9 +88,11 @@ pypi:	tagged
 	else \
 		python3 -mbuild -snw ; \
 	fi
-	twine upload \
+	for repo in $$(python3 -c 'import os,iniconfig;cf=iniconfig.IniConfig(os.environ["HOME"]+"/.pypirc");print(cf["distutils"]["index-servers"])') ; do \
+	twine upload -r smurf \
 		dist/${PYPI}-$(shell git describe --tags --exact-match).tar.gz \
-		dist/$(subst -,_,${PYPI})-$(shell git describe --tags --exact-match)-py3-none-any.whl
+		dist/$(subst -,_,${PYPI})-$(shell git describe --tags --exact-match)-py3-none-any.whl; \
+	done
 
 upload: pypi
 	git push --tags
