@@ -85,5 +85,5 @@ fi
 chroot $B apt update
 chroot $B apt -o APT::Install-Recommends=false -o APT::Get::Assume-Yes=true dist-upgrade
 chroot $B apt -o APT::Install-Recommends=false -o APT::Get::Assume-Yes=true install eatmydata
-chroot $B eatmydata apt -o APT::Install-Recommends=false -o APT::Get::Assume-Yes=true install build-essential devscripts equivs $@
+chroot $B eatmydata apt -o APT::Install-Recommends=false -o APT::Get::Assume-Yes=true install build-essential devscripts git equivs $@
 chroot $B apt -o APT::Get::Assume-Yes=true autoremove
