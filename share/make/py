@@ -13,7 +13,11 @@ TESTS ?= tests/
 CODE ?= $(subst -,/,$(PACKAGE))
 
 BUILD_DIR ?= build
-INPUT_DIR ?= docs/source
+ifneq ($(wildcard docs/source/conf.py),)
+	INPUT_DIR ?= docs/source
+else
+	INPUT_DIR ?= docs
+endif
 
 # Sphinx options (are passed to build_docs, which passes them to sphinx-build)
 #   -W       : turn warning into errors

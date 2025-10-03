@@ -72,8 +72,12 @@ if ! test -v B ; then B=$D/$V/$S/$A; fi
 set -ex
 cd $D
 mkdir -p $(dirname $B)
-test -n "$F" && test -d $B && btrfs subvolume delete $B
-test -d $B || btrfs subvolume create $B
+if test -n "$F" && test -d $B ; then
+	btrfs subvolume delete $B || rm -rf $B
+fi
+if test -d $B ; then
+	btrfs subvolume create $B || mkdir -p $B
+fi
 if ! test -d $B/etc ; then
 	debootstrap --arch=$A ${V:+--variant=$V} $S $B $M
 	chmod 755 $B
