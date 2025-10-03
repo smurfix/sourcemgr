@@ -223,7 +223,7 @@ Description: {desc}
     repo.index.add(deb/"control")
     repo.index.add(deb/".gitignore")
     if repo.is_dirty(index=True, working_tree=False, untracked_files=False, submodules=False):
-        repo.index.commit("Debianized.")
+        repo.index.commit("Debianized.", skip_hooks=True)
 
     ign = Path(".gitignore")
 
@@ -235,9 +235,9 @@ Description: {desc}
         with ign.open("a") as f:
             f.write("\n# Debian packaging\n/debian/\n")
         repo.index.add(ign)
-        repo.index.commit("Ignore Debian subdir")
+        repo.index.commit("Ignore Debian subdir", skip_hooks=True)
         repo.refs[debian].checkout()
-        repo.index.commit("Debian ignore", parent_commits=(repo.heads[debian].commit, repo.heads[main].commit))
+        repo.index.commit("Debian ignore", parent_commits=(repo.heads[debian].commit, repo.heads[main].commit), skip_hooks=True)
         repo.heads[main].checkout()
 
 if __name__ == "__main__":
