@@ -201,7 +201,8 @@ ln -sf /dev/null etc/systemd/system/networking.service
 echo CONFIGURE_INTERFACES=no >>etc/default/networking
 
 grep -qs '^max_usb_current' boot/firmware/config.txt || echo max_usb_current=1 >>boot/firmware/config.txt
-test -e usr/bin/qemu-arm-static || cp /usr/bin/qemu-arm-static usr/bin/qemu-arm-static
+if test -e /usr/bin/qemu-arm-static; then ST="-static" ; else ST=""; fi
+test -e usr/bin/qemu-arm$ST || cp /usr/bin/qemu-arm$ST usr/bin/qemu-arm$ST
 echo 'root:$6$3p6oMizl$cPgeRCuM6f/5.7q5.NhYEXSQUQleNzYHxfwIseZD6z3fZp9Y7eaSE5ueeYIa98i9NF19y4hdEeL4j7DW9rYDW.' | /usr/sbin/chpasswd -e -R $T
 echo "wget -O - http://build.smurf.noris.de:/info/pgp_key.asc | apt-key add -"
 echo "vi /etc/ld.so.preload"
