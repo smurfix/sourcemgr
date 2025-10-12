@@ -87,6 +87,7 @@ if ! test -d $T/r/usr ; then
 	mount --bind usr/state/dpkg var/lib/dpkg
 
 	cd ..
+	rm -rf ext2_saved
 	cp -prx --reflink=always [a-z]* _r/
 	rm -rf [a-z]*
 	mv _r r
