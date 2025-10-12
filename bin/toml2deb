@@ -65,7 +65,10 @@ def main(no_deb, overwrite, main,debian):
         try:
             name = d.tool.poetry.name
         except AttributeError:
-            name = d.tool.flit.metadata["dist-name"]
+            try:
+                name = d.tool.flit.metadata["dist-name"]
+            except KeyError:
+                name = d.tool.flit.metadata["module"]
 
     named = name.replace(".","-").replace("_","-").lower()
 
