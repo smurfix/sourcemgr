@@ -53,7 +53,6 @@ while umount $L1 ; do : ; done
 while umount $L2 ; do : ; done
 fsck -fy $L2 || fsck -fy $L2
 
-OK=
 TY=$(blkid -s TYPE -o value $L2)
 
 sfdisk -d $L | sed -e 's#^\('"$L2"' :.*size=\) *[0-9][0-9]*#\1+#' | sfdisk $L
@@ -63,8 +62,7 @@ while umount $L2 ; do : ; done
 fatlabel $L1 RASPIFIRM
 
 if [ "$TY" = "btrfs" ] ; then
-	: already OK
-	if mount -o subvol=r $L2 $T ; then OK=1; umount $T; fi
+	: already OK?
 else
 	resize2fs $L2
 	btrfs-convert --checksum crc32c -l RASPIROOT -O skinny-metadata --uuid new $L2
@@ -75,10 +73,7 @@ umask 0022
 
 mount -o subvol=/ $L2 $T
 btrfs filesystem resize max $T
-if test -n "$OK" ; then
-	umount $T
-else
-	btrfs filesystem resize max $T
+if ! test -d $T/r/usr ; then
 	cd $T
 	btrfs subvolume create _r
 	cd _r
@@ -108,8 +103,8 @@ else
 
 	cd /
 	umount $T/r/var/lib/dpkg
-	umount $T
 fi
+umount $T
 mount -o subvol=r $L2 $T
 mount $L1 $T/boot/firmware
 mount --bind $C $T/var/cache
