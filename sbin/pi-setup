@@ -73,6 +73,7 @@ umask 0022
 
 mount -o subvol=/ $L2 $T
 btrfs filesystem resize max $T
+btrfs filesystem label $T RASPIROOT
 if ! test -d $T/r/usr ; then
 	cd $T
 	btrfs subvolume create _r
@@ -127,7 +128,9 @@ if ! grep -qs "\s/mnt/r\b" etc/fstab ; then
 	echo >> etc/fstab "LABEL=rootfs  /mnt/r btrfs noatime,subvol=/ 0 1"
 	mkdir mnt/r || true
 fi
-sed -i -e "s/PARTUUID=[0-9a-f]*/LABEL=rootfs/g" boot/firmware/cmdline.txt etc/fstab
+sed -i -e "s/PARTUUID=[^ ]*/LABEL=RASPIROOT/g" -e "s/LABEL=[^ ]*/LABEL=RASPIROOT/g" boot/firmware/cmdline.txt etc/fstab
+
+sed -i -e "s#/boot LABEL=RASPIROOT#/boot LABEL=RASPIFIRM#g" etc/fstab
 
 sed -i -e "s/console=serial0[^ ]* //" boot/firmware/cmdline.txt
 sed -i -e "s/quiet //" -e "s/rootfstype=ext4/rootfstype=btrfs/ " boot/firmware/cmdline.txt
@@ -219,12 +222,13 @@ cp /etc/default/keyboard $T/etc/default/keyboard
 
 mkdir -p $T/var/cache/libapt/archives/partial
 $NSP chown -R _apt /var/cache/libapt
-$NSP dpkg --purge man-db manpages manpages-dev cron logrotate rsyslog dphys-swapfile build-essential gcc g++ cpp ed nano ruby-power-assert ruby-net-telnet ruby-minitest ruby-did-you-mean ruby ruby1.9.1 ruby2.1 ruby2.3 rubygems-integration libruby2.3 ruby-test-unit raspi-copies-and-fills userconf-pi network-manager modemmanager raspberrypi-net-mods apparmor udisks2 triggerhappy || true
+$NSP dpkg --purge man-db manpages manpages-dev cron logrotate rsyslog dphys-swapfile build-essential gcc g++ cpp ed nano ruby-power-assert ruby-net-telnet ruby-minitest ruby-did-you-mean ruby ruby1.9.1 ruby2.1 ruby2.3 rubygems-integration libruby2.3 ruby-test-unit raspi-copies-and-fills userconf-pi network-manager modemmanager raspberrypi-net-mods apparmor udisks2 triggerhappy apt-listchanges || true
 $NSP deluser pi || true
 
 $NSP apt-get update
+$NSP apt-get --fix-broken install --yes -o Dpkg::Options::="--force-confdef"
 $NSP apt-get install --yes -o Dpkg::Options::="--force-confdef" eatmydata
-$NSP eatmydata apt-get install --yes -o Dpkg::Options::="--force-confdef" systemd libpam-systemd libnss-systemd udev libudev1 python3 openssh-server nfs-common zstd usr-is-merged kbd btrfs-progs python3-apt wget kitty-terminfo systemd-resolved aptitude screen netcat-openbsd dosfstools
+$NSP eatmydata apt-get install --yes -o Dpkg::Options::="--force-confdef" systemd libpam-systemd libnss-systemd udev libudev1 python3 openssh-server nfs-common zstd usr-is-merged kbd btrfs-progs python3-apt wget kitty-terminfo systemd-resolved aptitude screen netcat-openbsd dosfstools nullmailer
 $NSP eatmydata apt-get --yes -o Dpkg::Options::="--force-confdef" dist-upgrade
 $NSP eatmydata apt --yes autoremove
 # $NSP eatmydata /bin/bash -c 'U=$(uname -r); cd /; test etc/initramfs-tools/initramfs.conf -ot boot/firmware initrd.img-$U || update-initramfs -u -k all'
@@ -232,7 +236,7 @@ $NSP eatmydata apt --yes autoremove
 $NSP ssh-keygen -A
 
 if ! grep -qsxF "de_DE.UTF-8 UTF-8" etc/locale.gen ; then
-	cat >>etc/locale.gen <<_
+	cat >etc/locale.gen <<_
 de_DE.UTF-8 UTF-8
 en_GB.UTF-8 UTF-8
 en_US.UTF-8 UTF-8
