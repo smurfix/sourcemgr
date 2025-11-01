@@ -4,7 +4,7 @@ set -u -o pipefail -e
 
 D=/srv/build
 S=stable
-V=base
+V=minbase
 M=http://mirror.noris.net/debian/
 
 usage() {
