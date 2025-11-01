@@ -173,7 +173,7 @@ mk() {
 	else
 		$R --chdir=/$Y git clone --depth 1 -b $BR --shallow-submodules orig src
 	fi
-	$R --chdir=/$Y/src git submodule update --init
+	$R --chdir=/$Y/src git submodule update --init --recursive
 
 	test "$ov" = "$vx$vv" || $R --chdir=/$Y/src debchange -b -D $xd -v "$vx$vv" "Autobuild."
 
