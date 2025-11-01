@@ -9,6 +9,7 @@ B=minbase
 S=smurf
 NC=
 BIN=-b
+N=$(dpkg-parsechangelog  -l debian/changelog -S source)
 F=
 C="$(/bin/pwd)"
 
@@ -30,7 +31,7 @@ Usage: $0 [options]
 -R          style of root (default: minbase)
 -d DIST     distribution (default: all)
 -f FLAGS    flags for debuild
--n NAME     name of the generated package (default: basename)
+-n NAME     name of the generated package (default: $N)
 -N          don't clean the source
 -v VERSION  Package version (default: TAG-1)
 -V          use existing version from debian/changelog
@@ -82,7 +83,6 @@ while true ; do
         usage "Unknown argument '$1'"
     esac
 done
-if test ! -v N ; then N=$(basename "$C"); fi
 
 export LC_ALL=C.UTF-8
 
