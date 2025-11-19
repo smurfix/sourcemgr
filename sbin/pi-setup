@@ -222,13 +222,26 @@ cp /etc/default/keyboard $T/etc/default/keyboard
 
 mkdir -p $T/var/cache/libapt/archives/partial
 $NSP chown -R _apt /var/cache/libapt
-$NSP dpkg --purge man-db manpages manpages-dev cron logrotate rsyslog dphys-swapfile build-essential gcc g++ cpp ed nano ruby-power-assert ruby-net-telnet ruby-minitest ruby-did-you-mean ruby ruby1.9.1 ruby2.1 ruby2.3 rubygems-integration libruby2.3 ruby-test-unit raspi-copies-and-fills userconf-pi network-manager modemmanager raspberrypi-net-mods apparmor udisks2 triggerhappy apt-listchanges || true
+$NSP dpkg --purge man-db manpages manpages-dev cron logrotate rsyslog \
+	dphys-swapfile build-essential gcc g++ cpp ed nano ruby-power-assert \
+	ruby-net-telnet ruby-minitest ruby-did-you-mean ruby ruby1.9.1 \
+	ruby2.1 ruby2.3 rubygems-integration libruby2.3 ruby-test-unit \
+	raspi-copies-and-fills userconf-pi network-manager modemmanager \
+	raspberrypi-net-mods apparmor udisks2 triggerhappy apt-listchanges \
+	cloud-init rpi-swap systemd-zram-generator || true
 $NSP deluser pi || true
+
+F=$T/etc/initramfs-tools/initramfs.conf
+sed -i -e 's/^MODULES=.*/MODULES=most/' $F || echo 'MODULES=most' >>$F
 
 $NSP apt-get update
 $NSP apt-get --fix-broken install --yes -o Dpkg::Options::="--force-confdef"
 $NSP apt-get install --yes -o Dpkg::Options::="--force-confdef" eatmydata
-$NSP eatmydata apt-get install --yes -o Dpkg::Options::="--force-confdef" systemd libpam-systemd libnss-systemd udev libudev1 python3 openssh-server nfs-common zstd usr-is-merged kbd btrfs-progs python3-apt wget kitty-terminfo systemd-resolved aptitude screen netcat-openbsd dosfstools nullmailer
+$NSP eatmydata apt-get install --yes -o Dpkg::Options::="--force-confdef" \
+	systemd libpam-systemd libnss-systemd udev libudev1 python3 \
+	openssh-server nfs-common zstd usr-is-merged kbd btrfs-progs \
+	python3-apt wget kitty-terminfo systemd-resolved aptitude \
+	screen netcat-openbsd dosfstools nullmailer
 $NSP eatmydata apt-get --yes -o Dpkg::Options::="--force-confdef" dist-upgrade
 $NSP eatmydata apt --yes autoremove
 # $NSP eatmydata /bin/bash -c 'U=$(uname -r); cd /; test etc/initramfs-tools/initramfs.conf -ot boot/firmware initrd.img-$U || update-initramfs -u -k all'
