@@ -93,7 +93,7 @@ pypi:	tagged
 		python3 -mbuild -snw ; \
 	fi
 	for repo in $$(python3 -c 'import os,iniconfig;cf=iniconfig.IniConfig(os.environ["HOME"]+"/.pypirc");print(cf["distutils"]["index-servers"])') ; do \
-	twine upload -r smurf \
+	twine upload -r $$repo \
 		dist/${PYPI}-$(shell git describe --tags --exact-match).tar.gz \
 		dist/$(subst -,_,${PYPI})-$(shell git describe --tags --exact-match)-py3-none-any.whl; \
 	done
