@@ -157,11 +157,6 @@ override_dh_usrlocal:
 """)
     (deb/"rules").chmod(0o755)
 
-    with open(deb/"compat","w") as f:
-        f.write(f"""\
-13
-""")
-
     try:
         hp = d.project.urls.homepage
     except AttributeError:
@@ -190,7 +185,8 @@ Source: {named}
 Maintainer: "{maint[0].name}" <{maint[0].email}>
 Section: python
 Priority: optional
-Build-Depends: dh-python, python3-setuptools, python3-all, debhelper (>= 13),{dev_depends}{build_depends}
+Build-Depends: dh-python, python3-setuptools, python3-all, debhelper (>= 13),
+  debhelper-compat (= 13), {dev_depends}{build_depends}
 Standards-Version: 3.9.6
 Homepage: {hp}
 
@@ -221,7 +217,6 @@ Description: {desc}
 /python3-{named}
 """)
     repo.index.add(deb/"changelog")
-    repo.index.add(deb/"compat")
     repo.index.add(deb/"rules")
     repo.index.add(deb/"control")
     repo.index.add(deb/".gitignore")
