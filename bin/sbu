@@ -116,11 +116,11 @@ fi
 
 sv() {
 	case $1 in
-		(oldoldstable|buster) echo 10 ;;
-		(oldstable|bullseye) echo 11 ;;
-		(stable|bookworm) echo 12 ;;
-		(testing|trixie) echo 13 ;;
-		(unstable) echo 987 ;;
+		(oldoldstable|bullseye) echo 11 ;;
+		(oldstable|bookworm) echo 12 ;;
+		(stable|trixie) echo 13 ;;
+		(testing|forky) echo 14 ;;
+		(unstable|sid) echo 987 ;;
 		(experimental) echo 999 ;;
 		(*)
 			usage "Dunno Debian version for '$1'"
@@ -159,10 +159,10 @@ mk() {
 	# extract epoch
 	vx=$(dpkg-parsechangelog  -l debian/changelog  -S version | sed -ne 's/^\([0-9]\):.*/\1:/p')
 	local ov="$(dpkg-parsechangelog  -l debian/changelog  -S version | sed -e 's/^[0-9]://')"
-	if dpkg --compare-versions $vv "<<" $ov ; then
-		echo "WARNING using Debian version '$ov' instead of '$vv'"
-		vv="$ov"
-	fi
+#	if dpkg --compare-versions $vv "<<" $ov ; then
+#		echo "WARNING using Debian version '$ov' instead of '$vv'"
+#		vv="$ov"
+#	fi
 	if echo "$vv" | grep -qs ":" ; then vx=""; fi
 	export EMAIL=${DEBEMAIL?:$EMAIL}
 	export FULLNAME=${DEBFULLNAME?:$FULLNAME}
