@@ -8,10 +8,12 @@ umask 022
 B=minbase
 S=smurf
 NC=
+N=shell
 BIN=-b
 F=
 A=amd64
 C="$(/bin/pwd)"
+Z=testing
 
 usage() {
 	if [ $# -gt 0 ] ; then
@@ -26,7 +28,8 @@ usage() {
 Usage: $0 [options]
 -a ARCH     architecture (default: $A)
 -R          style of root (default: $B)
--n          drop and create new (default: re-use)
+-n          chroot name (default: $N)
+-N          drop and create new (default: re-use)
 -d DIST     distribution (default: all)
 END
 	if test $# -gt 0 ; then
@@ -37,7 +40,7 @@ END
 	exit 1
 }
 
-TEMP="$(getopt -o 'a:R:d:n' -n "$(basename "$0")" -- "$@")" || usage "Invalid argument"
+TEMP="$(getopt -o 'a:d:n:NR:' -n "$(basename "$0")" -- "$@")" || usage "Invalid argument"
 
 eval set -- "$TEMP"
 unset TEMP
@@ -52,8 +55,10 @@ while true ; do
 	    shift; Z=$1; shift ;;
 	('-h')
 		usage ;;
-	('-n')
+	('-N')
 	    shift; NEW=Y ;;
+	('-n')
+	    shift; N=$1; shift ;;
 	('-R')
 	    shift; B=$1; shift ;;
 	('--')
@@ -65,47 +70,28 @@ done
 
 export LC_ALL=C.UTF-8
 
-mk() {
-	local X=$1
-	local xd=$2
-
-	cd "$C"
-
-	local R="sudo --preserve-env=EMAIL,FULLNAME systemd-nspawn -E EMAIL -E FULLNAME --private-users=pick -D $X --bind-ro=$C:/$X/orig:rootidmap --bind=/srv/build/cache:/var/cache/apt/archives:rootidmap"
-
-	# test -n "$NC" || $R eatmydata apt update
-	# $R --chdir=/$Y eatmydata mk-build-deps -i -t 'apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' src/debian/control
-
-	$R --chdir=/src /bin/bash -i
-}
-
-mk2() {
-	local xd=$1
-	local xa=$2
-	local DR=$D/$xd/$xa
-	local X=$DM/$xd/$xa
-
-	test -d $X && test -v NEW && sudo btrfs subvolume delete $X
-	sudo mkdir -p $(dirname $X)
-	test -d $X || sudo btrfs subvolume snapshot $DR $X
-
-	sudo mkdir -p $X/src
-
-	mk $X $xd
-}
-
-mk1() {
-	local xd=$1
-	local DD=$D/$xd
-
-	mk2 $xd amd64
-}
-
 D=/srv/build/$B
-DM=/srv/build/shell
-if test -v Z ; then
-	mk1 $Z
-else
-	mk1 testing
-fi
+DM=/srv/build/$N
+
+DR=$D/$Z/$A
+X=$DM/$Z/$A
+
+test -d $X && test -v NEW && sudo btrfs subvolume delete $X
+sudo mkdir -p $(dirname $X)
+test -d $X || sudo btrfs subvolume snapshot $DR $X
+
+sudo mkdir -p $X/src
+
+cd "$C"
+
+test -n "$*" || set -- /bin/bash -i
+
+exec sudo --preserve-env=EMAIL,FULLNAME \
+	systemd-nspawn -E EMAIL -E FULLNAME \
+	    --private-users=pick \
+		--directory=$X \
+		--bind-ro=$C:/$X/orig:rootidmap \
+		--bind=/srv/build/cache:/var/cache/apt/archives:rootidmap \
+		--chdir=/src \
+	"$@"
 
