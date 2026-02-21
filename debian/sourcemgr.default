@@ -1,0 +1,4 @@
+#
+# Default git archives to push to
+#GIT_ARCHIVES="origin netz"
+#
