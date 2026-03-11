@@ -167,7 +167,7 @@ chmod 644 etc/resolv.conf
 
 cat <<END >etc/apt/preferences
 Package: *
-Pin: release a=smurf
+Pin: release n=smurf
 Pin-Priority: 750
 
 Package: *
