@@ -1,0 +1,4 @@
+%wheel ALL=(ALL) NOPASSWD: /usr/bin/dnf
+smurf ALL=(ALL) NOPASSWD: /usr/bin/dnf
+%adm ALL=(ALL) NOPASSWD: /usr/bin/apt-in
+smurf ALL=(ALL) NOPASSWD: /usr/bin/apt-in
