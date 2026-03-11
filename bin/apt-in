@@ -1,0 +1,2 @@
+#!/bin/sh
+exec sudo eatmydata apt -U install "$@"
