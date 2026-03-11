@@ -1,0 +1,97 @@
+#!/bin/bash
+
+# shell on a local dir
+#
+set -u -o pipefail -ex
+umask 022
+
+B=minbase
+S=smurf
+NC=
+N=shell
+BIN=-b
+F=
+A=amd64
+C="$(/bin/pwd)"
+Z=testing
+
+usage() {
+	if [ $# -gt 0 ] ; then
+		echo "$0: $*"
+		echo "" >&2
+		cat >&2
+	else
+		echo "$0: Simple shell (in a chroot)."
+		echo ""
+		cat
+	fi <<END
+Usage: $0 [options]
+-a ARCH     architecture (default: $A)
+-R          style of root (default: $B)
+-n          chroot name (default: $N)
+-N          drop and create new (default: re-use)
+-d DIST     distribution (default: all)
+END
+	if test $# -gt 0 ; then
+		echo "$*" >&2
+	else
+		echo 'Terminating...' >&2
+	fi
+	exit 1
+}
+
+TEMP="$(getopt -o 'a:d:n:NR:' -n "$(basename "$0")" -- "$@")" || usage "Invalid argument"
+
+eval set -- "$TEMP"
+unset TEMP
+BIN=-b
+MBIN=
+BR=
+while true ; do
+    case "$1" in
+	('-a')
+	    shift; A=$1; shift ;;
+	('-d')
+	    shift; Z=$1; shift ;;
+	('-h')
+		usage ;;
+	('-N')
+	    shift; NEW=Y ;;
+	('-n')
+	    shift; N=$1; shift ;;
+	('-R')
+	    shift; B=$1; shift ;;
+	('--')
+		shift; break ;;
+    *)
+        usage "Unknown argument '$1'"
+    esac
+done
+
+export LC_ALL=C.UTF-8
+
+D=/srv/build/$B
+DM=/srv/build/$N
+
+DR=$D/$Z/$A
+X=$DM/$Z/$A
+
+test -d $X && test -v NEW && sudo btrfs subvolume delete $X
+sudo mkdir -p $(dirname $X)
+test -d $X || sudo btrfs subvolume snapshot $DR $X
+
+sudo mkdir -p $X/src
+
+cd "$C"
+
+test -n "$*" || set -- /bin/bash -i
+
+exec sudo --preserve-env=EMAIL,FULLNAME \
+	systemd-nspawn -E EMAIL -E FULLNAME \
+	    --private-users=pick \
+		--directory=$X \
+		--bind-ro=$C:/$X/orig:rootidmap \
+		--bind=/srv/build/cache:/var/cache/apt/archives:rootidmap \
+		--chdir=/src \
+	"$@"
+
