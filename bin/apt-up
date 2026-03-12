@@ -1,2 +1,5 @@
 #!/bin/sh
-exec sudo eatmydata apt -U dist-upgrade "$@"
+if [ $(id -u) != 0 ] ; then
+	exec sudo "$0" "$@"
+fi
+exec eatmydata apt -U dist-upgrade "$@"
