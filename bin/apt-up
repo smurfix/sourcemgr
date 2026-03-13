@@ -2,4 +2,9 @@
 if [ $(id -u) != 0 ] ; then
 	exec sudo "$0" "$@"
 fi
-exec eatmydata apt -U dist-upgrade "$@"
+U=
+if [ "$1" = "-U" ] ; then
+	shift
+	U="-U"
+fi
+exec eatmydata apt $U dist-upgrade "$@"
