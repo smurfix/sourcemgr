@@ -32,7 +32,7 @@ def dep_str(dep, prefix="python3-"):
 @click.option("--no-deb",is_flag=True,help="use the current branch")
 @click.option("-o","--overwrite",is_flag=True,help="ignore files in existing debian/ subdir")
 @click.option("-m","--main",type=str,default="main",help="Branch to base the .deb on")
-@click.option("-d","--debian","--deb",type=str,default="deb",help="Name of the debian branch")
+@click.option("-d","--debian","--deb",type=str,help="Name of the debian branch")
 def main(no_deb, overwrite, main,debian):
     """
     Create a Debian subdirectory for a Python module described via
@@ -40,6 +40,8 @@ def main(no_deb, overwrite, main,debian):
     """
     if debian and no_deb:
         raise click.UsageError("To Deb or not to Deb, that is the question")
+    if not no_deb and not debian:
+        debian="deb"
     repo=git.Repo(".")
     main = repo.active_branch.name
     if not no_deb and main not in {"deb", "debian"}:
