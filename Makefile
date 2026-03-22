@@ -14,5 +14,8 @@ install:
         done
 	:
 	mkdir -p $(DESTDIR)/usr/share/sourcemgr
-	cp -a share/* $(DESTDIR)/usr/share/sourcemgr
+	cp -r share/* $(DESTDIR)/usr/share/sourcemgr
+	:
+	mkdir -p $(DESTDIR)/etc
+	cp -r etc/* $(DESTDIR)/etc
 

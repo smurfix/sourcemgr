@@ -1,0 +1,10 @@
+#!/bin/sh
+if [ $(id -u) != 0 ] ; then
+	exec sudo "$0" "$@"
+fi
+U=
+if [ "$1" = "-U" ] ; then
+	shift
+	U="-U"
+fi
+exec eatmydata apt $U dist-upgrade "$@"

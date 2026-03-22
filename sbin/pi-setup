@@ -167,7 +167,7 @@ chmod 644 etc/resolv.conf
 
 cat <<END >etc/apt/preferences
 Package: *
-Pin: release a=smurf
+Pin: release n=smurf
 Pin-Priority: 750
 
 Package: *
@@ -228,7 +228,9 @@ $NSP dpkg --purge man-db manpages manpages-dev cron logrotate rsyslog \
 	ruby2.1 ruby2.3 rubygems-integration libruby2.3 ruby-test-unit \
 	raspi-copies-and-fills userconf-pi network-manager modemmanager \
 	raspberrypi-net-mods apparmor udisks2 triggerhappy apt-listchanges \
-	cloud-init rpi-swap systemd-zram-generator || true
+	cloud-init rpi-swap systemd-zram-generator fake-hwclock \
+	netplan-generator netplan.io \
+	|| true
 $NSP deluser pi || true
 
 F=$T/etc/initramfs-tools/initramfs.conf
@@ -241,7 +243,7 @@ $NSP eatmydata apt-get install --yes -o Dpkg::Options::="--force-confdef" \
 	systemd libpam-systemd libnss-systemd udev libudev1 python3 \
 	openssh-server nfs-common zstd usr-is-merged kbd btrfs-progs \
 	python3-apt wget kitty-terminfo systemd-resolved aptitude \
-	screen netcat-openbsd dosfstools nullmailer
+	screen netcat-openbsd dosfstools nullmailer file eject btrfs-progs
 $NSP eatmydata apt-get --yes -o Dpkg::Options::="--force-confdef" dist-upgrade
 $NSP eatmydata apt --yes autoremove
 # $NSP eatmydata /bin/bash -c 'U=$(uname -r); cd /; test etc/initramfs-tools/initramfs.conf -ot boot/firmware initrd.img-$U || update-initramfs -u -k all'

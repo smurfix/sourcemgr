@@ -75,6 +75,10 @@ elif git describe --all deb >/dev/null 2>&1; then
     DEB=deb
 elif git describe --all debian >/dev/null 2>&1; then
     DEB=debian
+elif git describe --all origin/deb >/dev/null 2>&1; then
+    DEB=deb
+elif git describe --all origin/debian >/dev/null 2>&1; then
+    DEB=debian
 else
     echo "Neither 'deb' nor 'debian' branches found." >&2
     exit 1
